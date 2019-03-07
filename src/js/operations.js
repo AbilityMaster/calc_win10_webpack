@@ -10,7 +10,42 @@ class Operations {
 		}
 	}		
 
-	[OPERATIONS.PLUS]() {
+	sendOperation(operation) {
+		switch (operation) {
+			case OPERATIONS.PLUS:
+				this._plus();
+				break;
+			case OPERATIONS.MINUS:
+				this._minus();
+				break;
+			case OPERATIONS.MULTIPLY:
+				this._multiply();
+				break;
+			case OPERATIONS.DIVIDE:
+				this._divide();
+				break;
+			case OPERATIONS.POW:
+				this._pow();
+				break;
+			case OPERATIONS.FRAC:
+				this._frac();
+				break;
+			case OPERATIONS.SQRT:
+				this._sqrt();
+				break;
+			case OPERATIONS.NEGATE: 
+				this._negate();
+				break;
+			case OPERATIONS.PERCENT: 
+				this._percent();
+				break;
+			default:
+				console.log('Error in work of function');
+		}
+	}
+
+	_plus() {
+		console.log('ss');
 		if (this.resultPressed) {
 			this.currentValue += this.ValueForProgressive;
 		}	else {
@@ -26,7 +61,7 @@ class Operations {
 		display.innerHTML = this.trimmer(this.currentValue);
 	}
 
-	[OPERATIONS.MINUS]() {
+	_minus() {
 		if (this.resultPressed) {
 			this.currentValue -= this.ValueForProgressive;
 		}	else {   
@@ -42,7 +77,7 @@ class Operations {
 		display.innerHTML = this.trimmer(this.currentValue);
 	}
 
-	[OPERATIONS.MULTIPLY]() {
+	_multiply() {
 		if (this.resultPressed) {
 			this.currentValue *= this.ValueForProgressive;
 		}	else {
@@ -58,7 +93,7 @@ class Operations {
 		display.innerHTML = this.trimmer(this.currentValue);
 	}
 
-	[OPERATIONS.DIVIDE]() {
+	_divide() {
 		if (this.ValueForProgressive === 0 || parseFloat(display.innerHTML) === 0) {	
 			this.operationsDisabled = true;
 			disableButtons();
@@ -76,7 +111,7 @@ class Operations {
 		display.innerHTML = this.trimmer(this.currentValue);
 	}
 
-	[OPERATIONS.POW]() {
+	_pow() {
 		let temp = Math.pow(parseFloat(display.innerHTML),2);
 		if (!isFinite(temp)) {
 			disableButtons();
@@ -88,7 +123,7 @@ class Operations {
 		display.innerHTML = this.trimmer(Math.pow(parseFloat(display.innerHTML),2));
 	}
 
-	[OPERATIONS.FRAC]() {
+	_frac() {
 		if (parseFloat(display.innerHTML) === 0) {	
 			this.operationsDisabled = true;
 			disableButtons();
@@ -107,7 +142,7 @@ class Operations {
 		display.innerHTML = this.trimmer(temp);
 	}
 
-	[OPERATIONS.SQRT]() {
+	_sqrt() {
 		if (parseFloat(display.innerHTML) < 0) {
 			disableButtons();
 			display.style.fontSize = STYLES.SMALL;
@@ -126,7 +161,7 @@ class Operations {
 		display.innerHTML = this.trimmer(temp);
 	}
 
-	[OPERATIONS.NEGATE]() {
+	_negate() {
 		let temp = parseFloat(display.innerHTML) * -1;
 		if (!isFinite(temp)) {
 			disableButtons();
@@ -138,7 +173,7 @@ class Operations {
 		display.innerHTML = this.trimmer(temp);
 	}
 
-	[OPERATIONS.PERCENT]() {
+	_percent() {
 		let temp = parseFloat(display.innerHTML)/100*this.currentValue;
 		if (!isFinite(temp)) {
 			disableButtons();

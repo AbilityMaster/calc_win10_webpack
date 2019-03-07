@@ -80,7 +80,7 @@ class Calculator extends Operations {
 			this.data = smallDisplay.innerHTML;
 			this.dataWidth = smallDisplay.clientWidth;
 			if (operation === OPERATIONS.PERCENT) {
-				this.valueArray.push(this[operation]());
+				this.valueArray.push(this.sendOperation(operation));
 				smallDisplay.innerHTML += '&nbsp;' + this.valueArray[this.valueArray.length-1];
 			} else {
 				this.valueArray.push(this.nameOp[operation] + '('+ display.innerHTML +')');
@@ -93,7 +93,7 @@ class Calculator extends Operations {
 		}
 		if (this.pressedSingleOperation) {
 			if (operation ===  OPERATIONS.PERCENT) {
-				this.valueArray[this.valueArray.length-1] = this[operation]();
+				this.valueArray[this.valueArray.length-1] = this.sendOperation(operation);
 				smallDisplay.innerHTML = this.data + '&nbsp;' + this.valueArray[this.valueArray.length - 1] + '&nbsp;';
 			} else {
 				this.valueArray[this.valueArray.length-1] = this.nameOp[operation] + '(' + this.valueArray[this.valueArray.length - 1] + ')';
@@ -113,11 +113,11 @@ class Calculator extends Operations {
 		this.enteredNewValue = true;
 
 		if (operation ===  OPERATIONS.PERCENT) {
-			display.innerHTML = super[operation]();
+			display.innerHTML = this.sendOperation(operation);
 			return;
 		}
 
-		super[operation]();
+		this.sendOperation(operation);
 	}
 
 	result() {
@@ -136,7 +136,7 @@ class Calculator extends Operations {
 		}
 
 		if ((this.operationPressed || this.resultPressed) && this.currentValue !== null) {
-			this[this.typeOperation]();
+			this.sendOperation(this.typeOperation);
 		}
 
 	}
@@ -175,7 +175,7 @@ class Calculator extends Operations {
 
 		if (this.operationPressed) {
 			if (this.enteredNewValue) {
-				this[this.typeOperation]();
+				this.sendOperation(this.typeOperation);
 				this.enteredNewValue = false;
 			}
 			this.typeOperation = operation;
