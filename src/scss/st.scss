@@ -5,15 +5,35 @@ body, html {
 	width: 100%;
 	font-family: Segoe UI;	
 }
+
+.open-calculator {
+	position: fixed;
+	display: none;
+	right: 40px;
+	bottom: 40px;
+	line-height: 100px;
+	text-align: center;
+	width: 100px;
+	height: 100px;
+	background: #ebebeb;
+	border: 1px solid rgba(0,0,0,0);
+	box-shadow: 0 0 0px 0px rgba(0, 0, 0, 0.25);
+	border-radius: 50px;
+}
+
+.open-calculator:hover {
+	cursor: pointer;
+	border: 1px solid #3497e0;
+	box-shadow: 0 0 17px 5px rgba(0, 0, 0, 0.25);
+	transition: box-shadow .2s;
+	transition: border .1s;
+}
+
 .calculator {
 	position: absolute;
 	width: 320px;
 	height: 540px;
 	background: url(../img/back.png);
-	top: 0;
-	bottom: 0;
-	left: 0;
-	right: 0;
 	margin: auto;
 	outline: 1px solid #3497e0;
 	box-shadow: 0 0 17px 5px rgba(0, 0, 0, 0.25);
@@ -26,7 +46,6 @@ body, html {
 
 .index-menu {
 	margin: 0;
-	padding-left: 10px;
 	font-size: $font-size__index-menu;
 	display: -webkit-flex;
 	display: flex; 
@@ -34,6 +53,9 @@ body, html {
 	justify-content: flex-end;
 	&__title {
 		margin: 0;
+		height: 32px;		
+		padding-left: 10px;
+		line-height: 32px;
 		flex-basis: 100px;
 		text-align: left;
 		flex-grow: 1;

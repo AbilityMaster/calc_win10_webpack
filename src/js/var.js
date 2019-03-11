@@ -11,20 +11,29 @@ sqrt = document.querySelector('.calc__button_sqrt'),
 pow = document.querySelector('.calc__button_pow'),
 frac = document.querySelector('.calc__button_frac'),
 arrowLeft = document.querySelector('.small-display__button_left'),
-arrowRight = document.querySelector('.small-display__button_right');
+arrowRight = document.querySelector('.small-display__button_right'),
+calculator = document.querySelector('.calculator'),
+forDrag = document.querySelector('.index-menu__title');
 
-const MESSAGES = {
+export const CALC_MODES = {
+	STANDART: 'standart',
+	MINIMIZED: 'minimized',
+	CLOSED: 'closed',
+	DEFAULT: 'default'
+}
+
+export const MESSAGES = {
 	OVERFLOW: 'Переполнение',
 	DIVIDE_BY_ZERO: 'Деление на 0 невозможно',
 	UNCORRECT_DATA: 'Введены неверные данные'
 };
 
-const STYLES = {
+export const STYLES = {
 	SMALL: '20px',
 	NORMAL: '45px'
 };
 
-const OPERATIONS = {
+export const OPERATIONS = {
 	PLUS: '+',
 	MINUS: '-',
 	MULTIPLY: '*',
@@ -76,6 +85,3 @@ export	function activateButtons() {
 		element.classList.remove('calc__button_disabled');
 	});
 }
-
-
-export {MESSAGES, STYLES, OPERATIONS};
