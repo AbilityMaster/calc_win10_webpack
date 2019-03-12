@@ -31,7 +31,6 @@ window.onload = function() {
 	let info = {} 
 
 	window.onresize = function(e) {
-		let shiftX = e.pageX - calculator.offsetLeft;
 		if ((calculator.offsetLeft + calculator.clientWidth) > window.innerWidth) {
 			info.x = ( window.innerWidth - calculator.clientWidth ) / window.innerWidth * 100 + '%';
 			calculator.style.left = info.x;
@@ -46,7 +45,7 @@ window.onload = function() {
 		}
 		if (calculator.offsetTop < 0) {
 			info.y = 0 + '%';
-			calculator.style.top = info.x;
+			calculator.style.top = info.y;
 		}
 		lc.dataset = info;
 	}	
@@ -92,6 +91,9 @@ window.onload = function() {
 		}
 
 		document.onmousemove = function(e) {
+			if (window.innerWidth < 350) {
+				return false;
+			}
 			moveAt(e);
 		};	
 

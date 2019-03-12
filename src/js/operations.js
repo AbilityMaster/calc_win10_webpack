@@ -1,4 +1,5 @@
-import {MESSAGES, STYLES, OPERATIONS, disableButtons, activateButtons} from './const.js';
+import {MESSAGES, STYLES, OPERATIONS} from './const.js';
+import {disableButtons, activateButtons} from './calculator.js';
 
 let display = document.querySelector('.display');
 

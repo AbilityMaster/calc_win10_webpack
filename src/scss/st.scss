@@ -5,6 +5,7 @@ body, html {
 	width: 100%;
 	min-width: 330px;
 	font-family: Segoe UI;	
+	overflow: hidden;
 }
 
 @keyframes pulse {
@@ -43,7 +44,7 @@ body, html {
 	border: 1px solid #3497e0;
 	box-shadow: 0 0 17px 5px rgba(0, 0, 0, 0.25);
 	transition: box-shadow .2s;
-	animation: pulse 1s infinite;
+	animation: pulse .7s infinite;
 }
 
 .calculator {

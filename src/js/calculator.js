@@ -1,12 +1,61 @@
 import Operations from './operations.js';
-import {MAX_WIDTH_DISPLAY, MESSAGES, STYLES, OPERATIONS, disableButtons, activateButtons, NAME_FOR_DISPLAY} from './const.js';
+import {MAX_WIDTH_DISPLAY, MESSAGES, STYLES, OPERATIONS, NAME_FOR_DISPLAY} from './const.js';
 
 let display = document.querySelector('.display'),
 arrowLeft = document.querySelector('.small-display__button_left'),
 arrowRight = document.querySelector('.small-display__button_right'),
 smallDisplay = document.querySelector('.small-display__block'),
+point = document.querySelector('.calc__button_add-point'),
+resultButton = document.querySelector('.calc__button_get-result'),
+sqrt = document.querySelector('.calc__button_sqrt'),
+pow = document.querySelector('.calc__button_pow'),
+frac = document.querySelector('.calc__button_frac'),
+percent = document.querySelector('.calc__button_percent'),
+reverse = document.querySelector('.calc__button_reverse'),
+operationList = document.querySelectorAll('.calc__button_operation'),
 hiddenDisplay = document.querySelector('.small-display__add');
 
+export function disableButtons() {
+	reverse.classList.remove('calc__button_enabled');
+	reverse.classList.add('calc__button_disabled');
+	percent.classList.remove('calc__button_enabled');
+	percent.classList.add('calc__button_disabled');
+	sqrt.classList.remove('calc__button_enabled');
+	sqrt.classList.add('calc__button_disabled');
+	pow.classList.remove('calc__button_enabled');
+	pow.classList.add('calc__button_disabled');
+	frac.classList.remove('calc__button_enabled');
+	frac.classList.add('calc__button_disabled');
+	point.classList.remove('calc__button_enabled');
+	point.classList.add('calc__button_disabled');
+	resultButton.classList.remove('calc__button_enabled');
+	resultButton.classList.add('calc__button_disabled');
+	operationList.forEach(function(element){
+		element.classList.remove('calc__button_enabled');
+		element.classList.add('calc__button_disabled');
+	});
+}
+
+export function activateButtons() {
+	reverse.classList.add('calc__button_enabled');
+	reverse.classList.remove('calc__button_disabled');
+	point.classList.add('calc__button_enabled');
+	point.classList.remove('calc__button_disabled');
+	resultButton.classList.add('calc__button_enabled');
+	resultButton.classList.remove('calc__button_disabled');
+	percent.classList.add('calc__button_enabled');
+	percent.classList.remove('calc__button_disabled');
+	sqrt.classList.add('calc__button_enabled');
+	sqrt.classList.remove('calc__button_disabled');
+	pow.classList.add('calc__button_enabled');
+	pow.classList.remove('calc__button_disabled');
+	frac.classList.add('calc__button_enabled');
+	frac.classList.remove('calc__button_disabled');
+	operationList.forEach(function(element){
+		element.classList.add('calc__button_enabled');
+		element.classList.remove('calc__button_disabled');
+	});
+}
 
 class Calculator extends Operations {
 	constructor() {
