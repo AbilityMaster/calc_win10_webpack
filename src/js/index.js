@@ -1,11 +1,55 @@
 'use strict'
 import calc from './calculator.js'
-import lcStorage from './localStorage.js'
-import {forDrag, calculator, numbers, operationList, reverse, percent, sqrt, pow, frac, point, resultButton, smallDisplay} from './var.js'
+import modes from './modes.js'
+import {MAX_WIDTH_DISPLAY, CALC_MODES} from './const.js'
+import lc from './localStorage.js'
 
-lcStorage.init();
+let smallDisplay = document.querySelector('.small-display__block'),
+point = document.querySelector('.calc__button_add-point'),
+resultButton = document.querySelector('.calc__button_get-result'),
+sqrt = document.querySelector('.calc__button_sqrt'),
+pow = document.querySelector('.calc__button_pow'),
+frac = document.querySelector('.calc__button_frac'),
+percent = document.querySelector('.calc__button_percent'),
+reverse = document.querySelector('.calc__button_reverse'),
+operationList = document.querySelectorAll('.calc__button_operation'),
+numbers = document.querySelectorAll('.calc__button_number'),
+calculator = document.querySelector('.calculator'),
+display = document.querySelector('.display'),
+forDrag = document.querySelector('.index-menu__title'),
+optionMenu = document.querySelector('.option-menu'),
+buttonArea = document.querySelector('.button-area'),
+groupSmallDisplay = document.querySelector('.group-small-display'),
+openCalc = document.querySelector('.open-calculator');
+
+modes.init();
+
+
 
 window.onload = function() {
+
+	let info = {} 
+
+	window.onresize = function(e) {
+		let shiftX = e.pageX - calculator.offsetLeft;
+		if ((calculator.offsetLeft + calculator.clientWidth) > window.innerWidth) {
+			info.x = ( window.innerWidth - calculator.clientWidth ) / window.innerWidth * 100 + '%';
+			calculator.style.left = info.x;
+		}
+		if ((calculator.offsetTop + calculator.clientHeight) > window.innerHeight) {
+			info.y = ( window.innerHeight - calculator.clientHeight ) / window.innerHeight * 100 + '%';
+			calculator.style.top = info.y; 
+		}
+		if (calculator.offsetLeft < 0) {
+			info.x = 0 + '%';
+			calculator.style.left = info.x;
+		}
+		if (calculator.offsetTop < 0) {
+			info.y = 0 + '%';
+			calculator.style.top = info.x;
+		}
+		lc.dataset = info;
+	}	
 
 	forDrag.onmousedown = function(e) {
 
@@ -19,9 +63,32 @@ window.onload = function() {
 		calculator.style.zIndex = 1000;
 
 		function moveAt(e) {
-			calculator.style.left = e.pageX - shiftX + 'px';
-			calculator.style.top = e.pageY - shiftY + 'px';
-			lcStorage.cords = calculator.style.left + ' ' + calculator.style.top;
+			if ((e.pageX - shiftX + calculator.clientWidth) > window.innerWidth) {
+				calculator.style.left = (window.innerWidth - calculator.clientWidth) / window.innerWidth * 100 + '%';
+			} else {				
+				calculator.style.left = (e.pageX - shiftX) / window.innerWidth * 100 + '%';
+			}
+
+			if ((e.pageY - shiftY + calculator.clientHeight) > window.innerHeight) {
+				calculator.style.top = (window.innerHeight - calculator.clientHeight) / window.innerHeight * 100 + '%';
+			} else {
+				calculator.style.top = (e.pageY - shiftY) / window.innerHeight * 100 + '%';
+			}
+			if ((e.pageY - shiftY) <= 0) {
+				calculator.style.top = 0;
+			}
+			if ((e.pageX - shiftX) <= 0) {
+				calculator.style.left = 0;
+			}
+
+			info.x = calculator.style.left;
+			info.y = calculator.style.top;
+
+			if (lc.dataset.mode === CALC_MODES.DEFAULT) {
+				info.mode = CALC_MODES.STANDART;
+			}
+			
+			lc.dataset = info;
 		}
 
 		document.onmousemove = function(e) {
@@ -39,16 +106,24 @@ window.onload = function() {
 	};
 
 	document.querySelector('.index-menu__button_open').addEventListener('click', function() {
-		lcStorage.manage('standart');
+		info.mode = CALC_MODES.STANDART;
+		lc.dataset = info;
+		modes.manage(CALC_MODES.STANDART);
 	});
 	document.querySelector('.index-menu__button_trey').addEventListener('click',function() {
-		lcStorage.manage('minimized');
+		info.mode = CALC_MODES.MINIMIZED;
+		lc.dataset = info;
+		modes.manage(CALC_MODES.MINIMIZED)
 	});
 	document.querySelector('.index-menu__button_close').addEventListener('click', function() {
-		lcStorage.manage('closed');
+		modes.manage(CALC_MODES.CLOSED)		
+		info.mode = CALC_MODES.CLOSED;
+		lc.dataset = info;
 	});
 	document.querySelector('.open-calculator').addEventListener('click', function() {
-		lcStorage.manage('default');
+		modes.manage(CALC_MODES.DEFAULT);
+		info.mode = CALC_MODES.DEFAULT;		
+		lc.dataset = info;	
 	});
 
 	numbers.forEach(element => {
@@ -108,20 +183,16 @@ window.onload = function() {
 		calc.backspace();
 	}
 	document.querySelector('.small-display__button_left').onclick = function() {
-		if (smallDisplay.clientWidth > 286) {
+		if (smallDisplay.clientWidth > MAX_WIDTH_DISPLAY) {
 			smallDisplay.style.removeProperty('right');
 			smallDisplay.style.left = 0;
-		} else {
-			return;
 		}
 	}
 
 	document.querySelector('.small-display__button_right').onclick = function() {
-		if (smallDisplay.clientWidth > 286) {
+		if (smallDisplay.clientWidth > MAX_WIDTH_DISPLAY) {
 			smallDisplay.style.removeProperty('left');
 			smallDisplay.style.right = 0;
-		} else {
-			return;
-		}
+		} 
 	}
 }

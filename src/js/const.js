@@ -1,19 +1,5 @@
-export const numbers = document.querySelectorAll('.calc__button_number'),
-display = document.querySelector('.display'),
-smallDisplay = document.querySelector('.small-display__block'),
-hiddenDisplay = document.querySelector('.small-display__add'),
-operationList = document.querySelectorAll('.calc__button_operation'),
-reverse = document.querySelector('.calc__button_reverse'),
-point = document.querySelector('.calc__button_add-point'),
-resultButton = document.querySelector('.calc__button_get-result'),
-percent = document.querySelector('.calc__button_percent'),
-sqrt = document.querySelector('.calc__button_sqrt'),
-pow = document.querySelector('.calc__button_pow'),
-frac = document.querySelector('.calc__button_frac'),
-arrowLeft = document.querySelector('.small-display__button_left'),
-arrowRight = document.querySelector('.small-display__button_right'),
-calculator = document.querySelector('.calculator'),
-forDrag = document.querySelector('.index-menu__title');
+export const MAX_WIDTH_DISPLAY = 286;
+export const VERSION = '1.0.0';
 
 export const CALC_MODES = {
 	STANDART: 'standart',
@@ -25,7 +11,11 @@ export const CALC_MODES = {
 export const MESSAGES = {
 	OVERFLOW: 'Переполнение',
 	DIVIDE_BY_ZERO: 'Деление на 0 невозможно',
-	UNCORRECT_DATA: 'Введены неверные данные'
+	UNCORRECT_DATA: 'Введены неверные данные',
+	ERROR: {
+		MODES: 'Ошибка в режиме калькулятора',
+		OPERATIONS: 'Ошибка в работе операций'
+	}
 };
 
 export const STYLES = {
@@ -43,6 +33,14 @@ export const OPERATIONS = {
 	SQRT: 'SQRT',
 	NEGATE: 'NEGATE',
 	PERCENT: 'PERCENT'
+};
+
+
+export const NAME_FOR_DISPLAY = {
+	[OPERATIONS.POW]: 'sqr',
+	[OPERATIONS.FRAC]: '1/',
+	[OPERATIONS.SQRT]: '√',
+	[OPERATIONS.NEGATE]: 'negate'
 };
 
 export function disableButtons() {

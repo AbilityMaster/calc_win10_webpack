@@ -1,14 +1,9 @@
-import {MESSAGES, STYLES, OPERATIONS, display, disableButtons, activateButtons} from './var.js';
+import {MESSAGES, STYLES, OPERATIONS, disableButtons, activateButtons} from './const.js';
+
+let display = document.querySelector('.display');
 
 class Operations {
-	constructor() {	
-		this.nameOp = {
-			[OPERATIONS.POW]: 'sqr',
-			[OPERATIONS.FRAC]: '1/',
-			[OPERATIONS.SQRT]: '√',
-			[OPERATIONS.NEGATE]: 'negate'
-		}
-	}		
+	constructor() {	}		
 
 	sendOperation(operation) {
 		switch (operation) {
@@ -40,24 +35,26 @@ class Operations {
 				this._percent();
 				break;
 			default:
-				console.log('Error in work of function');
+				console.log(MESSAGES.ERROR.OPERATIONS);
 		}
 	}
 
 	_plus() {
-		console.log('ss');
 		if (this.resultPressed) {
 			this.currentValue += this.ValueForProgressive;
 		}	else {
 			this.currentValue += parseFloat(display.innerHTML);
 		}
+
 		if (!isFinite(this.currentValue)) {
 			disableButtons();
 			display.style.fontSize = STYLES.SMALL;
 			display.innerHTML = MESSAGES.OVERFLOW;
 			this.operationsDisabled = true;
+
 			return;
 		}
+
 		display.innerHTML = this.trimmer(this.currentValue);
 	}
 
@@ -67,13 +64,16 @@ class Operations {
 		}	else {   
 			this.currentValue -= parseFloat(display.innerHTML);
 		}
+
 		if (!isFinite(this.currentValue)) {
 			disableButtons();
 			display.style.fontSize = STYLES.SMALL;
 			display.innerHTML = MESSAGES.OVERFLOW;
 			this.operationsDisabled = true;
+
 			return;
 		}
+
 		display.innerHTML = this.trimmer(this.currentValue);
 	}
 
@@ -83,13 +83,16 @@ class Operations {
 		}	else {
 			this.currentValue *= parseFloat(display.innerHTML);
 		}
+
 		if (!isFinite(this.currentValue)) {
 			disableButtons();
 			display.style.fontSize = STYLES.SMALL;
 			display.innerHTML = MESSAGES.OVERFLOW;
 			this.operationsDisabled = true;
+
 			return;
 		}
+
 		display.innerHTML = this.trimmer(this.currentValue);
 	}
 
@@ -99,6 +102,7 @@ class Operations {
 			disableButtons();
 			display.style.fontSize = STYLES.SMALL;
 			display.innerHTML = MESSAGES.DIVIDE_BY_ZERO;
+
 			return;
 		} 
 
@@ -112,15 +116,18 @@ class Operations {
 	}
 
 	_pow() {
-		let temp = Math.pow(parseFloat(display.innerHTML),2);
+		let temp = Math.pow(parseFloat(display.innerHTML), 2);
+
 		if (!isFinite(temp)) {
 			disableButtons();
 			display.style.fontSize = STYLES.SMALL;
 			display.innerHTML = MESSAGES.OVERFLOW;
 			this.operationsDisabled = true;
+
 			return;
 		}
-		display.innerHTML = this.trimmer(Math.pow(parseFloat(display.innerHTML),2));
+
+		display.innerHTML = this.trimmer(Math.pow(parseFloat(display.innerHTML), 2));
 	}
 
 	_frac() {
@@ -129,16 +136,21 @@ class Operations {
 			disableButtons();
 			display.style.fontSize = STYLES.SMALL;
 			display.innerHTML = MESSAGES.DIVIDE_BY_ZERO;
+
 			return;
-		} 
-		let temp = 1 / parseFloat(display.innerHTML)
+		}
+
+		let temp = 1 / parseFloat(display.innerHTML);
+
 		if (!isFinite(temp)) {
 			disableButtons();
 			display.style.fontSize = STYLES.SMALL;
 			display.innerHTML = MESSAGES.OVERFLOW;
 			this.operationsDisabled = true;
+
 			return;
 		}
+
 		display.innerHTML = this.trimmer(temp);
 	}
 
@@ -148,44 +160,57 @@ class Operations {
 			display.style.fontSize = STYLES.SMALL;
 			display.innerHTML =  MESSAGES.UNCORRECT_DATA;
 			this.operationsDisabled = true;
+
 			return;
 		}
+
 		let temp = Math.sqrt(parseFloat(display.innerHTML));
+
 		if (!isFinite(temp)) {
 			disableButtons();
 			display.style.fontSize = STYLES.SMALL;
 			display.innerHTML = MESSAGES.OVERFLOW;
 			this.operationsDisabled = true;
+
 			return;
 		}
+
 		display.innerHTML = this.trimmer(temp);
 	}
 
 	_negate() {
 		let temp = parseFloat(display.innerHTML) * -1;
+
 		if (!isFinite(temp)) {
 			disableButtons();
 			display.style.fontSize = STYLES.SMALL;
 			display.innerHTML = MESSAGES.OVERFLOW;
 			this.operationsDisabled = true;
+
 			return;
 		}
+
 		display.innerHTML = this.trimmer(temp);
 	}
 
 	_percent() {
-		let temp = parseFloat(display.innerHTML)/100*this.currentValue;
+		let temp = parseFloat(display.innerHTML) / 100 * this.currentValue;
+
 		if (!isFinite(temp)) {
 			disableButtons();
 			display.style.fontSize = STYLES.SMALL;
 			display.innerHTML = MESSAGES.OVERFLOW;
 			this.operationsDisabled = true;
+
 			return;
 		}
+
 		if (!this.currentValue) {
 			display.innerHTML = 0;
+
 			return;
 		}
+
 		return this.trimmer(temp);
 	}
 }

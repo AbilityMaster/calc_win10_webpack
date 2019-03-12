@@ -1,5 +1,12 @@
 import Operations from './operations.js';
-import {MESSAGES, STYLES, OPERATIONS, display, arrowLeft, arrowRight, smallDisplay, hiddenDisplay, disableButtons, activateButtons} from './var.js';
+import {MAX_WIDTH_DISPLAY, MESSAGES, STYLES, OPERATIONS, disableButtons, activateButtons, NAME_FOR_DISPLAY} from './const.js';
+
+let display = document.querySelector('.display'),
+arrowLeft = document.querySelector('.small-display__button_left'),
+arrowRight = document.querySelector('.small-display__button_right'),
+smallDisplay = document.querySelector('.small-display__block'),
+hiddenDisplay = document.querySelector('.small-display__add');
+
 
 class Calculator extends Operations {
 	constructor() {
@@ -81,29 +88,29 @@ class Calculator extends Operations {
 			this.dataWidth = smallDisplay.clientWidth;
 			if (operation === OPERATIONS.PERCENT) {
 				this.valueArray.push(this.sendOperation(operation));
-				smallDisplay.innerHTML += '&nbsp;' + this.valueArray[this.valueArray.length-1];
+				smallDisplay.innerHTML += ` ${this.valueArray[this.valueArray.length-1]}`;
 			} else {
-				this.valueArray.push(this.nameOp[operation] + '('+ display.innerHTML +')');
-				hiddenDisplay.innerHTML = '&nbsp;' + this.valueArray[this.valueArray.length-1];
-				if ((this.dataWidth + hiddenDisplay.clientWidth) >= 286) {
+				this.valueArray.push(`${NAME_FOR_DISPLAY[operation]}(${display.innerHTML})`);
+				hiddenDisplay.innerHTML = ` ${this.valueArray[this.valueArray.length-1]}`;
+				if ((this.dataWidth + hiddenDisplay.clientWidth) >= MAX_WIDTH_DISPLAY) {
 					smallDisplay.style.width = this.dataWidth + hiddenDisplay.clientWidth;
 				}
-				smallDisplay.innerHTML += '&nbsp;' + this.nameOp[operation] + '('+ display.innerHTML +')';
+				smallDisplay.innerHTML += ` ${NAME_FOR_DISPLAY[operation]}(${display.innerHTML})`;
 			}
 		}
 		if (this.pressedSingleOperation) {
 			if (operation ===  OPERATIONS.PERCENT) {
 				this.valueArray[this.valueArray.length-1] = this.sendOperation(operation);
-				smallDisplay.innerHTML = this.data + '&nbsp;' + this.valueArray[this.valueArray.length - 1] + '&nbsp;';
+				smallDisplay.innerHTML = `${this.data} ${this.valueArray[this.valueArray.length - 1]} `;
 			} else {
-				this.valueArray[this.valueArray.length-1] = this.nameOp[operation] + '(' + this.valueArray[this.valueArray.length - 1] + ')';
-				hiddenDisplay.innerHTML = '&nbsp;' + this.valueArray[this.valueArray.length-1] + '&nbsp;';
-				if ((this.dataWidth + hiddenDisplay.clientWidth) >= 286) {
+				this.valueArray[this.valueArray.length-1] = `${NAME_FOR_DISPLAY[operation]}(${this.valueArray[this.valueArray.length - 1]})`;
+				hiddenDisplay.innerHTML = ` ${this.valueArray[this.valueArray.length-1]} `;
+				if ((this.dataWidth + hiddenDisplay.clientWidth) >= MAX_WIDTH_DISPLAY) {
 					arrowLeft.style.visibility = 'visible';
 					arrowRight.style.visibility = 'visible';
 					smallDisplay.style.width = this.dataWidth + hiddenDisplay.clientWidth;
 				} 
-				smallDisplay.innerHTML = this.data + '&nbsp;' + this.valueArray[this.valueArray.length - 1] + '&nbsp;';
+				smallDisplay.innerHTML = `${this.data} ${this.valueArray[this.valueArray.length - 1]} `;
 			}
 		}
 
@@ -148,7 +155,7 @@ class Calculator extends Operations {
 
 		if (this.enteredNewValue && this.pressedSingleOperation) {
 			this.valueArray.push(operation);
-			hiddenDisplay.innerHTML = '&nbsp;' + this.valueArray[this.valueArray.length-1];
+			hiddenDisplay.innerHTML = ` ${this.valueArray[this.valueArray.length-1]}`;
 			if ((smallDisplay.clientWidth + hiddenDisplay.clientWidth) >= 286) {
 				arrowLeft.style.visibility = 'visible';
 				arrowRight.style.visibility = 'visible';
@@ -158,14 +165,14 @@ class Calculator extends Operations {
 		} else if (this.enteredNewValue) {
 			this.valueArray.push(display.innerHTML);
 			this.valueArray.push(operation);
-			hiddenDisplay.innerHTML = '&nbsp;' + this.valueArray[this.valueArray.length-2] + '&nbsp;' + this.valueArray[this.valueArray.length-1];
+			hiddenDisplay.innerHTML = ` ${this.valueArray[this.valueArray.length-2]} ${this.valueArray[this.valueArray.length-1]}`;
 			if ((smallDisplay.clientWidth + hiddenDisplay.clientWidth) >= 286) {
 				arrowLeft.style.visibility = 'visible';
 				arrowRight.style.visibility = 'visible';
 				smallDisplay.style.width = smallDisplay.clientWidth + hiddenDisplay.clientWidth;
 			}
-			smallDisplay.innerHTML += '&nbsp;' + this.valueArray[this.valueArray.length-2];
-			smallDisplay.innerHTML += '&nbsp;' + this.valueArray[this.valueArray.length-1];
+			smallDisplay.innerHTML += ` ${this.valueArray[this.valueArray.length-2]}`;
+			smallDisplay.innerHTML += ` ${this.valueArray[this.valueArray.length-1]}`;
 		}
 
 		this.valueArray[this.valueArray.length - 1] = operation;	
