@@ -4,39 +4,38 @@ import {disableButtons, activateButtons} from './calculator.js';
 let display = document.querySelector('.display');
 
 class Operations {
-	constructor() {	}		
+	constructor() {		
+		this.operationsDisabled = false;
+	}		
 
 	sendOperation(operation) {
 		switch (operation) {
 			case OPERATIONS.PLUS:
-				this._plus();
-				break;
+			this._plus();
+			break;
 			case OPERATIONS.MINUS:
-				this._minus();
-				break;
+			this._minus();
+			break;
 			case OPERATIONS.MULTIPLY:
-				this._multiply();
-				break;
+			this._multiply();
+			break;
 			case OPERATIONS.DIVIDE:
-				this._divide();
-				break;
+			this._divide();
+			break;
 			case OPERATIONS.POW:
-				this._pow();
-				break;
+			this._pow();
+			break;
 			case OPERATIONS.FRAC:
-				this._frac();
-				break;
+			this._frac();
+			break;
 			case OPERATIONS.SQRT:
-				this._sqrt();
-				break;
+			this._sqrt();
+			break;
 			case OPERATIONS.NEGATE: 
-				this._negate();
-				break;
-			case OPERATIONS.PERCENT: 
-				this._percent();
-				break;
+			this._negate();
+			break;
 			default:
-				console.log(MESSAGES.ERROR.OPERATIONS);
+			console.log(MESSAGES.ERROR.OPERATIONS);
 		}
 	}
 
@@ -47,16 +46,9 @@ class Operations {
 			this.currentValue += parseFloat(display.innerHTML);
 		}
 
-		if (!isFinite(this.currentValue)) {
-			disableButtons();
-			display.style.fontSize = STYLES.SMALL;
-			display.innerHTML = MESSAGES.OVERFLOW;
-			this.operationsDisabled = true;
-
-			return;
+		if (this.checkForFinite(this.currentValue)) {
+			display.innerHTML = this.trimmer(this.currentValue);
 		}
-
-		display.innerHTML = this.trimmer(this.currentValue);
 	}
 
 	_minus() {
@@ -66,16 +58,9 @@ class Operations {
 			this.currentValue -= parseFloat(display.innerHTML);
 		}
 
-		if (!isFinite(this.currentValue)) {
-			disableButtons();
-			display.style.fontSize = STYLES.SMALL;
-			display.innerHTML = MESSAGES.OVERFLOW;
-			this.operationsDisabled = true;
-
-			return;
+		if (this.checkForFinite(this.currentValue)) {
+			display.innerHTML = this.trimmer(this.currentValue);
 		}
-
-		display.innerHTML = this.trimmer(this.currentValue);
 	}
 
 	_multiply() {
@@ -85,16 +70,9 @@ class Operations {
 			this.currentValue *= parseFloat(display.innerHTML);
 		}
 
-		if (!isFinite(this.currentValue)) {
-			disableButtons();
-			display.style.fontSize = STYLES.SMALL;
-			display.innerHTML = MESSAGES.OVERFLOW;
-			this.operationsDisabled = true;
-
-			return;
+		if (this.checkForFinite(this.currentValue)) {
+			display.innerHTML = this.trimmer(this.currentValue);
 		}
-
-		display.innerHTML = this.trimmer(this.currentValue);
 	}
 
 	_divide() {
@@ -119,16 +97,9 @@ class Operations {
 	_pow() {
 		let temp = Math.pow(parseFloat(display.innerHTML), 2);
 
-		if (!isFinite(temp)) {
-			disableButtons();
-			display.style.fontSize = STYLES.SMALL;
-			display.innerHTML = MESSAGES.OVERFLOW;
-			this.operationsDisabled = true;
-
-			return;
+		if (this.checkForFinite(temp)) {
+			display.innerHTML = this.trimmer(Math.pow(parseFloat(display.innerHTML), 2));
 		}
-
-		display.innerHTML = this.trimmer(Math.pow(parseFloat(display.innerHTML), 2));
 	}
 
 	_frac() {
@@ -143,16 +114,9 @@ class Operations {
 
 		let temp = 1 / parseFloat(display.innerHTML);
 
-		if (!isFinite(temp)) {
-			disableButtons();
-			display.style.fontSize = STYLES.SMALL;
-			display.innerHTML = MESSAGES.OVERFLOW;
-			this.operationsDisabled = true;
-
-			return;
+		if (this.checkForFinite(temp)) {
+			display.innerHTML = this.trimmer(temp);
 		}
-
-		display.innerHTML = this.trimmer(temp);
 	}
 
 	_sqrt() {
@@ -167,53 +131,34 @@ class Operations {
 
 		let temp = Math.sqrt(parseFloat(display.innerHTML));
 
-		if (!isFinite(temp)) {
-			disableButtons();
-			display.style.fontSize = STYLES.SMALL;
-			display.innerHTML = MESSAGES.OVERFLOW;
-			this.operationsDisabled = true;
-
-			return;
+		if (this.checkForFinite(temp)) {
+			display.innerHTML = this.trimmer(temp);
 		}
-
-		display.innerHTML = this.trimmer(temp);
 	}
 
 	_negate() {
 		let temp = parseFloat(display.innerHTML) * -1;
 
-		if (!isFinite(temp)) {
-			disableButtons();
-			display.style.fontSize = STYLES.SMALL;
-			display.innerHTML = MESSAGES.OVERFLOW;
-			this.operationsDisabled = true;
-
-			return;
+		if (this.checkForFinite(temp)) {
+			display.innerHTML = this.trimmer(temp);
 		}
-
-		display.innerHTML = this.trimmer(temp);
 	}
 
-	_percent() {
+	percent() {
 		let temp = parseFloat(display.innerHTML) / 100 * this.currentValue;
 
-		if (!isFinite(temp)) {
-			disableButtons();
-			display.style.fontSize = STYLES.SMALL;
-			display.innerHTML = MESSAGES.OVERFLOW;
-			this.operationsDisabled = true;
+		if (this.checkForFinite(temp)) {
 
-			return;
+			if (!this.currentValue) {
+				display.innerHTML = 0;
+
+				return;
+			}	
+
+			return this.trimmer(temp);
 		}
-
-		if (!this.currentValue) {
-			display.innerHTML = 0;
-
-			return;
-		}
-
-		return this.trimmer(temp);
 	}
+
 }
 
 export default Operations; 

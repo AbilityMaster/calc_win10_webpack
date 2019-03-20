@@ -1,5 +1,5 @@
 import {CALC_MODES, MESSAGES} from './const.js'
-import lc from './localStorage.js'
+import Storage from './localStorage.js'
 
 let optionMenu = document.querySelector('.option-menu'),
 		buttonArea = document.querySelector('.button-area'),
@@ -14,15 +14,15 @@ let def = {
 	y: (window.innerHeight - calculator.offsetHeight) / window.innerHeight * 100 + '%'
 };
 
-class modes {
+class CalcLoader {
 	constructor() {}
 
 	init() {	
-		if (!lc.dataset) {
-			lc.dataset = def;
+		if (!Storage.dataset) {
+			Storage.dataset = def;
 		}
 
-		let obj = lc.dataset;
+		let obj = Storage.dataset;
 		
 		calculator.style.left = obj.x ? obj.x : def.x;
 		calculator.style.top = obj.y ? obj.y : def.y;
@@ -81,4 +81,4 @@ class modes {
 	}
 }
 
-export default new modes();
+export default new CalcLoader();

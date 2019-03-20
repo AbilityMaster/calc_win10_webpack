@@ -1,8 +1,9 @@
 'use strict'
 import calc from './calculator.js'
-import modes from './modes.js'
+import calcLoader from './calcLoader.js'
 import {MAX_WIDTH_DISPLAY, CALC_MODES} from './const.js'
-import lc from './localStorage.js'
+import Storage from './localStorage.js'
+import Display from './display.js'
 
 let smallDisplay = document.querySelector('.small-display__block'),
 point = document.querySelector('.calc__button_add-point'),
@@ -22,12 +23,13 @@ buttonArea = document.querySelector('.button-area'),
 groupSmallDisplay = document.querySelector('.group-small-display'),
 openCalc = document.querySelector('.open-calculator');
 
-modes.init();
+calcLoader.init();
 
+
+console.log(calc);
 
 
 window.onload = function() {
-
 	let info = {} 
 
 	window.onresize = function(e) {
@@ -47,7 +49,7 @@ window.onload = function() {
 			info.y = 0 + '%';
 			calculator.style.top = info.y;
 		}
-		lc.dataset = info;
+		Storage.dataset = info;
 	}	
 
 	forDrag.onmousedown = function(e) {
@@ -83,11 +85,11 @@ window.onload = function() {
 			info.x = calculator.style.left;
 			info.y = calculator.style.top;
 
-			if (lc.dataset.mode === CALC_MODES.DEFAULT) {
+			if (Storage.dataset.mode === CALC_MODES.DEFAULT) {
 				info.mode = CALC_MODES.STANDART;
 			}
 			
-			lc.dataset = info;
+			Storage.dataset = info;
 		}
 
 		document.onmousemove = function(e) {
@@ -109,23 +111,23 @@ window.onload = function() {
 
 	document.querySelector('.index-menu__button_open').addEventListener('click', function() {
 		info.mode = CALC_MODES.STANDART;
-		lc.dataset = info;
-		modes.manage(CALC_MODES.STANDART);
+		Storage.dataset = info;
+		calcLoader.manage(CALC_MODES.STANDART);
 	});
 	document.querySelector('.index-menu__button_trey').addEventListener('click',function() {
 		info.mode = CALC_MODES.MINIMIZED;
-		lc.dataset = info;
-		modes.manage(CALC_MODES.MINIMIZED)
+		Storage.dataset = info;
+		calcLoader.manage(CALC_MODES.MINIMIZED)
 	});
 	document.querySelector('.index-menu__button_close').addEventListener('click', function() {
-		modes.manage(CALC_MODES.CLOSED)		
+		calcLoader.manage(CALC_MODES.CLOSED)		
 		info.mode = CALC_MODES.CLOSED;
-		lc.dataset = info;
+		Storage.dataset = info;
 	});
 	document.querySelector('.open-calculator').addEventListener('click', function() {
-		modes.manage(CALC_MODES.DEFAULT);
+		calcLoader.manage(CALC_MODES.DEFAULT);
 		info.mode = CALC_MODES.DEFAULT;		
-		lc.dataset = info;	
+		Storage.dataset = info;	
 	});
 
 	numbers.forEach(element => {
