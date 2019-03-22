@@ -1,10 +1,12 @@
 import {MESSAGES, STYLES, OPERATIONS} from './const.js';
 import {disableButtons, activateButtons} from './calculator.js';
+import Memory from './memory.js';
 
 let display = document.querySelector('.display');
 
-class Operations {
-	constructor() {		
+class Operations extends Memory{
+	constructor() {	
+		super();	
 		this.operationsDisabled = false;
 	}		
 
