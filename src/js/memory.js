@@ -5,16 +5,21 @@ class Memory {
 	constructor() {
 		this.MemoryActivatedButtons = false;
 		this.openWindow = false;
+		this.positionAttribute = 0;
+		this.memoryValues = {};
 	}
 
 	addToMemory(data) {
 		let self = this;
+
+		this.memoryValues[this.positionAttribute] = data;
 
 		this.needNewValue = true;
 
 		let memory__block = document.createElement('div');
 
 		memory__block.className = "memory__block";
+		memory__block.setAttribute('data-position', this.positionAttribute);
 		memory.insertBefore(memory__block, memory.children[0]);
 
 		let memoryValue = document.createElement('div');
@@ -38,10 +43,11 @@ class Memory {
 		btn_m_plus.innerHTML = 'M+';
 		memory__block.appendChild(btn_m_plus);
 
-		btn_m_plus.addEventListener('click', function() {
+		btn_m_plus.addEventListener('click', function(event) {
 			let value = this.parentElement.childNodes[0].innerHTML;
 			let displayValue = display.innerHTML;
-			this.parentElement.childNodes[0].innerHTML = self.m_plus(value, displayValue);
+			self.valueObject[this.parentElement.dataset.position] = self.m_plus(value, displayValue);
+			this.parentElement.childNodes[0].innerHTML = self.valueObject[this.parentElement.dataset.position];
 		});
 
 		let btn_m_minus = document.createElement('div');
@@ -53,20 +59,23 @@ class Memory {
 		btn_m_minus.addEventListener('click', function() {
 			let value = this.parentElement.childNodes[0].innerHTML;
 			let displayValue = display.innerHTML;
-			this.parentElement.childNodes[0].innerHTML = self.m_minus(value, displayValue);
+			self.valueObject[this.parentElement.dataset.position] = self.m_minus(value, displayValue);
+			this.parentElement.childNodes[0].innerHTML = self.valueObject[this.parentElement.dataset.position];
 		});
 
+		this.positionAttribute++;
 	}
 
 	m_plus(value, displayValue) {
-		return parseFloat(value) + parseFloat(displayValue); 
+		return String(parseFloat(value) + parseFloat(displayValue));
 	}
 	m_minus(value, displayValue) {
-		return parseFloat(value) - parseFloat(displayValue); 
+		return String(parseFloat(value) - parseFloat(displayValue)); 
 	}
 
 	m_clear(elem) {
 		elem.remove(elem);
+		delete this.memoryValues[elem.dataset.position];
 	}
 }
 
