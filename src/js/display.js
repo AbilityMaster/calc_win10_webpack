@@ -16,13 +16,13 @@ class Display extends Operations {
 	
 	displayClear() {
 		this.valueArray = [];
-		display.innerHTML = '0';
-		smallDisplay.innerHTML = '';
-		smallDisplay.style.width = '';
-		hiddenDisplay.innerHTML = '';
-		hiddenDisplay.style.width = '';
-		arrowLeft.style.visibility = 'hidden';
-		arrowRight.style.visibility = 'hidden';
+		this.display.innerHTML = '0';
+		this.smallDisplay.innerHTML = '';
+		this.smallDisplay.style.width = '';
+		this.hiddenDisplay.innerHTML = '';
+		this.hiddenDisplay.style.width = '';
+		this.arrowLeft.style.visibility = 'hidden';
+		this.arrowRight.style.visibility = 'hidden';
 	}
 
 	numberPress(number) {
@@ -55,39 +55,39 @@ class Display extends Operations {
 		}
 	}
 
-	addPoint(text) {
+	addPoint() {
 		if (this.operationsDisabled) {
 			return;
 		}
 
-		if (text.indexOf('.') === -1 && this.needNewValue || text.indexOf('.') === -1 && this.resultPressed || text.indexOf('.') !== -1 && this.needNewValue ||		text.indexOf('.') !== -1 && this.resultPressed) {
-			display.innerHTML = '0.';
+		if (this.display.innerHTML.indexOf('.') === -1 && this.needNewValue || this.display.innerHTML.indexOf('.') === -1 && this.resultPressed || this.display.innerHTML.indexOf('.') !== -1 && this.needNewValue ||		this.display.innerHTML.indexOf('.') !== -1 && this.resultPressed) {
+			this.display.innerHTML = '0.';
 			this.needNewValue = false;
 			return;
 		} 
 
-		if (text.indexOf('.') === -1) {
-			display.innerHTML += '.';
+		if (this.display.innerHTML.indexOf('.') === -1) {
+			this.display.innerHTML += '.';
 		}
 	}
 
 	backspace() {
-		let length = display.innerHTML.length;
-		if (length === 2 && display.innerHTML[0] === '-' || length === 1) {
-			display.innerHTML = '0';
+		let length = this.display.innerHTML.length;
+		if (length === 2 && this.display.innerHTML[0] === '-' || length === 1) {
+			this.display.innerHTML = '0';
 			return;
 		}
 
-		if (display.innerHTML === MESSAGES.DIVIDE_BY_ZERO || display.innerHTML === MESSAGES.OVERFLOW || display.innerHTML === MESSAGES.UNCORRECT_DATA) {
-			smallDisplay.innerHTML = '';
-			display.style.fontSize = STYLES.NORMAL;
+		if (this.display.innerHTML === MESSAGES.DIVIDE_BY_ZERO || this.display.innerHTML === MESSAGES.OVERFLOW || this.display.innerHTML === MESSAGES.UNCORRECT_DATA) {
+			this.smallDisplay.innerHTML = '';
+			this.display.style.fontSize = STYLES.NORMAL;
 			this.operationsDisabled = false;
-			display.innerHTML = '0';
+			this.display.innerHTML = '0';
 			activateButtons();
 			return;
 		}
 
-		display.innerHTML = display.innerHTML.slice(0,length-1);	
+		this.display.innerHTML = this.display.innerHTML.slice(0,length-1);	
 	}
 
 	sendToStatusDisplay(typeOperation, operation) {

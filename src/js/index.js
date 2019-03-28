@@ -18,6 +18,10 @@ button_Reverse = document.querySelector('.calc__button_reverse'),
 button_Clear = document.querySelector('.calc__button_clear'),
 button_Backspace = document.querySelector('.calc__button_backspace'),
 operationList = document.querySelectorAll('.calc__button_operation'),
+button_Open = document.querySelector('.index-menu__button_open'),
+button_Trey = document.querySelector('.index-menu__button_trey'),
+button_Close = document.querySelector('.index-menu__button_close'),
+button_OpenCalculator = document.querySelector('.open-calculator'),
 numbers = document.querySelectorAll('.calc__button_number'),
 calculator = document.querySelector('.calculator'),
 display = document.querySelector('.display'),
@@ -56,7 +60,6 @@ export function disableButtons() {
 		element.classList.add('calc__button_disabled');
 	});
 }
-
 
 export function activateButtons() {
 	reverse.classList.add('calc__button_enabled');
@@ -161,30 +164,29 @@ window.onload = function() {
 		return false;
 	};
 
-
-	document.querySelector('.index-menu__button_open').addEventListener('click', function() {
+	button_Open.onclick = function() {
 		info.mode = CALC_MODES.STANDART;
 		Storage.dataset = info;
 		calcLoader.manage(CALC_MODES.STANDART);
-	});
+	}
 
-	document.querySelector('.index-menu__button_trey').addEventListener('click',function() {
+	button_Trey.onclick = function() {
 		info.mode = CALC_MODES.MINIMIZED;
 		Storage.dataset = info;
 		calcLoader.manage(CALC_MODES.MINIMIZED)
-	});
+	}
 
-	document.querySelector('.index-menu__button_close').addEventListener('click', function() {
+	button_Close.onclick = function() {
 		calcLoader.manage(CALC_MODES.CLOSED)		
 		info.mode = CALC_MODES.CLOSED;
 		Storage.dataset = info;
-	});
+	}
 
-	document.querySelector('.open-calculator').addEventListener('click', function() {
+	button_OpenCalculator.onclick = function() {
 		calcLoader.manage(CALC_MODES.DEFAULT);
 		info.mode = CALC_MODES.DEFAULT;		
 		Storage.dataset = info;	
-	});
+	}
 
 	numbers.forEach(element => {
 		element.addEventListener('click', function() {
@@ -208,12 +210,6 @@ window.onload = function() {
 	}
 
 	button_addPoint.onclick = function() {	
-		if (calc.operationsDisabled) {
-			return;
-		}
-
-		Disp.data = calc.needNewValue + ' ' + calc.resultPressed;
-
 		smallDisplay.style.removeProperty('left');
 		smallDisplay.style.right = 0;
 		calc.addPoint();
