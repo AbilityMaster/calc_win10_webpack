@@ -4,7 +4,7 @@ import calcLoader from './calcLoader.js'
 import {MAX_WIDTH_DISPLAY, CALC_MODES} from './const.js'
 import Storage from './localStorage.js'
 import Display from './display.js'
-import Memory from './memory.js'
+import Memory from './Memory.js'
 
 let smallDisplay = document.querySelector('.small-display__block'),
 point = document.querySelector('.calc__button_add-point'),
@@ -23,15 +23,15 @@ optionMenu = document.querySelector('.option-menu'),
 buttonArea = document.querySelector('.button-area'),
 groupSmallDisplay = document.querySelector('.group-small-display'),
 openCalc = document.querySelector('.open-calculator'),
-mem = document.querySelector('.memory'),
-memoryClear = document.querySelector('.calc-add__button_memory-clear'),
-memoryRead = document.querySelector('.calc-add__button_read'),
-memoryPlus = document.querySelector('.calc-add__button_plus'),
-memoryMinus = document.querySelector('.calc-add__button_minus'),
+memoryBoard = document.querySelector('.memory'),
+buttonMemory_Clear = document.querySelector('.calc-add__button_memory-clear'),
+buttonMemory_Read = document.querySelector('.calc-add__button_read'),
+buttonMemory_Plus = document.querySelector('.calc-add__button_plus'),
+buttonMemory_Minus = document.querySelector('.calc-add__button_minus'),
 clear = document.querySelector('.calc__button_clear'),
 backspace = document.querySelector('.calc__button_backspace'),
-memorySave = document.querySelector('.calc-add__button_ms'),
-memory = document.querySelector('.calc-add__button_memory');
+buttonMemory_Save = document.querySelector('.calc-add__button_ms'),
+buttonMemory_Open = document.querySelector('.calc-add__button_memory');
 
 calcLoader.init();
 
@@ -209,92 +209,95 @@ window.onload = function() {
 		} 
 	}
 
-	memorySave.onclick = function() {
-		if (calc.openWindow) {
+	buttonMemory_Save.onclick = function() {
+		if (Memory.isOpenMemoryWindow) {
 			return;
 		}
 
-		memoryRead.classList.remove("calc-add__button_disabled");
-		memoryClear.classList.remove("calc-add__button_disabled");
-		memory.classList.remove("calc-add__button_disabled");
-		calc.MemoryActivatedButtons = true;
+		buttonMemory_Read.classList.remove("calc-add__button_disabled");
+		buttonMemory_Clear.classList.remove("calc-add__button_disabled");
+		buttonMemory_Open.classList.remove("calc-add__button_disabled");
+		Memory.isActivatedMemoryButtons = true;
 
-		calc.addToMemory(display.innerHTML);
+		Memory.addToMemory(display.innerHTML);
 	}
 
-	memory.onclick = function() {		
-		if (!calc.MemoryActivatedButtons) {
+	buttonMemory_Open.onclick = function() {		
+		if (!Memory.isActivatedMemoryButtons) {
 			return;
 		}
-		mem.classList.toggle("visibility");
-		memoryClear.classList.toggle("calc-add__button_disabled");
-		memoryRead.classList.toggle("calc-add__button_disabled");
-		memoryPlus.classList.toggle("calc-add__button_disabled");
-		memoryMinus.classList.toggle("calc-add__button_disabled");
-		memorySave.classList.toggle("calc-add__button_disabled");
-		if (calc.openWindow) {
-			calc.openWindow = false;
-			return;
-		}
-		calc.openWindow = true;
 
+		memoryBoard.classList.toggle("visibility");
+		buttonMemory_Clear.classList.toggle("calc-add__button_disabled");
+		buttonMemory_Read.classList.toggle("calc-add__button_disabled");
+		buttonMemory_Plus.classList.toggle("calc-add__button_disabled");
+		buttonMemory_Minus.classList.toggle("calc-add__button_disabled");
+		buttonMemory_Save.classList.toggle("calc-add__button_disabled");
+
+		if (Memory.isOpenMemoryWindow) {
+			Memory.isOpenMemoryWindow = false;
+			return;
+		}
+
+		Memory.isOpenMemoryWindow = true;
 	}
 
-	memoryPlus.onclick = function() {		
-		if (calc.openWindow) {
+	buttonMemory_Plus.onclick = function() {		
+		if (Memory.isOpenMemoryWindow) {
 			return;
 		}
 
-		memoryRead.classList.remove("calc-add__button_disabled");
-		memoryClear.classList.remove("calc-add__button_disabled");
-		memory.classList.remove("calc-add__button_disabled");
-		calc.MemoryActivatedButtons = true;
+		buttonMemory_Read.classList.remove("calc-add__button_disabled");
+		buttonMemory_Clear.classList.remove("calc-add__button_disabled");
+		buttonMemory_Open.classList.remove("calc-add__button_disabled");
 
-		if (document.querySelector('.memory').children.length === 0) {
-			calc.addToMemory(display.innerHTML);
+		Memory.isActivatedMemoryButtons = true;
+
+		if (Memory.isEmpty()) {
+			Memory.addToMemory(display.innerHTML);
 		} else {
 			let value =	document.querySelector('.memory__block').childNodes[0].innerHTML;
 			let displayValue = display.innerHTML;
-			document.querySelector('.memory__block').childNodes[0].innerHTML = calc.m_plus(value, displayValue);
+			document.querySelector('.memory__block').childNodes[0].innerHTML = Memory.m_plus(value, displayValue);
 		}
 	}
 
-	memoryMinus.onclick = function() {
-		if (calc.openWindow) {
+	buttonMemory_Minus.onclick = function() {
+		if (Memory.isOpenMemoryWindow) {
 			return;
 		}
 
-		memoryRead.classList.remove("calc-add__button_disabled");
-		memoryClear.classList.remove("calc-add__button_disabled");
-		memory.classList.remove("calc-add__button_disabled");
-		calc.MemoryActivatedButtons = true;
+		buttonMemory_Read.classList.remove("calc-add__button_disabled");
+		buttonMemory_Clear.classList.remove("calc-add__button_disabled");
+		buttonMemory_Open.classList.remove("calc-add__button_disabled");
+		Memory.isActivatedMemoryButtons = true;
 
-		if (document.querySelector('.memory').children.length === 0) {
-			calc.addToMemory(display.innerHTML);
+		if (Memory.isEmpty()) {
+			Memory.addToMemory(display.innerHTML);
 		} else {
 			let value =	document.querySelector('.memory__block').childNodes[0].innerHTML;
 			let displayValue = display.innerHTML;
-			document.querySelector('.memory__block').childNodes[0].innerHTML = calc.m_minus(value, displayValue);
+			document.querySelector('.memory__block').childNodes[0].innerHTML = Memory.m_minus(value, displayValue);
 		}
 	}
 
-	memoryRead.onclick = function() {		
-		if (!calc.MemoryActivatedButtons || calc.openWindow) {
+	buttonMemory_Read.onclick = function() {		
+		if (!Memory.isActivatedMemoryButtons || Memory.isOpenMemoryWindow) {
 			return;
 		}
 		display.innerHTML = 	document.querySelector('.memory__block').childNodes[0].innerHTML;
 		calc.enteredNewValue = true;
 	}
 
-	memoryClear.onclick = function() {
-		if (!calc.MemoryActivatedButtons || calc.openWindow) {
+	buttonMemory_Clear.onclick = function() {
+		if (!Memory.isActivatedMemoryButtons || Memory.isOpenMemoryWindow) {
 			return;
 		}
-		calc.MemoryActivatedButtons = false;
-		memoryRead.classList.add("calc-add__button_disabled");
-		memoryClear.classList.add("calc-add__button_disabled");
-		memory.classList.add("calc-add__button_disabled");
-		mem.innerHTML = '';
+		Memory.isActivatedMemoryButtons = false;
+		buttonMemory_Read.classList.add("calc-add__button_disabled");
+		buttonMemory_Clear.classList.add("calc-add__button_disabled");
+		buttonMemory_Open.classList.add("calc-add__button_disabled");
+		memoryBoard.innerHTML = '';
 	}
 
 }

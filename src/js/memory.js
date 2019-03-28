@@ -3,8 +3,8 @@ display = document.querySelector('.display');
 
 class Memory {
 	constructor() {
-		this.MemoryActivatedButtons = false;
-		this.openWindow = false;
+		this.isActivatedMemoryButtons = false;
+		this.isOpenMemoryWindow = false;
 		this.positionAttribute = 0;
 		this.memoryValues = {};
 	}
@@ -77,6 +77,10 @@ class Memory {
 		elem.remove(elem);
 		delete this.memoryValues[elem.dataset.position];
 	}
+
+	isEmpty() {
+		return (Object.keys(this.memoryValues).length === 0) ? true : false;		
+	}
 }
 
-export default Memory;
+export default new Memory();
