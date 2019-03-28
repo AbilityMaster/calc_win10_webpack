@@ -7,6 +7,7 @@ class lc {
 
 	set dataset(obj) {
 		let temp = JSON.parse(localStorage.getItem(this.key));
+		console.log(obj);
 
 		if (temp) {
 			for (let key in temp) {
@@ -14,8 +15,12 @@ class lc {
 					temp[key] = obj[key]
 				}
 			}
+			for (let key in obj) {
+				if (temp[key] === undefined) {
+					temp[key] = obj[key];
+				}
+			}
 			localStorage.setItem(this.key, JSON.stringify(temp));
-			
 			return;
 		} 
 		localStorage.setItem(this.key, JSON.stringify(obj));

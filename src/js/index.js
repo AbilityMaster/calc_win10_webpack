@@ -247,19 +247,21 @@ window.onload = function() {
 			return;
 		}
 
+		Memory.isActivatedMemoryButtons = true;
+		
 		buttonMemory_Read.classList.remove("calc-add__button_disabled");
 		buttonMemory_Clear.classList.remove("calc-add__button_disabled");
 		buttonMemory_Open.classList.remove("calc-add__button_disabled");
 
-		Memory.isActivatedMemoryButtons = true;
 
 		if (Memory.isEmpty()) {
 			Memory.addToMemory(display.innerHTML);
 		} else {
 			let value =	document.querySelector('.memory__block').childNodes[0].innerHTML;
 			let displayValue = display.innerHTML;
-			document.querySelector('.memory__block').childNodes[0].innerHTML = Memory.m_plus(value, displayValue);
+			document.querySelector('.memory__block').childNodes[0].innerHTML = Memory.plus(value, displayValue);
 		}
+
 	}
 
 	buttonMemory_Minus.onclick = function() {
@@ -267,17 +269,18 @@ window.onload = function() {
 			return;
 		}
 
+		Memory.isActivatedMemoryButtons = true;
+
 		buttonMemory_Read.classList.remove("calc-add__button_disabled");
 		buttonMemory_Clear.classList.remove("calc-add__button_disabled");
 		buttonMemory_Open.classList.remove("calc-add__button_disabled");
-		Memory.isActivatedMemoryButtons = true;
 
 		if (Memory.isEmpty()) {
 			Memory.addToMemory(display.innerHTML);
 		} else {
 			let value =	document.querySelector('.memory__block').childNodes[0].innerHTML;
 			let displayValue = display.innerHTML;
-			document.querySelector('.memory__block').childNodes[0].innerHTML = Memory.m_minus(value, displayValue);
+			document.querySelector('.memory__block').childNodes[0].innerHTML = Memory.minus(value, displayValue);
 		}
 	}
 
@@ -293,7 +296,9 @@ window.onload = function() {
 		if (!Memory.isActivatedMemoryButtons || Memory.isOpenMemoryWindow) {
 			return;
 		}
+
 		Memory.isActivatedMemoryButtons = false;
+
 		buttonMemory_Read.classList.add("calc-add__button_disabled");
 		buttonMemory_Clear.classList.add("calc-add__button_disabled");
 		buttonMemory_Open.classList.add("calc-add__button_disabled");

@@ -34,7 +34,7 @@ class Memory {
 		btn_mc.innerHTML = 'MC';
 		memory__block.appendChild(btn_mc);
 		btn_mc.addEventListener('click', function() {
-			self.m_clear(this.parentElement);
+			self.clear(this.parentElement);
 		});
 
 		let btn_m_plus = document.createElement('div');
@@ -46,7 +46,7 @@ class Memory {
 		btn_m_plus.addEventListener('click', function(event) {
 			let value = this.parentElement.childNodes[0].innerHTML;
 			let displayValue = display.innerHTML;
-			self.memoryValues[this.parentElement.dataset.position] = self.m_plus(value, displayValue);
+			self.memoryValues[this.parentElement.dataset.position] = self.plus(value, displayValue);
 			this.parentElement.childNodes[0].innerHTML = self.memoryValues[this.parentElement.dataset.position];
 		});
 
@@ -59,21 +59,21 @@ class Memory {
 		btn_m_minus.addEventListener('click', function() {
 			let value = this.parentElement.childNodes[0].innerHTML;
 			let displayValue = display.innerHTML;
-			self.memoryValues[this.parentElement.dataset.position] = self.m_minus(value, displayValue);
+			self.memoryValues[this.parentElement.dataset.position] = self.minus(value, displayValue);
 			this.parentElement.childNodes[0].innerHTML = self.memoryValues[this.parentElement.dataset.position];
 		});
 
 		this.positionAttribute++;
 	}
 
-	m_plus(value, displayValue) {
+	plus(value, displayValue) {
 		return String(parseFloat(value) + parseFloat(displayValue));
 	}
-	m_minus(value, displayValue) {
+	minus(value, displayValue) {
 		return String(parseFloat(value) - parseFloat(displayValue)); 
 	}
 
-	m_clear(elem) {
+	clear(elem) {
 		elem.remove(elem);
 		delete this.memoryValues[elem.dataset.position];
 	}

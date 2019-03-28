@@ -14,8 +14,6 @@ class Display extends Operations {
 		super();
 		this.valueArray = [];
 	}
-
-	
 	
 	displayClear() {
 		this.valueArray = [];
