@@ -46,8 +46,8 @@ class Memory {
 		btn_m_plus.addEventListener('click', function(event) {
 			let value = this.parentElement.childNodes[0].innerHTML;
 			let displayValue = display.innerHTML;
-			self.valueObject[this.parentElement.dataset.position] = self.m_plus(value, displayValue);
-			this.parentElement.childNodes[0].innerHTML = self.valueObject[this.parentElement.dataset.position];
+			self.memoryValues[this.parentElement.dataset.position] = self.m_plus(value, displayValue);
+			this.parentElement.childNodes[0].innerHTML = self.memoryValues[this.parentElement.dataset.position];
 		});
 
 		let btn_m_minus = document.createElement('div');
@@ -59,8 +59,8 @@ class Memory {
 		btn_m_minus.addEventListener('click', function() {
 			let value = this.parentElement.childNodes[0].innerHTML;
 			let displayValue = display.innerHTML;
-			self.valueObject[this.parentElement.dataset.position] = self.m_minus(value, displayValue);
-			this.parentElement.childNodes[0].innerHTML = self.valueObject[this.parentElement.dataset.position];
+			self.memoryValues[this.parentElement.dataset.position] = self.m_minus(value, displayValue);
+			this.parentElement.childNodes[0].innerHTML = self.memoryValues[this.parentElement.dataset.position];
 		});
 
 		this.positionAttribute++;
