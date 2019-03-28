@@ -1,7 +1,7 @@
 import {MESSAGES, STYLES, OPERATIONS} from './const.js';
 import {disableButtons, activateButtons} from './index.js';
 
-let display = document.querySelector('.display');
+let display = document.querySelector('.js_display');
 
 class Operations {
 	constructor() {	

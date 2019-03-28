@@ -3,75 +3,75 @@
 	<title>calculator</title>
 	<link rel="stylesheet" href="dist/css/st.css">
 </head>
-<body unselectable="on">
-	<div class="open-calculator">Open calc</div>
-	<div class="calculator">
+<body>
+	<div class="open-calculator js_open-calculator">Open calc</div>
+	<div class="calculator js_calculator">
 		<div class="index-menu">
-			<p class="index-menu__title">Калькулятор</p>
-			<div class="index-menu__button index-menu__button_trey">–</div>
-			<div class="index-menu__button index-menu__button_open">☐</div>
-			<div class="index-menu__button index-menu__button_close">✕</div>
+			<p class="index-menu__title js_index-menu__title">Калькулятор</p>
+			<div class="index-menu__button index-menu__button_trey js_index-menu__button_trey">–</div>
+			<div class="index-menu__button index-menu__button_open js_index-menu__button_open">☐</div>
+			<div class="index-menu__button index-menu__button_close js_index-menu__button_close">✕</div>
 		</div>
-		<div class="option-menu">
+		<div class="option-menu js_option-menu">
 			<div class="option-menu__btn-menu">☰</div>
 			<p class="option-menu__title">Обычный</p>
 			<div class="option-menu__btn-journal"></div>
 		</div>
-		<div class="group-small-display">
-			<div class="small-display__button small-display__button_left"></div>
+		<div class="group-small-display js_group-small-display">
+			<div class="small-display__button small-display__button_left js_small-display__button_left"></div>
 			<div class="small-display">
-				<div class="small-display__block"></div>
-				<div class="small-display__add"></div>
+				<div class="small-display__block js_small-display__block"></div>
+				<div class="small-display__add js_small-display__add"></div>
 			</div>
-			<div class="small-display__button small-display__button_right"></div>
+			<div class="small-display__button small-display__button_right js_small-display__button_right"></div>
 		</div>
-		<div class="display">0</div>
-		<div class="button-area">
+		<div class="display js_display">0</div>
+		<div class="button-area js_button-area">
 			<div class="calc calc-add">
-				<div class="calc-add__button calc-add__button_memory-clear calc-add__button_disabled">MC</div>
-				<div class="calc-add__button calc-add__button_read calc-add__button_disabled">MR</div>
-				<div class="calc-add__button calc-add__button_plus">M<span>+</span></div>
-				<div class="calc-add__button calc-add__button_minus">M<span>-</span></div>
-				<div class="calc-add__button calc-add__button_ms">MS</div>
-				<div class="calc-add__button calc-add__button_memory calc-add__button_disabled">M</div>
+				<div class="calc-add__button calc-add__button_memory-clear js_calc-add__button_memory-clear calc-add__button_disabled">MC</div>
+				<div class="calc-add__button calc-add__button_read js_calc-add__button_read calc-add__button_disabled">MR</div>
+				<div class="calc-add__button calc-add__button_plus js_calc-add__button_plus">M<span>+</span></div>
+				<div class="calc-add__button calc-add__button_minus js_calc-add__button_minus">M<span>-</span></div>
+				<div class="calc-add__button calc-add__button_ms js_calc-add__button_ms">MS</div>
+				<div class="calc-add__button calc-add__button_memory js_calc-add__button_memory calc-add__button_disabled">M</div>
 			</div>
 			<div class="calc">
-				<div class="calc__button calc__button_enabled calc__button_percent">%</div>
-				<div class="calc__button calc__button_enabled calc__button_sqrt">√</div>
-				<div class="calc__button calc__button_enabled calc__button_pow"><span class="span">x</span></div>
-				<div class="calc__button calc__button_enabled calc__button_frac"><span class="span">/</span></div>
+				<div class="calc__button calc__button_enabled calc__button_percent js_calc__button_percent">%</div>
+				<div class="calc__button calc__button_enabled calc__button_sqrt js_calc__button_sqrt">√</div>
+				<div class="calc__button calc__button_enabled calc__button_pow js_calc__button_pow"><span class="span">x</span></div>
+				<div class="calc__button calc__button_enabled calc__button_frac js_calc__button_frac"><span class="span">/</span></div>
 			</div>
 			<div class="calc">
 				<div class="calc__button calc__button_disabled">CE</div>
-				<div class="calc__button calc__button_enabled calc__button_clear">C</div>
-				<div class="calc__button calc__button_enabled calc__button_backspace"><-</div>
-				<div class="calc__button calc__button_enabled calc__button_operation">÷</div>
+				<div class="calc__button calc__button_enabled calc__button_clear js_calc__button_clear">C</div>
+				<div class="calc__button calc__button_enabled calc__button_backspace js_calc__button_backspace"><-</div>
+				<div class="calc__button calc__button_enabled calc__button_operation js_calc__button_operation">÷</div>
 			</div>
 			<div class="calc">
-				<div class="calc__button calc__button_enabled calc__button_number" data-value="7">7</div>
-				<div class="calc__button calc__button_enabled calc__button_number" data-value="8">8</div>
-				<div class="calc__button calc__button_enabled calc__button_number" data-value="9">9</div>
-				<div class="calc__button calc__button_enabled calc__button_operation">*</div>
+				<div class="calc__button calc__button_enabled calc__button_number js_calc__button_number" data-value="7">7</div>
+				<div class="calc__button calc__button_enabled calc__button_number js_calc__button_number" data-value="8">8</div>
+				<div class="calc__button calc__button_enabled calc__button_number js_calc__button_number" data-value="9">9</div>
+				<div class="calc__button calc__button_enabled calc__button_operation js_calc__button_operation">*</div>
 			</div>
 			<div class="calc">
-				<div class="calc__button calc__button_enabled calc__button_number" data-value="4">4</div>
-				<div class="calc__button calc__button_enabled calc__button_number" data-value="5">5</div>
-				<div class="calc__button calc__button_enabled calc__button_number" data-value="6">6</div>
-				<div class="calc__button calc__button_enabled calc__button_operation">-</div>
+				<div class="calc__button calc__button_enabled calc__button_number js_calc__button_number" data-value="4">4</div>
+				<div class="calc__button calc__button_enabled calc__button_number js_calc__button_number" data-value="5">5</div>
+				<div class="calc__button calc__button_enabled calc__button_number js_calc__button_number" data-value="6">6</div>
+				<div class="calc__button calc__button_enabled calc__button_operation js_calc__button_operation">-</div>
 			</div>
 			<div class="calc">
-				<div class="calc__button calc__button_enabled calc__button_number" data-value="1">1</div>
-				<div class="calc__button calc__button_enabled calc__button_number" data-value="2">2</div>
-				<div class="calc__button calc__button_enabled calc__button_number" data-value="3">3</div>
-				<div class="calc__button calc__button_enabled calc__button_operation">+</div>
+				<div class="calc__button calc__button_enabled calc__button_number js_calc__button_number" data-value="1">1</div>
+				<div class="calc__button calc__button_enabled calc__button_number js_calc__button_number" data-value="2">2</div>
+				<div class="calc__button calc__button_enabled calc__button_number js_calc__button_number" data-value="3">3</div>
+				<div class="calc__button calc__button_enabled calc__button_operation js_calc__button_operation">+</div>
 			</div>
 			<div class="calc">
-				<div class="calc__button calc__button_enabled calc__button_reverse">±</div>
-				<div class="calc__button calc__button_enabled calc__button_number" data-value="0">0</div>
-				<div class="calc__button calc__button_enabled calc__button_add-point">,</div>
-				<div class="calc__button calc__button_enabled calc__button_get-result">=</div>
+				<div class="calc__button calc__button_enabled calc__button_reverse js_calc__button_reverse">±</div>
+				<div class="calc__button calc__button_enabled calc__button_number js_calc__button_number" data-value="0">0</div>
+				<div class="calc__button calc__button_enabled calc__button_add-point js_calc__button_add-point">,</div>
+				<div class="calc__button calc__button_enabled calc__button_get-result js_calc__button_get-result">=</div>
 			</div>
-			<div class="memory">
+			<div class="memory js_memory">
 			</div>
 		</div>
 	</div>

@@ -2,11 +2,11 @@ import Display from './display.js';
 import {MAX_WIDTH_DISPLAY, MESSAGES, STYLES, OPERATIONS, NAME_FOR_DISPLAY} from './const.js';
 import {activateButtons, disableButtons} from './index.js';
 
-let display = document.querySelector('.display'),
-arrowLeft = document.querySelector('.small-display__button_left'),
-arrowRight = document.querySelector('.small-display__button_right'),
-smallDisplay = document.querySelector('.small-display__block'),
-hiddenDisplay = document.querySelector('.small-display__add');
+let display = document.querySelector('.js_display'),
+arrowLeft = document.querySelector('.js_small-display__button_left'),
+arrowRight = document.querySelector('.js_small-display__button_right'),
+smallDisplay = document.querySelector('.js_small-display__block'),
+hiddenDisplay = document.querySelector('.js_small-display__add');
 
 
 class Calculator extends Display {

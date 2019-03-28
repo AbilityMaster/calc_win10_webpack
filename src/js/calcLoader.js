@@ -1,12 +1,12 @@
 import {CALC_MODES, MESSAGES} from './const.js'
 import Storage from './localStorage.js'
 
-let optionMenu = document.querySelector('.option-menu'),
-		buttonArea = document.querySelector('.button-area'),
-		groupSmallDisplay = document.querySelector('.group-small-display'),
-		openCalc = document.querySelector('.open-calculator'),
-		display = document.querySelector('.display'),
-		calculator = document.querySelector('.calculator');
+let optionMenu = document.querySelector('.js_option-menu'),
+		buttonArea = document.querySelector('.js_button-area'),
+		groupSmallDisplay = document.querySelector('.js_group-small-display'),
+		openCalc = document.querySelector('.js_open-calculator'),
+		display = document.querySelector('.js_display'),
+		calculator = document.querySelector('.js_calculator');
 
 let def = {
 	mode: 'default',

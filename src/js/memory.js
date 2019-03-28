@@ -1,5 +1,5 @@
-let memory = document.querySelector('.memory'),
-display = document.querySelector('.display');
+let memory = document.querySelector('.js_memory'),
+display = document.querySelector('.js_display');
 
 class Memory {
 	constructor() {
