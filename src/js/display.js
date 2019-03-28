@@ -1,18 +1,17 @@
-import Calculator from './calculator.js';
 import Operations from './operations.js';
 import {MAX_WIDTH_DISPLAY, NAME_FOR_DISPLAY, OPERATIONS, MESSAGES, STYLES} from './const.js';
-import {disableButtons, activateButtons} from './calculator.js';
+import {disableButtons, activateButtons} from './index.js';
 
-let display = document.querySelector('.display'),
-smallDisplay = document.querySelector('.small-display__block'),
-arrowLeft = document.querySelector('.small-display__button_left'),
-arrowRight = document.querySelector('.small-display__button_right'),
-hiddenDisplay = document.querySelector('.small-display__add');
 
 class Display extends Operations {
-	constructor() {
+	constructor(display, smallDisplay, arrowLeft, arrowRight, hiddenDisplay) {
 		super();
 		this.valueArray = [];
+		this.display = display;
+		this.smallDisplay = smallDisplay;
+		this.hiddenDisplay = hiddenDisplay;
+		this.arrowLeft = arrowLeft;
+		this.arrowRight = arrowRight;
 	}
 	
 	displayClear() {
@@ -34,25 +33,25 @@ class Display extends Operations {
 		}
 
 		this.enteredNewValue = true;
-		display.style.fontSize = STYLES.NORMAL;
+		this.display.style.fontSize = STYLES.NORMAL;
 
-		if (display.innerHTML === '0.') {
-			display.innerHTML += number;
+		if (this.display.innerHTML === '0.') {
+			this.display.innerHTML += number;
 			this.needNewValue = false;
 			this.resultPressed = false;
 			return;
 		}
 
-		if ((display.innerHTML === '0' || (this.needNewValue) || (this.resultPressed) || display.innerHTML === MESSAGES.DIVIDE_BY_ZERO)) {
-			display.innerHTML = number;
+		if ((this.display.innerHTML === '0' || (this.needNewValue) || (this.resultPressed) || this.display.innerHTML === MESSAGES.DIVIDE_BY_ZERO)) {
+			this.display.innerHTML = number;
 			this.needNewValue = false;
 			this.resultPressed = false;
 			this.pressedSingleOperation = false;
 		} else {
-			if (display.innerHTML.length > this.maxLength) {
+			if (this.display.innerHTML.length > this.maxLength) {
 				return;
 			}
-			display.innerHTML += number;
+			this.display.innerHTML += number;
 		}
 	}
 
@@ -95,33 +94,33 @@ class Display extends Operations {
 		switch (typeOperation) {
 			case OPERATIONS.LABEL_SINGLE_OPERATION: {
 				if (!this.pressedSingleOperation) {
-					this.data = smallDisplay.innerHTML;
-					this.dataWidth = smallDisplay.clientWidth;
+					this.data = this.smallDisplay.innerHTML;
+					this.dataWidth = this.smallDisplay.clientWidth;
 					if (operation === OPERATIONS.PERCENT) {
 						this.valueArray.push(this.percent());
-						smallDisplay.innerHTML += `&nbsp;${this.valueArray[this.valueArray.length-1]}`;
+						this.smallDisplay.innerHTML += `&nbsp;${this.valueArray[this.valueArray.length-1]}`;
 					} else {
-						this.valueArray.push(`${NAME_FOR_DISPLAY[operation]}(${display.innerHTML})`);
-						hiddenDisplay.innerHTML = `&nbsp;${this.valueArray[this.valueArray.length-1]}`;
-						if ((this.dataWidth + hiddenDisplay.clientWidth) >= MAX_WIDTH_DISPLAY) {
-							smallDisplay.style.width = this.dataWidth + hiddenDisplay.clientWidth;
+						this.valueArray.push(`${NAME_FOR_DISPLAY[operation]}(${this.display.innerHTML})`);
+						this.hiddenDisplay.innerHTML = `&nbsp;${this.valueArray[this.valueArray.length-1]}`;
+						if ((this.dataWidth + this.hiddenDisplay.clientWidth) >= MAX_WIDTH_DISPLAY) {
+							this.smallDisplay.style.width = this.dataWidth + this.hiddenDisplay.clientWidth;
 						}
-						smallDisplay.innerHTML += `&nbsp;${NAME_FOR_DISPLAY[operation]}(${display.innerHTML})&nbsp;`;
+						this.smallDisplay.innerHTML += `&nbsp;${NAME_FOR_DISPLAY[operation]}(${this.display.innerHTML})&nbsp;`;
 					}
 				}
 				if (this.pressedSingleOperation) {
 					if (operation ===  OPERATIONS.PERCENT) {
 						this.valueArray[this.valueArray.length-1] = this.percent();
-						smallDisplay.innerHTML = `${this.data} ${this.valueArray[this.valueArray.length - 1]}&nbsp;`;
+						this.smallDisplay.innerHTML = `${this.data} ${this.valueArray[this.valueArray.length - 1]}&nbsp;`;
 					} else {
 						this.valueArray[this.valueArray.length-1] = `${NAME_FOR_DISPLAY[operation]}(${this.valueArray[this.valueArray.length - 1]})`;
-						hiddenDisplay.innerHTML = `&nbsp;${this.valueArray[this.valueArray.length-1]}&nbsp;`;
-						if ((this.dataWidth + hiddenDisplay.clientWidth) >= MAX_WIDTH_DISPLAY) {
-							arrowLeft.style.visibility = 'visible';
-							arrowRight.style.visibility = 'visible';
-							smallDisplay.style.width = this.dataWidth + hiddenDisplay.clientWidth;
+						this.hiddenDisplay.innerHTML = `&nbsp;${this.valueArray[this.valueArray.length-1]}&nbsp;`;
+						if ((this.dataWidth + this.hiddenDisplay.clientWidth) >= MAX_WIDTH_DISPLAY) {
+							this.arrowLeft.style.visibility = 'visible';
+							this.arrowRight.style.visibility = 'visible';
+							this.smallDisplay.style.width = this.dataWidth + this.hiddenDisplay.clientWidth;
 						} 
-						smallDisplay.innerHTML = `${this.data} ${this.valueArray[this.valueArray.length - 1]}&nbsp;`;
+						this.smallDisplay.innerHTML = `${this.data} ${this.valueArray[this.valueArray.length - 1]}&nbsp;`;
 					}
 				}
 				break;
@@ -130,44 +129,40 @@ class Display extends Operations {
 				if (this.enteredNewValue && this.pressedSingleOperation) {
 
 					this.valueArray.push(operation);
-					hiddenDisplay.innerHTML = `&nbsp;${this.valueArray[this.valueArray.length-1]}`;
-					if ((smallDisplay.clientWidth + hiddenDisplay.clientWidth) >= MAX_WIDTH_DISPLAY) {
-						arrowLeft.style.visibility = 'visible';
-						arrowRight.style.visibility = 'visible';
-						smallDisplay.style.width = smallDisplay.clientWidth + hiddenDisplay.clientWidth + 1;
+					this.hiddenDisplay.innerHTML = `&nbsp;${this.valueArray[this.valueArray.length-1]}`;
+					if ((this.smallDisplay.clientWidth + this.hiddenDisplay.clientWidth) >= MAX_WIDTH_DISPLAY) {
+						this.arrowLeft.style.visibility = 'visible';
+						this.arrowRight.style.visibility = 'visible';
+						this.smallDisplay.style.width = this.smallDisplay.clientWidth + this.hiddenDisplay.clientWidth + 1;
 					}
-					smallDisplay.innerHTML += this.valueArray[this.valueArray.length-1];
+					this.smallDisplay.innerHTML += this.valueArray[this.valueArray.length-1];
 				} else if (this.enteredNewValue) {
 
 
-					this.valueArray.push(display.innerHTML);
+					this.valueArray.push(this.display.innerHTML);
 					this.valueArray.push(operation);
-					hiddenDisplay.innerHTML = `&nbsp;${this.valueArray[this.valueArray.length-2]} ${this.valueArray[this.valueArray.length-1]}`;
+					this.hiddenDisplay.innerHTML = `&nbsp;${this.valueArray[this.valueArray.length-2]} ${this.valueArray[this.valueArray.length-1]}`;
 
-					if ((smallDisplay.clientWidth + hiddenDisplay.clientWidth) >= MAX_WIDTH_DISPLAY) {
-						arrowLeft.style.visibility = 'visible';
-						arrowRight.style.visibility = 'visible';
-						smallDisplay.style.width = smallDisplay.clientWidth + hiddenDisplay.clientWidth;
+					if ((this.smallDisplay.clientWidth + this.hiddenDisplay.clientWidth) >= MAX_WIDTH_DISPLAY) {
+						this.arrowLeft.style.visibility = 'visible';
+						this.arrowRight.style.visibility = 'visible';
+						this.smallDisplay.style.width = this.smallDisplay.clientWidth + this.hiddenDisplay.clientWidth;
 					}
-					smallDisplay.innerHTML += `&nbsp;${this.valueArray[this.valueArray.length-2]}`;
-					smallDisplay.innerHTML += `&nbsp;${this.valueArray[this.valueArray.length-1]}`;
+					this.smallDisplay.innerHTML += `&nbsp;${this.valueArray[this.valueArray.length-2]}`;
+					this.smallDisplay.innerHTML += `&nbsp;${this.valueArray[this.valueArray.length-1]}`;
 				} else {
 					//hiddenDisplay.innerHTML = ` ${this.valueArray[this.valueArray.length-2]} ${this.valueArray[this.valueArray.length-1]}`;
 				}
 
 				this.valueArray[this.valueArray.length - 1] = operation;	
-				hiddenDisplay.innerHTML = `&nbsp;${this.valueArray[this.valueArray.length-2]} ${this.valueArray[this.valueArray.length-1]}`;
-				smallDisplay.innerHTML = smallDisplay.innerHTML.slice(0,smallDisplay.innerHTML.length-1) + this.valueArray[this.valueArray.length-1];
+				this.hiddenDisplay.innerHTML = `&nbsp;${this.valueArray[this.valueArray.length-2]} ${this.valueArray[this.valueArray.length-1]}`;
+				this.smallDisplay.innerHTML = this.smallDisplay.innerHTML.slice(0, this.smallDisplay.innerHTML.length-1) + this.valueArray[this.valueArray.length-1];
 				break;
 			}
 		}
 
 
 	}
-
-
-
-
 
 }
 

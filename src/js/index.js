@@ -1,19 +1,22 @@
 'use strict'
 import calc from './calculator.js'
 import calcLoader from './calcLoader.js'
-import {MAX_WIDTH_DISPLAY, CALC_MODES} from './const.js'
+import {MAX_WIDTH_DISPLAY, CALC_MODES, OPERATIONS} from './const.js'
 import Storage from './localStorage.js'
 import Display from './display.js'
 import Memory from './Memory.js'
+import button from './Button.js'
 
 let smallDisplay = document.querySelector('.small-display__block'),
 point = document.querySelector('.calc__button_add-point'),
 resultButton = document.querySelector('.calc__button_get-result'),
-sqrt = document.querySelector('.calc__button_sqrt'),
-pow = document.querySelector('.calc__button_pow'),
-frac = document.querySelector('.calc__button_frac'),
-percent = document.querySelector('.calc__button_percent'),
-reverse = document.querySelector('.calc__button_reverse'),
+button_Sqrt = document.querySelector('.calc__button_sqrt'),
+button_Pow = document.querySelector('.calc__button_pow'),
+button_Frac = document.querySelector('.calc__button_frac'),
+button_Percent = document.querySelector('.calc__button_percent'),
+button_Reverse = document.querySelector('.calc__button_reverse'),
+button_Clear = document.querySelector('.calc__button_clear'),
+button_Backspace = document.querySelector('.calc__button_backspace'),
 operationList = document.querySelectorAll('.calc__button_operation'),
 numbers = document.querySelectorAll('.calc__button_number'),
 calculator = document.querySelector('.calculator'),
@@ -28,10 +31,53 @@ buttonMemory_Clear = document.querySelector('.calc-add__button_memory-clear'),
 buttonMemory_Read = document.querySelector('.calc-add__button_read'),
 buttonMemory_Plus = document.querySelector('.calc-add__button_plus'),
 buttonMemory_Minus = document.querySelector('.calc-add__button_minus'),
-clear = document.querySelector('.calc__button_clear'),
-backspace = document.querySelector('.calc__button_backspace'),
 buttonMemory_Save = document.querySelector('.calc-add__button_ms'),
-buttonMemory_Open = document.querySelector('.calc-add__button_memory');
+buttonMemory_Open = document.querySelector('.calc-add__button_memory'),
+button_addPoint = document.querySelector('.calc__button_add-point');
+
+
+export function disableButtons() {
+	reverse.classList.remove('calc__button_enabled');
+	reverse.classList.add('calc__button_disabled');
+	percent.classList.remove('calc__button_enabled');
+	percent.classList.add('calc__button_disabled');
+	sqrt.classList.remove('calc__button_enabled');
+	sqrt.classList.add('calc__button_disabled');
+	pow.classList.remove('calc__button_enabled');
+	pow.classList.add('calc__button_disabled');
+	frac.classList.remove('calc__button_enabled');
+	frac.classList.add('calc__button_disabled');
+	point.classList.remove('calc__button_enabled');
+	point.classList.add('calc__button_disabled');
+	resultButton.classList.remove('calc__button_enabled');
+	resultButton.classList.add('calc__button_disabled');
+	operationList.forEach(function(element){
+		element.classList.remove('calc__button_enabled');
+		element.classList.add('calc__button_disabled');
+	});
+}
+
+
+export function activateButtons() {
+	reverse.classList.add('calc__button_enabled');
+	reverse.classList.remove('calc__button_disabled');
+	point.classList.add('calc__button_enabled');
+	point.classList.remove('calc__button_disabled');
+	resultButton.classList.add('calc__button_enabled');
+	resultButton.classList.remove('calc__button_disabled');
+	percent.classList.add('calc__button_enabled');
+	percent.classList.remove('calc__button_disabled');
+	sqrt.classList.add('calc__button_enabled');
+	sqrt.classList.remove('calc__button_disabled');
+	pow.classList.add('calc__button_enabled');
+	pow.classList.remove('calc__button_disabled');
+	frac.classList.add('calc__button_enabled');
+	frac.classList.remove('calc__button_disabled');
+	operationList.forEach(function(element){
+		element.classList.add('calc__button_enabled');
+		element.classList.remove('calc__button_disabled');
+	});
+}
 
 calcLoader.init();
 
@@ -115,21 +161,25 @@ window.onload = function() {
 		return false;
 	};
 
+
 	document.querySelector('.index-menu__button_open').addEventListener('click', function() {
 		info.mode = CALC_MODES.STANDART;
 		Storage.dataset = info;
 		calcLoader.manage(CALC_MODES.STANDART);
 	});
+
 	document.querySelector('.index-menu__button_trey').addEventListener('click',function() {
 		info.mode = CALC_MODES.MINIMIZED;
 		Storage.dataset = info;
 		calcLoader.manage(CALC_MODES.MINIMIZED)
 	});
+
 	document.querySelector('.index-menu__button_close').addEventListener('click', function() {
 		calcLoader.manage(CALC_MODES.CLOSED)		
 		info.mode = CALC_MODES.CLOSED;
 		Storage.dataset = info;
 	});
+
 	document.querySelector('.open-calculator').addEventListener('click', function() {
 		calcLoader.manage(CALC_MODES.DEFAULT);
 		info.mode = CALC_MODES.DEFAULT;		
@@ -138,13 +188,14 @@ window.onload = function() {
 
 	numbers.forEach(element => {
 		element.addEventListener('click', function() {
-			calc.numberPress(this.innerHTML);
+			button.type = element.dataset.value;
 			smallDisplay.style.removeProperty('left');
 			smallDisplay.style.right = 0;
+			calc.numberPress(button.type);
 		});
 	});
 
-	operationList.forEach(function(element){
+	operationList.forEach(element => {
 		element.addEventListener('click', function() {
 			calc.operation(this.innerHTML);
 			smallDisplay.style.removeProperty('left');
@@ -155,46 +206,60 @@ window.onload = function() {
 	document.querySelector('.calc__button_get-result').onclick = function() {
 		calc.result();
 	}
-	document.querySelector('.calc__button_add-point').onclick = function() {	
+
+	button_addPoint.onclick = function() {	
+		if (calc.operationsDisabled) {
+			return;
+		}
+
+		Disp.data = calc.needNewValue + ' ' + calc.resultPressed;
+
 		smallDisplay.style.removeProperty('left');
 		smallDisplay.style.right = 0;
-		calc.addPoint(display.innerHTML);
+		calc.addPoint();
 	}
-	reverse.onclick = function() {		
+
+	button_Clear.onclick = function() {
+		calc.clear();
+	}
+
+	button_Backspace.onclick = function() {
+		calc.operationsDisabled = false;
+		calc.backspace();
+	}
+
+	button_Reverse.onclick = function() {		
 		smallDisplay.style.removeProperty('left');
 		smallDisplay.style.right = 0;
 		calc.singleOperation('NEGATE');
 	}
-	clear.onclick = function() {
-		calc.clear();
-	}
 
-	pow.onclick = function() {
+
+
+	button_Pow.onclick = function() {
 		smallDisplay.style.removeProperty('left');
 		smallDisplay.style.right = 0;
 		calc.singleOperation('POW');
 	}
 
-	frac.onclick = function() {
+	button_Frac.onclick = function() {
 		calc.singleOperation('FRAC');
 		smallDisplay.style.removeProperty('left');
 		smallDisplay.style.right = 0;
 	}
 
-	sqrt.onclick = function() {
+	button_Sqrt.onclick = function() {
 		calc.singleOperation('SQRT');
 		smallDisplay.style.removeProperty('left');
 		smallDisplay.style.right = 0;
 	}
 
-	percent.onclick = function() {
+	button_Percent.onclick = function() {
 		calc.singleOperation('PERCENT');
 		smallDisplay.style.removeProperty('left');
 		smallDisplay.style.right = 0;
 	}
-	backspace.onclick = function() {
-		calc.backspace();
-	}
+
 	document.querySelector('.small-display__button_left').onclick = function() {
 		if (smallDisplay.clientWidth > MAX_WIDTH_DISPLAY) {
 			smallDisplay.style.removeProperty('right');
@@ -248,7 +313,7 @@ window.onload = function() {
 		}
 
 		Memory.isActivatedMemoryButtons = true;
-		
+
 		buttonMemory_Read.classList.remove("calc-add__button_disabled");
 		buttonMemory_Clear.classList.remove("calc-add__button_disabled");
 		buttonMemory_Open.classList.remove("calc-add__button_disabled");

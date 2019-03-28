@@ -1,9 +1,9 @@
 import {MESSAGES, STYLES, OPERATIONS} from './const.js';
-import {disableButtons, activateButtons} from './calculator.js';
+import {disableButtons, activateButtons} from './index.js';
 
 let display = document.querySelector('.display');
 
-class Operations{
+class Operations {
 	constructor() {	
 		this.operationsDisabled = false;
 	}		
