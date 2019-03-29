@@ -1,12 +1,17 @@
 import {CALC_MODES, MESSAGES} from './const.js'
 import Storage from './localStorage.js'
+import Memory from './memory.js'
 
 let optionMenu = document.querySelector('.js_option-menu'),
-		buttonArea = document.querySelector('.js_button-area'),
-		groupSmallDisplay = document.querySelector('.js_group-small-display'),
-		openCalc = document.querySelector('.js_open-calculator'),
-		display = document.querySelector('.js_display'),
-		calculator = document.querySelector('.js_calculator');
+buttonArea = document.querySelector('.js_button-area'),
+groupSmallDisplay = document.querySelector('.js_group-small-display'),
+openCalc = document.querySelector('.js_open-calculator'),
+display = document.querySelector('.js_display'),
+smallDisplay = document.querySelector('.js_small-display__block'),
+buttonMemory_Clear = document.querySelector('.js_calc-add__button_memory-clear'),
+buttonMemory_Read = document.querySelector('.js_calc-add__button_read'),
+buttonMemory_Open = document.querySelector('.js_calc-add__button_memory'),
+calculator = document.querySelector('.js_calculator');
 
 let def = {
 	mode: 'default',
@@ -23,6 +28,21 @@ class CalcLoader {
 		}
 
 		let obj = Storage.dataset;
+
+		for (var key in obj.memoryValues) {
+			Memory.addToMemory(obj.memoryValues[key]);
+		}
+		
+		if (obj.isActivatedMemoryButtons === true) {
+			Memory.isActivatedMemoryButtons = true;
+			buttonMemory_Read.classList.remove("calc-add__button_disabled");
+			buttonMemory_Clear.classList.remove("calc-add__button_disabled");
+			buttonMemory_Open.classList.remove("calc-add__button_disabled");
+		} else {
+			buttonMemory_Read.classList.add("calc-add__button_disabled");
+			buttonMemory_Clear.classList.add("calc-add__button_disabled");
+			buttonMemory_Open.classList.add("calc-add__button_disabled");
+		}
 		
 		calculator.style.left = obj.x ? obj.x : def.x;
 		calculator.style.top = obj.y ? obj.y : def.y;

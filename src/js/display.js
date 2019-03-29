@@ -39,6 +39,7 @@ class Display extends Operations {
 			this.display.innerHTML += number;
 			this.needNewValue = false;
 			this.resultPressed = false;
+
 			return;
 		}
 
@@ -51,6 +52,7 @@ class Display extends Operations {
 			if (this.display.innerHTML.length > this.maxLength) {
 				return;
 			}
+
 			this.display.innerHTML += number;
 		}
 	}
@@ -63,6 +65,7 @@ class Display extends Operations {
 		if (this.display.innerHTML.indexOf('.') === -1 && this.needNewValue || this.display.innerHTML.indexOf('.') === -1 && this.resultPressed || this.display.innerHTML.indexOf('.') !== -1 && this.needNewValue ||		this.display.innerHTML.indexOf('.') !== -1 && this.resultPressed) {
 			this.display.innerHTML = '0.';
 			this.needNewValue = false;
+			
 			return;
 		} 
 
@@ -75,6 +78,7 @@ class Display extends Operations {
 		let length = this.display.innerHTML.length;
 		if (length === 2 && this.display.innerHTML[0] === '-' || length === 1) {
 			this.display.innerHTML = '0';
+
 			return;
 		}
 
@@ -84,6 +88,7 @@ class Display extends Operations {
 			this.operationsDisabled = false;
 			this.display.innerHTML = '0';
 			activateButtons();
+
 			return;
 		}
 
@@ -123,6 +128,7 @@ class Display extends Operations {
 						this.smallDisplay.innerHTML = `${this.data} ${this.valueArray[this.valueArray.length - 1]}&nbsp;`;
 					}
 				}
+
 				break;
 			}
 			case OPERATIONS.LABEL_DEFAULT_OPERATION: {
@@ -157,6 +163,7 @@ class Display extends Operations {
 				this.valueArray[this.valueArray.length - 1] = operation;	
 				this.hiddenDisplay.innerHTML = `&nbsp;${this.valueArray[this.valueArray.length-2]} ${this.valueArray[this.valueArray.length-1]}`;
 				this.smallDisplay.innerHTML = this.smallDisplay.innerHTML.slice(0, this.smallDisplay.innerHTML.length-1) + this.valueArray[this.valueArray.length-1];
+				
 				break;
 			}
 		}

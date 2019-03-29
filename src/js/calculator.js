@@ -72,6 +72,10 @@ class Calculator extends Display {
 			return;
 		}
 
+		if (operation === OPERATIONS.PERCENT && this.currentValue === null) { 
+			return;
+		}
+
 		this.sendToStatusDisplay(OPERATIONS.LABEL_SINGLE_OPERATION, operation);
 
 		this.pressedSingleOperation = true;

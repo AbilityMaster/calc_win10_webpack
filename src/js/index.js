@@ -41,18 +41,18 @@ button_addPoint = document.querySelector('.js_calc__button_add-point');
 
 
 export function disableButtons() {
-	reverse.classList.remove('calc__button_enabled');
-	reverse.classList.add('calc__button_disabled');
-	percent.classList.remove('calc__button_enabled');
-	percent.classList.add('calc__button_disabled');
-	sqrt.classList.remove('calc__button_enabled');
-	sqrt.classList.add('calc__button_disabled');
-	pow.classList.remove('calc__button_enabled');
-	pow.classList.add('calc__button_disabled');
-	frac.classList.remove('calc__button_enabled');
-	frac.classList.add('calc__button_disabled');
-	point.classList.remove('calc__button_enabled');
-	point.classList.add('calc__button_disabled');
+	button_Reverse.classList.remove('calc__button_enabled');
+	button_Reverse.classList.add('calc__button_disabled');
+	button_Percent.classList.remove('calc__button_enabled');
+	button_Percent.classList.add('calc__button_disabled');
+	button_Sqrt.classList.remove('calc__button_enabled');
+	button_Sqrt.classList.add('calc__button_disabled');
+	button_Pow.classList.remove('calc__button_enabled');
+	button_Pow.classList.add('calc__button_disabled');
+	button_Frac.classList.remove('calc__button_enabled');
+	button_Frac.classList.add('calc__button_disabled');
+	button_addPoint.classList.remove('calc__button_enabled');
+	button_addPoint.classList.add('calc__button_disabled');
 	resultButton.classList.remove('calc__button_enabled');
 	resultButton.classList.add('calc__button_disabled');
 	operationList.forEach(function(element){
@@ -62,20 +62,20 @@ export function disableButtons() {
 }
 
 export function activateButtons() {
-	reverse.classList.add('calc__button_enabled');
-	reverse.classList.remove('calc__button_disabled');
-	point.classList.add('calc__button_enabled');
-	point.classList.remove('calc__button_disabled');
+	button_Reverse.classList.add('calc__button_enabled');
+	button_Reverse.classList.remove('calc__button_disabled');
+	button_addPoint.classList.add('calc__button_enabled');
+	button_addPoint.classList.remove('calc__button_disabled');
 	resultButton.classList.add('calc__button_enabled');
 	resultButton.classList.remove('calc__button_disabled');
-	percent.classList.add('calc__button_enabled');
-	percent.classList.remove('calc__button_disabled');
-	sqrt.classList.add('calc__button_enabled');
-	sqrt.classList.remove('calc__button_disabled');
-	pow.classList.add('calc__button_enabled');
-	pow.classList.remove('calc__button_disabled');
-	frac.classList.add('calc__button_enabled');
-	frac.classList.remove('calc__button_disabled');
+	button_Percent.classList.add('calc__button_enabled');
+	button_Percent.classList.remove('calc__button_disabled');
+	button_Sqrt.classList.add('calc__button_enabled');
+	button_Sqrt.classList.remove('calc__button_disabled');
+	button_Pow.classList.add('calc__button_enabled');
+	button_Pow.classList.remove('calc__button_disabled');
+	button_Frac.classList.add('calc__button_enabled');
+	button_Frac.classList.remove('calc__button_disabled');
 	operationList.forEach(function(element){
 		element.classList.add('calc__button_enabled');
 		element.classList.remove('calc__button_disabled');
@@ -230,8 +230,6 @@ window.onload = function() {
 		calc.singleOperation('NEGATE');
 	}
 
-
-
 	button_Pow.onclick = function() {
 		smallDisplay.style.removeProperty('left');
 		smallDisplay.style.right = 0;
@@ -252,6 +250,7 @@ window.onload = function() {
 
 	button_Percent.onclick = function() {
 		calc.singleOperation('PERCENT');
+		console.log(calc.singleOperation);
 		smallDisplay.style.removeProperty('left');
 		smallDisplay.style.right = 0;
 	}
@@ -275,12 +274,18 @@ window.onload = function() {
 			return;
 		}
 
+		Memory.isActivatedMemoryButtons = true;
+		info.isActivatedMemoryButtons = Memory.isActivatedMemoryButtons;
+		Storage.dataset = info;
+
 		buttonMemory_Read.classList.remove("calc-add__button_disabled");
 		buttonMemory_Clear.classList.remove("calc-add__button_disabled");
 		buttonMemory_Open.classList.remove("calc-add__button_disabled");
-		Memory.isActivatedMemoryButtons = true;
 
 		Memory.addToMemory(display.innerHTML);
+
+		info.memoryValues = Memory.memoryValues;
+		Storage.dataset = info;
 	}
 
 	buttonMemory_Open.onclick = function() {		
@@ -309,20 +314,27 @@ window.onload = function() {
 		}
 
 		Memory.isActivatedMemoryButtons = true;
+		info.isActivatedMemoryButtons = Memory.isActivatedMemoryButtons;
+		Storage.dataset = info;
 
 		buttonMemory_Read.classList.remove("calc-add__button_disabled");
 		buttonMemory_Clear.classList.remove("calc-add__button_disabled");
 		buttonMemory_Open.classList.remove("calc-add__button_disabled");
-
 
 		if (Memory.isEmpty()) {
 			Memory.addToMemory(display.innerHTML);
 		} else {
 			let value =	document.querySelector('.memory__block').childNodes[0].innerHTML;
 			let displayValue = display.innerHTML;
-			document.querySelector('.memory__block').childNodes[0].innerHTML = Memory.plus(value, displayValue);
+			let position = document.querySelector('.memory__block').dataset.position;
+
+			Memory.plus(value, displayValue, position);
+
+		  document.querySelector('.memory__block').childNodes[0].innerHTML = Memory.memoryValues[position];
 		}
 
+		info.memoryValues = Memory.memoryValues;
+		Storage.dataset = info;
 	}
 
 	buttonMemory_Minus.onclick = function() {
@@ -331,6 +343,8 @@ window.onload = function() {
 		}
 
 		Memory.isActivatedMemoryButtons = true;
+		info.isActivatedMemoryButtons = Memory.isActivatedMemoryButtons;
+		Storage.dataset = info;
 
 		buttonMemory_Read.classList.remove("calc-add__button_disabled");
 		buttonMemory_Clear.classList.remove("calc-add__button_disabled");
@@ -341,15 +355,25 @@ window.onload = function() {
 		} else {
 			let value =	document.querySelector('.memory__block').childNodes[0].innerHTML;
 			let displayValue = display.innerHTML;
-			document.querySelector('.memory__block').childNodes[0].innerHTML = Memory.minus(value, displayValue);
+			let position = document.querySelector('.memory__block').dataset.position;
+
+			Memory.minus(value, displayValue, position);
+
+			document.querySelector('.memory__block').childNodes[0].innerHTML = Memory.memoryValues[position];
 		}
+
+		info.memoryValues = Memory.memoryValues;
+		Storage.dataset = info;
 	}
 
 	buttonMemory_Read.onclick = function() {		
 		if (!Memory.isActivatedMemoryButtons || Memory.isOpenMemoryWindow) {
 			return;
 		}
-		display.innerHTML = 	document.querySelector('.memory__block').childNodes[0].innerHTML;
+
+		let position = document.querySelector('.memory__block').dataset.position;
+
+		display.innerHTML = Memory.memoryValues[position];
 		calc.enteredNewValue = true;
 	}
 
@@ -359,11 +383,18 @@ window.onload = function() {
 		}
 
 		Memory.isActivatedMemoryButtons = false;
+		info.isActivatedMemoryButtons = '0';
 
 		buttonMemory_Read.classList.add("calc-add__button_disabled");
 		buttonMemory_Clear.classList.add("calc-add__button_disabled");
 		buttonMemory_Open.classList.add("calc-add__button_disabled");
 		memoryBoard.innerHTML = '';
+
+		Memory.memoryValues = {};
+		Memory.storageMemoryData = {};
+		info.memoryValues = Memory.memoryValues;
+
+		Storage.dataset = info;
 	}
 
 }

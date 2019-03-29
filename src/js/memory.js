@@ -1,3 +1,5 @@
+import Storage from './localStorage.js'
+
 let memory = document.querySelector('.js_memory'),
 display = document.querySelector('.js_display');
 
@@ -7,11 +9,10 @@ class Memory {
 		this.isOpenMemoryWindow = false;
 		this.positionAttribute = 0;
 		this.memoryValues = {};
+		this.storageMemoryData = {};
 	}
 
 	addToMemory(data) {
-		let self = this;
-
 		this.memoryValues[this.positionAttribute] = data;
 
 		this.needNewValue = true;
@@ -25,7 +26,7 @@ class Memory {
 		let memoryValue = document.createElement('div');
 
 		memoryValue.className = "memory__data";
-		memoryValue.innerHTML = data;
+		memoryValue.innerHTML = String(data);
 		memory__block.appendChild(memoryValue);
 
 		let btn_mc = document.createElement('div');
@@ -33,8 +34,10 @@ class Memory {
 		btn_mc.className = "memory__btn memory__btn_mc";
 		btn_mc.innerHTML = 'MC';
 		memory__block.appendChild(btn_mc);
-		btn_mc.addEventListener('click', function() {
-			self.clear(this.parentElement);
+		btn_mc.addEventListener('click', (event) => {
+			this.clear(event.target.parentElement);
+			this.storageMemoryData.memoryValues = this.memoryValues;
+			Storage.dataset = this.storageMemoryData;
 		});
 
 		let btn_m_plus = document.createElement('div');
@@ -43,11 +46,15 @@ class Memory {
 		btn_m_plus.innerHTML = 'M+';
 		memory__block.appendChild(btn_m_plus);
 
-		btn_m_plus.addEventListener('click', function(event) {
-			let value = this.parentElement.childNodes[0].innerHTML;
+		btn_m_plus.addEventListener('click', (event) => {
+			let value = event.target.parentElement.childNodes[0].innerHTML;
 			let displayValue = display.innerHTML;
-			self.memoryValues[this.parentElement.dataset.position] = self.plus(value, displayValue);
-			this.parentElement.childNodes[0].innerHTML = self.memoryValues[this.parentElement.dataset.position];
+			let position = event.target.parentElement.dataset.position;
+
+			this.plus(value, displayValue, position);
+			this.storageMemoryData.memoryValues = this.memoryValues;
+			Storage.dataset = this.storageMemoryData;
+			event.target.parentElement.childNodes[0].innerHTML = this.memoryValues[position];
 		});
 
 		let btn_m_minus = document.createElement('div');
@@ -56,21 +63,27 @@ class Memory {
 		btn_m_minus.innerHTML = 'M-';
 		memory__block.appendChild(btn_m_minus);
 
-		btn_m_minus.addEventListener('click', function() {
-			let value = this.parentElement.childNodes[0].innerHTML;
+		btn_m_minus.addEventListener('click', (event) => {
+			let value = event.target.parentElement.childNodes[0].innerHTML;
 			let displayValue = display.innerHTML;
-			self.memoryValues[this.parentElement.dataset.position] = self.minus(value, displayValue);
-			this.parentElement.childNodes[0].innerHTML = self.memoryValues[this.parentElement.dataset.position];
+			let position = event.target.parentElement.dataset.position;
+
+			this.minus(value, displayValue, position);
+			this.storageMemoryData.memoryValues = this.memoryValues;
+			Storage.dataset = this.storageMemoryData;
+			event.target.parentElement.childNodes[0].innerHTML = this.memoryValues[position];
 		});
 
 		this.positionAttribute++;
 	}
 
-	plus(value, displayValue) {
-		return String(parseFloat(value) + parseFloat(displayValue));
+
+	plus(value, displayValue, position) {
+		this.memoryValues[position] = String(parseFloat(value) + parseFloat(displayValue));
 	}
-	minus(value, displayValue) {
-		return String(parseFloat(value) - parseFloat(displayValue)); 
+
+	minus(value, displayValue, position) {
+		this.memoryValues[position] = String(parseFloat(value) - parseFloat(displayValue));
 	}
 
 	clear(elem) {
