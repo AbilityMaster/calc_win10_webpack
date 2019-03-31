@@ -193,7 +193,8 @@ window.onload = function() {
 			button.type = element.dataset.value;
 			smallDisplay.style.removeProperty('left');
 			smallDisplay.style.right = 0;
-			calc.numberPress(button.type);
+			calc.disp.numberPress(button.type)
+			calc.enteredNewValue = true;
 		});
 	});
 

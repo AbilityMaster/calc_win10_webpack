@@ -1,4 +1,5 @@
 import Display from './display.js';
+import Operations from './operations.js';
 import {MAX_WIDTH_DISPLAY, MESSAGES, STYLES, OPERATIONS, NAME_FOR_DISPLAY} from './const.js';
 import {activateButtons, disableButtons} from './index.js';
 
@@ -9,79 +10,51 @@ smallDisplay = document.querySelector('.js_small-display__block'),
 hiddenDisplay = document.querySelector('.js_small-display__add');
 
 
-class Calculator extends Display {
+class Calculator {
 	constructor() {
-		super(display, smallDisplay, arrowLeft, arrowRight, hiddenDisplay);
-		this.valueArray = [];
-		this.resultPressed = false;
-		this.operationPressed = false;
-		this.needNewValue = false;
-		this.currentValue = null;
-		this.needValueForProgressive = false;
-		this.enteredNewValue = false;
+		this.disp = new Display(display, smallDisplay, arrowLeft, arrowRight, hiddenDisplay);
+		this.operations = new Operations();
+		this.isResultPressed = false;
+		this.isOperationPressed = false;
+		this.isNeedValueForProgressive = false;
+		this.isEnteredNewValue = false;
 		this.typeOperation = '';
-		this.pressedSingleOperation = false;
-		this.maxLength = 11;
-		this.singleFunction = false;
+
+		this.currentValue = null;
 	}
-
-	checkForFinite(temp) {
-		if (!isFinite(temp)) {
-			disableButtons();
-			this.display.style.fontSize = STYLES.SMALL;
-			this.display.innerHTML = MESSAGES.OVERFLOW;
-			this.operationsDisabled = true;
-
-			return false;
-		} else {			
-			return true;
-		}
-	}
-
-	trimmer(temp) {
-		temp = parseFloat(temp)
-		temp.toPrecision(6);
-		if (String(temp).length > this.maxLength) {
-			temp = temp.toPrecision(6);
-		}
-		return temp;
-	}
-
 
 	clear() {
-		if (this.operationsDisabled) {
-			this.display.style.fontSize = STYLES.NORMAL;
-			this.operationsDisabled = false;
+		if (this.disp.operationsDisabled) {
+			this.disp.display.style.fontSize = STYLES.NORMAL;
+			this.disp.operationsDisabled = false;
 			activateButtons();
 		}
 
 		this.displayClear();
 
 		this.currentValue = null;
-		this.resultPressed = false;
-		this.operationPressed = false;
-		this.needNewValue = false;
+		this.isResultPressed = false;
+		this.isOperationPressed = false;		
+		this.isNeedValueForProgressive = false,
+		this.disp.needNewValue = false;
+		this.isEnteredNewValue = false;
+		this.isPressedSingleOperation = false;		
 		this.typeOperation = '';
-		this.needValueForProgressive = false,
-		this.enteredNewValue = false;
-		this.singleFunction = false;
 	}
 
 	singleOperation(operation) {
-		if (this.operationsDisabled) {
+		if (this.disp.operationsDisabled) {
 			return;
 		}
 
-		if (operation === OPERATIONS.PERCENT && this.currentValue === null) { 
+		if (operation === OPERATIONS.PERCENT && this.operations.currentValue === null) { 
 			return;
 		}
 
-		this.sendToStatusDisplay(OPERATIONS.LABEL_SINGLE_OPERATION, operation);
-
-		this.pressedSingleOperation = true;
-		this.singleFunction = false;
-		this.needNewValue = true;
-		this.enteredNewValue = true;
+		this.disp.sendToStatusDisplay(OPERATIONS.LABEL_SINGLE_OPERATION, operation, this.isPressedSingleOperation, this.isEnteredNewValue);
+		this.isPressedSingleOperation = true;
+		this.disp.needNewValue = true;
+		this.isEnteredNewValue = true;
 
 		if (operation === OPERATIONS.PERCENT) {
 			display.innerHTML = this.percent();
@@ -89,54 +62,55 @@ class Calculator extends Display {
 			return;
 		} 
 
-		this.sendOperation(operation);
+		this.operations.sendOperation(operation);
 	}
 
 	result() {
-		if (this.operationsDisabled) {
+		if (this.disp.operationsDisabled) {
 			return;
 		}
 
-		this.smallDisplay.innerHTML = '';
-		this.resultPressed = true;
-		this.operationPressed = false;
-		this.enteredNewValue = true;
+		this.disp.smallDisplay.innerHTML = '';
+		this.isResultPressed = true;
+		this.isOperationPressed = false;
+		this.isEnteredNewValue = true;
 
-		if (this.needValueForProgressive) {
-			this.ValueForProgressive = parseFloat(display.innerHTML);
-			this.needValueForProgressive = false;
+		if (this.isNeedValueForProgressive) {
+			this.operations.valueForProgressive = parseFloat(display.innerHTML);
+			this.isNeedValueForProgressive = false;
 		}
 
-		if ((this.operationPressed || this.resultPressed) && this.currentValue !== null) {
-			this.sendOperation(this.typeOperation);
+		if ((this.isOperationPressed || this.isResultPressed) && this.operations.currentValue !== null) {
+			this.disp.text = this.operations.sendOperation(this.typeOperation, this.isResultPressed);
 		}
 
 	}
 
 	operation(operation) {
-		if (this.operationsDisabled) {
+		if (this.disp.operationsDisabled) {
 			return;
 		}
+		
+		this.isResultPressed = false;
+		this.disp.sendToStatusDisplay(OPERATIONS.LABEL_DEFAULT_OPERATION, operation, this.isPressedSingleOperation, this.isEnteredNewValue);
+		this.isPressedSingleOperation = false;
+		this.isNeedValueForProgressive = true;
 
-		this.sendToStatusDisplay(OPERATIONS.LABEL_DEFAULT_OPERATION, operation);
+		if (this.isOperationPressed) {
+			if (this.isEnteredNewValue) {
 
-		this.pressedSingleOperation = false;
-		this.needValueForProgressive = true;
-
-		if (this.operationPressed) {
-			if (this.enteredNewValue) {
-				this.sendOperation(this.typeOperation);
-				this.enteredNewValue = false;
+				this.disp.text = this.operations.sendOperation(this.typeOperation, this.isResultPressed);
+				this.isEnteredNewValue = false;
 			}
 			this.typeOperation = operation;
 		} else {
-			this.currentValue = parseFloat(display.innerHTML);
+			this.operations.currentValue = parseFloat(display.innerHTML);
 			this.typeOperation = operation;				
-			this.operationPressed = true;
-			this.enteredNewValue = false; 
+			this.isOperationPressed = true;
+			this.isEnteredNewValue = false; 
 		}
 
-		this.needNewValue = true;
+		this.disp.needNewValue = true;
 	}
 
 }

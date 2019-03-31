@@ -1,17 +1,17 @@
-import Operations from './operations.js';
-import {MAX_WIDTH_DISPLAY, NAME_FOR_DISPLAY, OPERATIONS, MESSAGES, STYLES} from './const.js';
+import {MAX_WIDTH_DISPLAY, MAX_LENGTH_DISPLAY, NAME_FOR_DISPLAY, OPERATIONS, MESSAGES, STYLES} from './const.js';
 import {disableButtons, activateButtons} from './index.js';
 
 
-class Display extends Operations {
+class Display {
 	constructor(display, smallDisplay, arrowLeft, arrowRight, hiddenDisplay) {
-		super();
 		this.valueArray = [];
 		this.display = display;
 		this.smallDisplay = smallDisplay;
 		this.hiddenDisplay = hiddenDisplay;
 		this.arrowLeft = arrowLeft;
 		this.arrowRight = arrowRight;
+		this.needNewValue = false;
+		this.maxLength = MAX_LENGTH_DISPLAY;
 	}
 	
 	displayClear() {
@@ -25,7 +25,7 @@ class Display extends Operations {
 		this.arrowRight.style.visibility = 'hidden';
 	}
 
-	numberPress(number) {
+	numberPress(number, callback) {
 		if (this.operationsDisabled) {
 			this.operationsDisabled = false;
 			this.clear();
@@ -55,6 +55,10 @@ class Display extends Operations {
 
 			this.display.innerHTML += number;
 		}
+	}
+
+	set text(data) {
+		this.display.innerHTML = data;
 	}
 
 	addPoint() {
@@ -95,7 +99,7 @@ class Display extends Operations {
 		this.display.innerHTML = this.display.innerHTML.slice(0,length-1);	
 	}
 
-	sendToStatusDisplay(typeOperation, operation) {
+	sendToStatusDisplay(typeOperation, operation, pressedSingleOperation, enteredNewValue) {
 		switch (typeOperation) {
 			case OPERATIONS.LABEL_SINGLE_OPERATION: {
 				if (!this.pressedSingleOperation) {
@@ -132,7 +136,7 @@ class Display extends Operations {
 				break;
 			}
 			case OPERATIONS.LABEL_DEFAULT_OPERATION: {
-				if (this.enteredNewValue && this.pressedSingleOperation) {
+				if (enteredNewValue && pressedSingleOperation) {
 
 					this.valueArray.push(operation);
 					this.hiddenDisplay.innerHTML = `&nbsp;${this.valueArray[this.valueArray.length-1]}`;
@@ -142,7 +146,7 @@ class Display extends Operations {
 						this.smallDisplay.style.width = this.smallDisplay.clientWidth + this.hiddenDisplay.clientWidth + 1;
 					}
 					this.smallDisplay.innerHTML += this.valueArray[this.valueArray.length-1];
-				} else if (this.enteredNewValue) {
+				} else if (enteredNewValue) {
 
 
 					this.valueArray.push(this.display.innerHTML);

@@ -6,77 +6,78 @@ let display = document.querySelector('.js_display');
 class Operations {
 	constructor() {	
 		this.operationsDisabled = false;
+		this.currentValue = 0;
 	}		
 
-	sendOperation(operation) {
+	sendOperation(operation, resultPressed) {
 		switch (operation) {
 			case OPERATIONS.PLUS:
-			this._plus();
+			return this._plus(resultPressed);
 			break;
 			case OPERATIONS.MINUS:
-			this._minus();
+			return this._minus(resultPressed);
 			break;
 			case OPERATIONS.MULTIPLY:
-			this._multiply();
+			return this._multiply(resultPressed);
 			break;
 			case OPERATIONS.DIVIDE:
-			this._divide();
+			return this._divide(resultPressed);
 			break;
 			case OPERATIONS.POW:
-			this._pow();
+			return this._pow();
 			break;
 			case OPERATIONS.FRAC:
-			this._frac();
+			return this._frac();
 			break;
 			case OPERATIONS.SQRT:
-			this._sqrt();
+			return this._sqrt();
 			break;
 			case OPERATIONS.NEGATE: 
-			this._negate();
+			return this._negate();
 			break;
 			default:
 			console.log(MESSAGES.ERROR.OPERATIONS);
 		}
 	}
 
-	_plus() {
-		if (this.resultPressed) {
-			this.currentValue += this.ValueForProgressive;
-		}	else {
+	_plus(resultPressed) {
+		if (resultPressed) {
+			this.currentValue += this.valueForProgressive;
+		} else {
 			this.currentValue += parseFloat(display.innerHTML);
 		}
 
 		if (this.checkForFinite(this.currentValue)) {
-			display.innerHTML = this.trimmer(this.currentValue);
+			return this.trimmer(this.currentValue);
 		}
 	}
 
-	_minus() {
-		if (this.resultPressed) {
-			this.currentValue -= this.ValueForProgressive;
+	_minus(resultPressed) {
+		if (resultPressed) {
+			this.currentValue -= this.valueForProgressive;
 		}	else {   
 			this.currentValue -= parseFloat(display.innerHTML);
 		}
-
+		
 		if (this.checkForFinite(this.currentValue)) {
-			display.innerHTML = this.trimmer(this.currentValue);
+			return this.trimmer(this.currentValue);
 		}
 	}
 
-	_multiply() {
-		if (this.resultPressed) {
-			this.currentValue *= this.ValueForProgressive;
+	_multiply(resultPressed) {
+		if (resultPressed) {
+			this.currentValue *= this.valueForProgressive;
 		}	else {
 			this.currentValue *= parseFloat(display.innerHTML);
 		}
 
 		if (this.checkForFinite(this.currentValue)) {
-			display.innerHTML = this.trimmer(this.currentValue);
+			return this.trimmer(this.currentValue);
 		}
 	}
 
-	_divide() {
-		if (this.ValueForProgressive === 0 || parseFloat(display.innerHTML) === 0) {	
+	_divide(resultPressed) {
+		if (this.valueForProgressive === 0 || parseFloat(display.innerHTML) === 0) {	
 			this.operationsDisabled = true;
 			disableButtons();
 			display.style.fontSize = STYLES.SMALL;
@@ -85,20 +86,20 @@ class Operations {
 			return;
 		} 
 
-		if (this.resultPressed) {
-			this.currentValue /= this.ValueForProgressive;
+		if (resultPressed) {
+			this.currentValue /= this.valueForProgressive;
 		}	else {
 			this.currentValue /= +display.innerHTML;
 		}
 
-		display.innerHTML = this.trimmer(this.currentValue);
+		return this.trimmer(this.currentValue);
 	}
 
 	_pow() {
 		let temp = Math.pow(parseFloat(display.innerHTML), 2);
 
 		if (this.checkForFinite(temp)) {
-			display.innerHTML = this.trimmer(Math.pow(parseFloat(display.innerHTML), 2));
+			return this.trimmer(Math.pow(parseFloat(display.innerHTML), 2));
 		}
 	}
 
@@ -115,7 +116,7 @@ class Operations {
 		let temp = 1 / parseFloat(display.innerHTML);
 
 		if (this.checkForFinite(temp)) {
-			display.innerHTML = this.trimmer(temp);
+			return this.trimmer(temp);
 		}
 	}
 
@@ -132,7 +133,7 @@ class Operations {
 		let temp = Math.sqrt(parseFloat(display.innerHTML));
 
 		if (this.checkForFinite(temp)) {
-			display.innerHTML = this.trimmer(temp);
+			return this.trimmer(temp);
 		}
 	}
 
@@ -140,7 +141,7 @@ class Operations {
 		let temp = parseFloat(display.innerHTML) * -1;
 
 		if (this.checkForFinite(temp)) {
-			display.innerHTML = this.trimmer(temp);
+			return this.trimmer(temp);
 		}
 	}
 
@@ -156,6 +157,28 @@ class Operations {
 			}	
 
 			return this.trimmer(temp);
+		}
+	}
+
+	trimmer(temp) {
+		temp = parseFloat(temp)
+		temp.toPrecision(6);
+		if (String(temp).length > this.maxLength) {
+			temp = temp.toPrecision(6);
+		}
+		return temp;
+	}
+
+	checkForFinite(temp) {
+		if (!isFinite(temp)) {
+			disableButtons();
+			display.style.fontSize = STYLES.SMALL;
+			display.innerHTML = MESSAGES.OVERFLOW;
+			this.operationsDisabled = true;
+
+			return false;
+		} else {			
+			return true;
 		}
 	}
 
