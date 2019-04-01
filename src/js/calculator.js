@@ -1,5 +1,6 @@
 import Display from './display.js';
 import Operations from './operations.js';
+import Memory from './memory.js';
 import {MAX_WIDTH_DISPLAY, MESSAGES, STYLES, OPERATIONS, NAME_FOR_DISPLAY} from './const.js';
 import {activateButtons, disableButtons} from './index.js';
 
@@ -10,7 +11,7 @@ smallDisplay = document.querySelector('.js_small-display__block'),
 hiddenDisplay = document.querySelector('.js_small-display__add');
 
 
-class Calculator {
+class Calc {
 	constructor() {
 		this.disp = new Display(display, smallDisplay, arrowLeft, arrowRight, hiddenDisplay);
 		this.operations = new Operations();
@@ -18,8 +19,8 @@ class Calculator {
 		this.isOperationPressed = false;
 		this.isNeedValueForProgressive = false;
 		this.isEnteredNewValue = false;
+		this.isPressedSingleOperation = false;	
 		this.typeOperation = '';
-
 		this.currentValue = null;
 	}
 
@@ -30,16 +31,14 @@ class Calculator {
 			activateButtons();
 		}
 
-		this.displayClear();
-
-		this.currentValue = null;
+		this.disp.displayClear();
 		this.isResultPressed = false;
 		this.isOperationPressed = false;		
 		this.isNeedValueForProgressive = false,
-		this.disp.needNewValue = false;
 		this.isEnteredNewValue = false;
 		this.isPressedSingleOperation = false;		
-		this.typeOperation = '';
+		this.typeOperation = '';		
+		this.currentValue = null;
 	}
 
 	singleOperation(operation) {
@@ -51,8 +50,8 @@ class Calculator {
 			return;
 		}
 
-		this.disp.sendToStatusDisplay(OPERATIONS.LABEL_SINGLE_OPERATION, operation, this.isPressedSingleOperation, this.isEnteredNewValue);
-		this.isPressedSingleOperation = true;
+		this.disp.sendToStatusDisplay(OPERATIONS.LABEL_SINGLE_OPERATION, operation);
+		this.isPressedSingleOperation = this.disp.isPressedSingleOperation = true;
 		this.disp.needNewValue = true;
 		this.isEnteredNewValue = true;
 
@@ -73,7 +72,7 @@ class Calculator {
 		this.disp.smallDisplay.innerHTML = '';
 		this.isResultPressed = true;
 		this.isOperationPressed = false;
-		this.isEnteredNewValue = true;
+		this.isEnteredNewValue = this.disp.isEnteredNewValue = true;
 
 		if (this.isNeedValueForProgressive) {
 			this.operations.valueForProgressive = parseFloat(display.innerHTML);
@@ -92,22 +91,21 @@ class Calculator {
 		}
 		
 		this.isResultPressed = false;
-		this.disp.sendToStatusDisplay(OPERATIONS.LABEL_DEFAULT_OPERATION, operation, this.isPressedSingleOperation, this.isEnteredNewValue);
-		this.isPressedSingleOperation = false;
+		this.disp.sendToStatusDisplay(OPERATIONS.LABEL_DEFAULT_OPERATION, operation);
+		this.isPressedSingleOperation = this.disp.isPressedSingleOperation = false;
 		this.isNeedValueForProgressive = true;
 
 		if (this.isOperationPressed) {
 			if (this.isEnteredNewValue) {
-
 				this.disp.text = this.operations.sendOperation(this.typeOperation, this.isResultPressed);
-				this.isEnteredNewValue = false;
+				this.isEnteredNewValue = this.disp.isEnteredNewValue = false;
 			}
 			this.typeOperation = operation;
 		} else {
 			this.operations.currentValue = parseFloat(display.innerHTML);
 			this.typeOperation = operation;				
 			this.isOperationPressed = true;
-			this.isEnteredNewValue = false; 
+			this.isEnteredNewValue = this.disp.isEnteredNewValue = false; 
 		}
 
 		this.disp.needNewValue = true;
@@ -115,4 +113,4 @@ class Calculator {
 
 }
 
-export default new Calculator();
+export default new Calc();

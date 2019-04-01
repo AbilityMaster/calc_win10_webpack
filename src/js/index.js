@@ -193,8 +193,9 @@ window.onload = function() {
 			button.type = element.dataset.value;
 			smallDisplay.style.removeProperty('left');
 			smallDisplay.style.right = 0;
-			calc.disp.numberPress(button.type)
-			calc.enteredNewValue = true;
+			calc.disp.numberPress(button.type);
+			calc.isEnteredNewValue = true;
+			calc.isPressedSingleOperation = false;
 		});
 	});
 
@@ -222,7 +223,7 @@ window.onload = function() {
 
 	button_Backspace.onclick = function() {
 		calc.operationsDisabled = false;
-		calc.backspace();
+		calc.disp.backspace();
 	}
 
 	button_Reverse.onclick = function() {		
