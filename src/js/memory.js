@@ -96,4 +96,4 @@ class Memory {
 	}
 }
 
-export default new Memory();
+export default Memory;

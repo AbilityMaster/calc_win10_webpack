@@ -4,7 +4,6 @@ import calcLoader from './calcLoader.js'
 import {MAX_WIDTH_DISPLAY, CALC_MODES, OPERATIONS} from './const.js'
 import Storage from './localStorage.js'
 import Display from './display.js'
-import Memory from './memory.js'
 import button from './Button.js'
 
 let smallDisplay = document.querySelector('.js_small-display__block'),
@@ -82,7 +81,10 @@ export function activateButtons() {
 	});
 }
 
-calcLoader.init();
+
+calc.calcLoader.init();
+
+
 
 window.onload = function() {
 	let info = {} 
@@ -104,7 +106,7 @@ window.onload = function() {
 			info.y = 0 + '%';
 			calculator.style.top = info.y;
 		}
-		Storage.dataset = info;
+		calc.storage.dataset = info;
 	}	
 
 	forDrag.onmousedown = function(e) {
@@ -140,11 +142,11 @@ window.onload = function() {
 			info.x = calculator.style.left;
 			info.y = calculator.style.top;
 
-			if (Storage.dataset.mode === CALC_MODES.DEFAULT) {
+			if (calc.storage.dataset.mode === CALC_MODES.DEFAULT) {
 				info.mode = CALC_MODES.STANDART;
 			}
 			
-			Storage.dataset = info;
+			calc.storage.dataset = info;
 		}
 
 		document.onmousemove = function(e) {
@@ -166,26 +168,26 @@ window.onload = function() {
 
 	button_Open.onclick = function() {
 		info.mode = CALC_MODES.STANDART;
-		Storage.dataset = info;
-		calcLoader.manage(CALC_MODES.STANDART);
+		calc.storage.dataset = info;
+		calc.calcLoader.manage(CALC_MODES.STANDART);
 	}
 
 	button_Trey.onclick = function() {
 		info.mode = CALC_MODES.MINIMIZED;
-		Storage.dataset = info;
-		calcLoader.manage(CALC_MODES.MINIMIZED)
+		calc.storage.dataset = info;
+		calc.calcLoader.manage(CALC_MODES.MINIMIZED)
 	}
 
 	button_Close.onclick = function() {
-		calcLoader.manage(CALC_MODES.CLOSED)		
+		calc.calcLoader.manage(CALC_MODES.CLOSED)		
 		info.mode = CALC_MODES.CLOSED;
-		Storage.dataset = info;
+		calc.storage.dataset = info;
 	}
 
 	button_OpenCalculator.onclick = function() {
-		calcLoader.manage(CALC_MODES.DEFAULT);
+		calc.calcLoader.manage(CALC_MODES.DEFAULT);
 		info.mode = CALC_MODES.DEFAULT;		
-		Storage.dataset = info;	
+		calc.storage.dataset = info;	
 	}
 
 	numbers.forEach(element => {
@@ -218,6 +220,7 @@ window.onload = function() {
 	}
 
 	button_Clear.onclick = function() {
+		calc.template(document.querySelector('.root'));
 		calc.clear();
 	}
 
@@ -272,13 +275,13 @@ window.onload = function() {
 	}
 
 	buttonMemory_Save.onclick = function() {
-		if (Memory.isOpenMemoryWindow) {
+		if (calc.memory.isOpenMemoryWindow) {
 			return;
 		}
 
-		Memory.isActivatedMemoryButtons = true;
-		info.isActivatedMemoryButtons = Memory.isActivatedMemoryButtons;
-		Storage.dataset = info;
+		calc.memory.isActivatedMemoryButtons = true;
+		info.isActivatedMemoryButtons = calc.memory.isActivatedMemoryButtons;
+		calc.storage.dataset = info;
 
 		buttonMemory_Read.classList.remove("calc-add__button_disabled");
 		buttonMemory_Clear.classList.remove("calc-add__button_disabled");
@@ -286,12 +289,12 @@ window.onload = function() {
 
 		Memory.addToMemory(display.innerHTML);
 
-		info.memoryValues = Memory.memoryValues;
-		Storage.dataset = info;
+		info.memoryValues = calc.memory.memoryValues;
+		calc.storage.dataset = info;
 	}
 
 	buttonMemory_Open.onclick = function() {		
-		if (!Memory.isActivatedMemoryButtons) {
+		if (!calc.memory.isActivatedMemoryButtons) {
 			return;
 		}
 
@@ -302,89 +305,89 @@ window.onload = function() {
 		buttonMemory_Minus.classList.toggle("calc-add__button_disabled");
 		buttonMemory_Save.classList.toggle("calc-add__button_disabled");
 
-		if (Memory.isOpenMemoryWindow) {
-			Memory.isOpenMemoryWindow = false;
+		if (calc.memory.isOpenMemoryWindow) {
+			calc.memory.isOpenMemoryWindow = false;
 			return;
 		}
 
-		Memory.isOpenMemoryWindow = true;
+		calc.memory.isOpenMemoryWindow = true;
 	}
 
 	buttonMemory_Plus.onclick = function() {		
-		if (Memory.isOpenMemoryWindow) {
+		if (calc.memory.isOpenMemoryWindow) {
 			return;
 		}
 
-		Memory.isActivatedMemoryButtons = true;
-		info.isActivatedMemoryButtons = Memory.isActivatedMemoryButtons;
-		Storage.dataset = info;
+		calc.memory.isActivatedMemoryButtons = true;
+		info.isActivatedMemoryButtons = calc.memory.isActivatedMemoryButtons;
+		calc.storage.dataset = info;
 
 		buttonMemory_Read.classList.remove("calc-add__button_disabled");
 		buttonMemory_Clear.classList.remove("calc-add__button_disabled");
 		buttonMemory_Open.classList.remove("calc-add__button_disabled");
 
-		if (Memory.isEmpty()) {
-			Memory.addToMemory(display.innerHTML);
+		if (calc.memory.isEmpty()) {
+			calc.memory.addToMemory(display.innerHTML);
 		} else {
 			let value =	document.querySelector('.memory__block').childNodes[0].innerHTML;
 			let displayValue = display.innerHTML;
 			let position = document.querySelector('.memory__block').dataset.position;
 
-			Memory.plus(value, displayValue, position);
+			calc.memory.plus(value, displayValue, position);
 
-		  document.querySelector('.memory__block').childNodes[0].innerHTML = Memory.memoryValues[position];
+		  document.querySelector('.memory__block').childNodes[0].innerHTML = calc.memory.memoryValues[position];
 		}
 
-		info.memoryValues = Memory.memoryValues;
-		Storage.dataset = info;
+		info.memoryValues = calc.memory.memoryValues;
+		calc.storage.dataset = info;
 	}
 
 	buttonMemory_Minus.onclick = function() {
-		if (Memory.isOpenMemoryWindow) {
+		if (calc.memory.isOpenMemoryWindow) {
 			return;
 		}
 
-		Memory.isActivatedMemoryButtons = true;
-		info.isActivatedMemoryButtons = Memory.isActivatedMemoryButtons;
-		Storage.dataset = info;
+		calc.memory.isActivatedMemoryButtons = true;
+		info.isActivatedMemoryButtons = calc.memory.isActivatedMemoryButtons;
+		calc.storage.dataset = info;
 
 		buttonMemory_Read.classList.remove("calc-add__button_disabled");
 		buttonMemory_Clear.classList.remove("calc-add__button_disabled");
 		buttonMemory_Open.classList.remove("calc-add__button_disabled");
 
-		if (Memory.isEmpty()) {
-			Memory.addToMemory(display.innerHTML);
+		if (calc.memory.isEmpty()) {
+			calc.memory.addToMemory(display.innerHTML);
 		} else {
 			let value =	document.querySelector('.memory__block').childNodes[0].innerHTML;
 			let displayValue = display.innerHTML;
 			let position = document.querySelector('.memory__block').dataset.position;
 
-			Memory.minus(value, displayValue, position);
+			calc.memory.minus(value, displayValue, position);
 
-			document.querySelector('.memory__block').childNodes[0].innerHTML = Memory.memoryValues[position];
+			document.querySelector('.memory__block').childNodes[0].innerHTML = calc.memory.memoryValues[position];
 		}
 
-		info.memoryValues = Memory.memoryValues;
-		Storage.dataset = info;
+		info.memoryValues = calc.memory.memoryValues;
+		calc.storage.dataset = info;
 	}
 
 	buttonMemory_Read.onclick = function() {		
-		if (!Memory.isActivatedMemoryButtons || Memory.isOpenMemoryWindow) {
+		if (!calc.memory.isActivatedMemoryButtons || calc.memory.isOpenMemoryWindow) {
 			return;
 		}
 
 		let position = document.querySelector('.memory__block').dataset.position;
 
-		display.innerHTML = Memory.memoryValues[position];
+		display.innerHTML = calc.memory.memoryValues[position];
 		calc.enteredNewValue = true;
 	}
 
 	buttonMemory_Clear.onclick = function() {
-		if (!Memory.isActivatedMemoryButtons || Memory.isOpenMemoryWindow) {
+		if (!calc.memory.isActivatedMemoryButtons || calc.memory.isOpenMemoryWindow) {
 			return;
 		}
 
-		Memory.isActivatedMemoryButtons = false;
+		calc.memory.isActivatedMemoryButtons = false;
 		info.isActivatedMemoryButtons = '0';
 
 		buttonMemory_Read.classList.add("calc-add__button_disabled");
@@ -392,11 +395,11 @@ window.onload = function() {
 		buttonMemory_Open.classList.add("calc-add__button_disabled");
 		memoryBoard.innerHTML = '';
 
-		Memory.memoryValues = {};
-		Memory.storageMemoryData = {};
-		info.memoryValues = Memory.memoryValues;
+		calc.memory.memoryValues = {};
+		calc.memory.storageMemoryData = {};
+		info.memoryValues = calc.memory.memoryValues;
 
-		Storage.dataset = info;
+		calc.storage.dataset = info;
 	}
-
 }
+

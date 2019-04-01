@@ -31,4 +31,4 @@ class lc {
 	}
 }
 
-export default new lc();
+export default lc;

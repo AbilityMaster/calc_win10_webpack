@@ -1,6 +1,5 @@
 import {CALC_MODES, MESSAGES} from './const.js'
-import Storage from './localStorage.js'
-import Memory from './memory.js'
+import calc from './calculator.js'
 
 let optionMenu = document.querySelector('.js_option-menu'),
 buttonArea = document.querySelector('.js_button-area'),
@@ -13,28 +12,35 @@ buttonMemory_Read = document.querySelector('.js_calc-add__button_read'),
 buttonMemory_Open = document.querySelector('.js_calc-add__button_memory'),
 calculator = document.querySelector('.js_calculator');
 
-let def = {
-	mode: 'default',
-	x: (window.innerWidth - calculator.offsetWidth) / window.innerWidth * 100 + '%',
-	y: (window.innerHeight - calculator.offsetHeight) / window.innerHeight * 100 + '%'
-};
+console.log(calculator);
 
 class CalcLoader {
-	constructor() {}
+	constructor() {
+		this.defaultSettings = {
+			mode: 'default',
+			x: (window.innerWidth - document.querySelector('.js_calculator').offsetWidth) / window.innerWidth * 100 + '%',
+			y: (window.innerHeight - document.querySelector('.js_calculator').offsetHeight) / window.innerHeight * 100 + '%'
+		};
+	}
 
 	init() {	
-		if (!Storage.dataset) {
-			Storage.dataset = def;
+		let buttonMemory_Clear = document.querySelector('.js_calc-add__button_memory-clear'),
+		buttonMemory_Read = document.querySelector('.js_calc-add__button_read'),
+		buttonMemory_Open = document.querySelector('.js_calc-add__button_memory'),
+		calculator = document.querySelector('.js_calculator');
+
+		if (!calc.storage.dataset) {
+			calc.storage.dataset = this.defaultSettings;
 		}
 
-		let obj = Storage.dataset;
+		let storage = calc.storage.dataset;
 
-		for (var key in obj.memoryValues) {
-			Memory.addToMemory(obj.memoryValues[key]);
+		for (var key in storage.memoryValues) {
+			calc.memory.addToMemory(storage.memoryValues[key]);
 		}
 		
-		if (obj.isActivatedMemoryButtons === true) {
-			Memory.isActivatedMemoryButtons = true;
+		if (storage.isActivatedMemoryButtons === true) {
+			calc.memory.isActivatedMemoryButtons = true;
 			buttonMemory_Read.classList.remove("calc-add__button_disabled");
 			buttonMemory_Clear.classList.remove("calc-add__button_disabled");
 			buttonMemory_Open.classList.remove("calc-add__button_disabled");
@@ -44,12 +50,19 @@ class CalcLoader {
 			buttonMemory_Open.classList.add("calc-add__button_disabled");
 		}
 		
-		calculator.style.left = obj.x ? obj.x : def.x;
-		calculator.style.top = obj.y ? obj.y : def.y;
-		this.manage(obj.mode);
+		calculator.style.left = storage.x ? storage.x : this.defaultSettings.x;
+		calculator.style.top = storage.y ? storage.y : this.defaultSettings.y;
+		this.manage(storage.mode);
 	}
 
 	manage(mode) {
+		let optionMenu = document.querySelector('.js_option-menu'),
+		buttonArea = document.querySelector('.js_button-area'),
+		groupSmallDisplay = document.querySelector('.js_group-small-display'),
+		openCalc = document.querySelector('.js_open-calculator'),
+		display = document.querySelector('.js_display'),
+		calculator = document.querySelector('.js_calculator');
+
 		switch (mode) {
 			case CALC_MODES.STANDART: {
 				optionMenu.style.display = 'flex';
@@ -76,8 +89,8 @@ class CalcLoader {
 				groupSmallDisplay.style.display = 'flex';
 				display.style.display = 'block';
 				calculator.style.height = '540px';
-				calculator.style.left = def.x;
-				calculator.style.top = def.y;		
+				calculator.style.left = this.defaultSettings.x;
+				calculator.style.top = this.defaultSettings.y;		
 				calculator.style.display = 'none';
 				break;
 			}
@@ -89,8 +102,8 @@ class CalcLoader {
 				buttonArea.style.display = 'block';
 				calculator.style.height = '540px';
 				calculator.style.display = 'block';
-				calculator.style.left = def.x;
-				calculator.style.top = def.y;			
+				calculator.style.left = this.defaultSettings.x;
+				calculator.style.top = this.defaultSettings.y;		
 				break;
 			}
 			default: {
@@ -99,6 +112,7 @@ class CalcLoader {
 			}
 		}
 	}
+
 }
 
-export default new CalcLoader();
+export default CalcLoader;
