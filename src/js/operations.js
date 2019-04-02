@@ -6,7 +6,6 @@ let display = document.querySelector('.js_display');
 class Operations {
 	constructor() {	
 		this.operationsDisabled = false;
-		this.currentValue = 0;
 	}		
 
 	sendOperation(operation, resultPressed) {
@@ -44,7 +43,7 @@ class Operations {
 		if (resultPressed) {
 			this.currentValue += this.valueForProgressive;
 		} else {
-			this.currentValue += parseFloat(display.innerHTML);
+			this.currentValue += parseFloat(this.display.innerHTML);
 		}
 
 		if (this.checkForFinite(this.currentValue)) {
@@ -56,7 +55,7 @@ class Operations {
 		if (resultPressed) {
 			this.currentValue -= this.valueForProgressive;
 		}	else {   
-			this.currentValue -= parseFloat(display.innerHTML);
+			this.currentValue -= parseFloat(this.display.innerHTML);
 		}
 		
 		if (this.checkForFinite(this.currentValue)) {
@@ -68,7 +67,7 @@ class Operations {
 		if (resultPressed) {
 			this.currentValue *= this.valueForProgressive;
 		}	else {
-			this.currentValue *= parseFloat(display.innerHTML);
+			this.currentValue *= parseFloat(this.display.innerHTML);
 		}
 
 		if (this.checkForFinite(this.currentValue)) {
@@ -77,11 +76,11 @@ class Operations {
 	}
 
 	_divide(resultPressed) {
-		if (this.valueForProgressive === 0 || parseFloat(display.innerHTML) === 0) {	
+		if (this.valueForProgressive === 0 || parseFloat(this.display.innerHTML) === 0) {	
 			this.operationsDisabled = true;
 			disableButtons();
-			display.style.fontSize = STYLES.SMALL;
-			display.innerHTML = MESSAGES.DIVIDE_BY_ZERO;
+			this.display.style.fontSize = STYLES.SMALL;
+			this.display.innerHTML = MESSAGES.DIVIDE_BY_ZERO;
 
 			return;
 		} 
@@ -89,31 +88,31 @@ class Operations {
 		if (resultPressed) {
 			this.currentValue /= this.valueForProgressive;
 		}	else {
-			this.currentValue /= +display.innerHTML;
+			this.currentValue /= +this.display.innerHTML;
 		}
 
 		return this.trimmer(this.currentValue);
 	}
 
 	_pow() {
-		let temp = Math.pow(parseFloat(display.innerHTML), 2);
+		let temp = Math.pow(parseFloat(this.display.innerHTML), 2);
 
 		if (this.checkForFinite(temp)) {
-			return this.trimmer(Math.pow(parseFloat(display.innerHTML), 2));
+			return this.trimmer(Math.pow(parseFloat(this.display.innerHTML), 2));
 		}
 	}
 
 	_frac() {
-		if (parseFloat(display.innerHTML) === 0) {	
+		if (parseFloat(this.display.innerHTML) === 0) {	
 			this.operationsDisabled = true;
 			disableButtons();
-			display.style.fontSize = STYLES.SMALL;
-			display.innerHTML = MESSAGES.DIVIDE_BY_ZERO;
+			this.display.style.fontSize = STYLES.SMALL;
+			this.display.innerHTML = MESSAGES.DIVIDE_BY_ZERO;
 
 			return;
 		}
 
-		let temp = 1 / parseFloat(display.innerHTML);
+		let temp = 1 / parseFloat(this.display.innerHTML);
 
 		if (this.checkForFinite(temp)) {
 			return this.trimmer(temp);
@@ -121,16 +120,16 @@ class Operations {
 	}
 
 	_sqrt() {
-		if (parseFloat(display.innerHTML) < 0) {
+		if (parseFloat(this.display.innerHTML) < 0) {
 			disableButtons();
-			display.style.fontSize = STYLES.SMALL;
-			display.innerHTML =  MESSAGES.UNCORRECT_DATA;
+			this.display.style.fontSize = STYLES.SMALL;
+			this.display.innerHTML =  MESSAGES.UNCORRECT_DATA;
 			this.operationsDisabled = true;
 
 			return;
 		}
 
-		let temp = Math.sqrt(parseFloat(display.innerHTML));
+		let temp = Math.sqrt(parseFloat(this.display.innerHTML));
 
 		if (this.checkForFinite(temp)) {
 			return this.trimmer(temp);
@@ -138,7 +137,7 @@ class Operations {
 	}
 
 	_negate() {
-		let temp = parseFloat(display.innerHTML) * -1;
+		let temp = parseFloat(this.display.innerHTML) * -1;
 
 		if (this.checkForFinite(temp)) {
 			return this.trimmer(temp);
@@ -146,12 +145,12 @@ class Operations {
 	}
 
 	percent() {
-		let temp = parseFloat(display.innerHTML) / 100 * this.currentValue;
+		let temp = parseFloat(this.display.innerHTML) / 100 * this.currentValue;
 
 		if (this.checkForFinite(temp)) {
 
 			if (!this.currentValue) {
-				display.innerHTML = 0;
+				this.display.innerHTML = 0;
 
 				return;
 			}	
@@ -172,8 +171,8 @@ class Operations {
 	checkForFinite(temp) {
 		if (!isFinite(temp)) {
 			disableButtons();
-			display.style.fontSize = STYLES.SMALL;
-			display.innerHTML = MESSAGES.OVERFLOW;
+			this.display.style.fontSize = STYLES.SMALL;
+			this.display.innerHTML = MESSAGES.OVERFLOW;
 			this.operationsDisabled = true;
 
 			return false;

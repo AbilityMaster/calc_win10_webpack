@@ -3,13 +3,13 @@ import {disableButtons, activateButtons} from './index.js';
 
 
 class Display {
-	constructor(display, smallDisplay, arrowLeft, arrowRight, hiddenDisplay) {
+	constructor() {
 		this.valueArray = [];
-		this.display = display;
-		this.smallDisplay = smallDisplay;
-		this.hiddenDisplay = hiddenDisplay;
-		this.arrowLeft = arrowLeft;
-		this.arrowRight = arrowRight;
+		//this.display = display;
+		//this.smallDisplay = smallDisplay;
+		//this.hiddenDisplay = hiddenDisplay;
+		//this.arrowLeft = arrowLeft;
+		//this.arrowRight = arrowRight;
 		this.needNewValue = false;
 		this.maxLength = MAX_LENGTH_DISPLAY;
 	}
@@ -29,12 +29,15 @@ class Display {
 
 	}
 
-	numberPress(number, callback) {
+	numberPress(number) {
+
+
 		if (this.operationsDisabled) {
 			this.operationsDisabled = false;
 			this.clear();
 			activateButtons();
 		}
+
 
 		this.isEnteredNewValue = true;
 		this.display.style.fontSize = STYLES.NORMAL;
@@ -48,6 +51,7 @@ class Display {
 		}
 
 		if ((this.display.innerHTML === '0' || (this.needNewValue) || (this.resultPressed) || this.display.innerHTML === MESSAGES.DIVIDE_BY_ZERO)) {
+			
 			this.display.innerHTML = number;
 			this.needNewValue = false;
 			this.resultPressed = false;
@@ -56,13 +60,29 @@ class Display {
 			if (this.display.innerHTML.length > this.maxLength) {
 				return;
 			}
-
 			this.display.innerHTML += number;
 		}
 	}
 
 	set text(data) {
 		this.display.innerHTML = data;
+	}
+
+	get text() {
+		return this.display.innerHTML;
+	}
+
+	get template() {
+		return `
+				<div class="group-small-display js_group-small-display">
+			<div class="small-display__button small-display__button_left js_small-display__button_left"></div>
+			<div class="small-display">
+				<div class="small-display__block js_small-display__block"></div>
+				<div class="small-display__add js_small-display__add"></div>
+			</div>
+			<div class="small-display__button small-display__button_right js_small-display__button_right"></div>
+		</div>
+		<div class="display js_display">0</div> `
 	}
 
 	addPoint() {

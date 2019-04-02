@@ -1,8 +1,5 @@
 import Storage from './localStorage.js'
 
-let memory = document.querySelector('.js_memory'),
-display = document.querySelector('.js_display');
-
 class Memory {
 	constructor() {
 		this.isActivatedMemoryButtons = false;
@@ -21,7 +18,7 @@ class Memory {
 
 		memory__block.className = "memory__block";
 		memory__block.setAttribute('data-position', this.positionAttribute);
-		memory.insertBefore(memory__block, memory.children[0]);
+		this.memory.insertBefore(memory__block, this.memory.children[0]);
 
 		let memoryValue = document.createElement('div');
 
@@ -48,7 +45,7 @@ class Memory {
 
 		btn_m_plus.addEventListener('click', (event) => {
 			let value = event.target.parentElement.childNodes[0].innerHTML;
-			let displayValue = display.innerHTML;
+			let displayValue = this.display.innerHTML;
 			let position = event.target.parentElement.dataset.position;
 
 			this.plus(value, displayValue, position);
@@ -65,7 +62,7 @@ class Memory {
 
 		btn_m_minus.addEventListener('click', (event) => {
 			let value = event.target.parentElement.childNodes[0].innerHTML;
-			let displayValue = display.innerHTML;
+			let displayValue = this.display.innerHTML;
 			let position = event.target.parentElement.dataset.position;
 
 			this.minus(value, displayValue, position);

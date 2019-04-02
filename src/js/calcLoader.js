@@ -12,8 +12,6 @@ buttonMemory_Read = document.querySelector('.js_calc-add__button_read'),
 buttonMemory_Open = document.querySelector('.js_calc-add__button_memory'),
 calculator = document.querySelector('.js_calculator');
 
-console.log(calculator);
-
 class CalcLoader {
 	constructor() {
 		this.defaultSettings = {
