@@ -4,7 +4,6 @@ import Memory from './memory.js';
 import Storage from './localStorage.js';
 import CalcLoader from './calcLoader.js';
 import {MAX_WIDTH_DISPLAY, MESSAGES, STYLES, OPERATIONS, NAME_FOR_DISPLAY, CALC_MODES} from './const.js';
-import {activateButtons, disableButtons} from './index.js';
 
 class Calc {
 	constructor(tag) {
@@ -22,7 +21,7 @@ class Calc {
 	}
 
 	clear() {
-		if (this.disp.operationsDisabled) {
+		if (this.operationsDisabled) {
 			this.disp.display.style.fontSize = STYLES.NORMAL;
 			this.disp.operationsDisabled = false;
 			activateButtons();
@@ -39,7 +38,7 @@ class Calc {
 	}
 
 	singleOperation(operation) {
-		if (this.disp.operationsDisabled) {
+		if (this.operationsDisabled) {
 			return;
 		}
 
@@ -53,7 +52,7 @@ class Calc {
 		this.isEnteredNewValue = true;
 
 		if (operation === OPERATIONS.PERCENT) {
-			display.innerHTML = this.percent();
+			this.disp.display.innerHTML = this.operations.percent();
 
 			return;
 		} 
@@ -63,7 +62,7 @@ class Calc {
 	}
 
 	result() {
-		if (this.disp.operationsDisabled) {
+		if (this.operationsDisabled) {
 			return;
 		}
 
@@ -84,10 +83,9 @@ class Calc {
 	}
 
 	operation(operation) {
-		if (this.disp.operationsDisabled) {
+		if (this.operationsDisabled) {
 			return;
 		}
-		
 		this.isResultPressed = false;
 		this.disp.sendToStatusDisplay(OPERATIONS.LABEL_DEFAULT_OPERATION, operation);
 		this.isPressedSingleOperation = this.disp.isPressedSingleOperation = false;
@@ -326,20 +324,20 @@ class Calc {
 		});
 
 		numbers.forEach(element => {
-			element.addEventListener('click', function() {
+			element.addEventListener('click', () => {
 				//console.log(this);
 			//	button.type = element.dataset.value;
 			smallDisplay.style.removeProperty('left');
 			smallDisplay.style.right = 0;
-			self.disp.numberPress(element.dataset.value);
-			self.isEnteredNewValue = true;
-			self.isPressedSingleOperation = false;
+			this.disp.numberPress(element.dataset.value);
+			this.isEnteredNewValue = true;
+			this.isPressedSingleOperation = false;
 		});
 		});
 
 		operationList.forEach(element => {
-			element.addEventListener('click', function() {
-				self.operation(this.innerHTML);
+			element.addEventListener('click', () => {
+				this.operation(element.innerHTML);
 				smallDisplay.style.removeProperty('left');
 				smallDisplay.style.right = 0;
 			});
@@ -398,6 +396,7 @@ class Calc {
 			if (smallDisplay.clientWidth > MAX_WIDTH_DISPLAY) {
 				smallDisplay.style.removeProperty('right');
 				smallDisplay.style.left = 0;
+				smallDisplay.style.textAlign = 'left';
 			}
 		});
 
@@ -405,11 +404,12 @@ class Calc {
 			if (smallDisplay.clientWidth > MAX_WIDTH_DISPLAY) {
 				smallDisplay.style.removeProperty('left');
 				smallDisplay.style.right = 0;
+				smallDisplay.style.textAlign = 'right';
 			} 
 		});
 
 		buttonMemory_Save.addEventListener('click', () => {
-			if (this.memory.isOpenMemoryWindow) {
+			if (this.memory.isOpenMemoryWindow || !isFinite(this.disp.text)) {
 				return;
 			}
 
@@ -427,10 +427,11 @@ class Calc {
 			this.storage.dataset = sendToLocalStorage;
 		});
 
-		buttonMemory_Open.addEventListener('click', () => {
+		buttonMemory_Open.addEventListener('click', () => {	
 			if (!this.memory.isActivatedMemoryButtons) {
 				return;
 			}
+
 
 			memoryBoard.classList.toggle("visibility");
 			buttonMemory_Clear.classList.toggle("calc-add__button_disabled");
@@ -438,6 +439,20 @@ class Calc {
 			buttonMemory_Plus.classList.toggle("calc-add__button_disabled");
 			buttonMemory_Minus.classList.toggle("calc-add__button_disabled");
 			buttonMemory_Save.classList.toggle("calc-add__button_disabled");
+
+			if (this.memory.isEmpty()) {
+				this.memory.isActivatedMemoryButtons = false;
+				buttonMemory_Read.classList.add("calc-add__button_disabled");
+				buttonMemory_Clear.classList.add("calc-add__button_disabled");
+				buttonMemory_Open.classList.add("calc-add__button_disabled");
+				this.memory.isActivatedMemoryButtons = false;
+				sendToLocalStorage.isActivatedMemoryButtons = '0';
+				this.memory.memoryValues = {};
+				this.memory.storageMemoryData = {};
+				sendToLocalStorage.memoryValues = this.memory.memoryValues;
+
+				this.storage.dataset = sendToLocalStorage;
+			}
 
 			if (this.memory.isOpenMemoryWindow) {
 				this.memory.isOpenMemoryWindow = false;
@@ -448,7 +463,7 @@ class Calc {
 		});
 
 		buttonMemory_Plus.addEventListener('click', () => {	
-			if (this.memory.isOpenMemoryWindow) {
+			if (this.memory.isOpenMemoryWindow || !isFinite(this.disp.text)) {
 				return;
 			}
 
@@ -477,7 +492,7 @@ class Calc {
 		});
 
 		buttonMemory_Minus.addEventListener('click', () => {
-			if (this.memory.isOpenMemoryWindow) {
+			if (this.memory.isOpenMemoryWindow || !isFinite(this.disp.text)) {
 				return;
 			}
 
@@ -536,6 +551,66 @@ class Calc {
 			this.storage.dataset = sendToLocalStorage;
 		});
 	}
+}
+
+export function disableButtons() {
+	let resultButton = document.querySelector('.js_calc__button_get-result'),
+	button_Sqrt = document.querySelector('.js_calc__button_sqrt'),
+	button_Pow = document.querySelector('.js_calc__button_pow'),
+	button_Frac = document.querySelector('.js_calc__button_frac'),
+	button_Percent = document.querySelector('.js_calc__button_percent'),
+	button_Reverse = document.querySelector('.js_calc__button_reverse'),
+	operationList = document.querySelectorAll('.js_calc__button_operation'),
+	button_addPoint = document.querySelector('.js_calc__button_add-point');
+
+	button_Reverse.classList.remove('calc__button_enabled');
+	button_Reverse.classList.add('calc__button_disabled');
+	button_Percent.classList.remove('calc__button_enabled');
+	button_Percent.classList.add('calc__button_disabled');
+	button_Sqrt.classList.remove('calc__button_enabled');
+	button_Sqrt.classList.add('calc__button_disabled');
+	button_Pow.classList.remove('calc__button_enabled');
+	button_Pow.classList.add('calc__button_disabled');
+	button_Frac.classList.remove('calc__button_enabled');
+	button_Frac.classList.add('calc__button_disabled');
+	button_addPoint.classList.remove('calc__button_enabled');
+	button_addPoint.classList.add('calc__button_disabled');
+	resultButton.classList.remove('calc__button_enabled');
+	resultButton.classList.add('calc__button_disabled');
+	operationList.forEach((element) => {
+		element.classList.remove('calc__button_enabled');
+		element.classList.add('calc__button_disabled');
+	});
+}
+
+export function activateButtons() {
+	let resultButton = document.querySelector('.js_calc__button_get-result'),
+	button_Sqrt = document.querySelector('.js_calc__button_sqrt'),
+	button_Pow = document.querySelector('.js_calc__button_pow'),
+	button_Frac = document.querySelector('.js_calc__button_frac'),
+	button_Percent = document.querySelector('.js_calc__button_percent'),
+	button_Reverse = document.querySelector('.js_calc__button_reverse'),
+	operationList = document.querySelectorAll('.js_calc__button_operation'),
+	button_addPoint = document.querySelector('.js_calc__button_add-point');
+
+	button_Reverse.classList.add('calc__button_enabled');
+	button_Reverse.classList.remove('calc__button_disabled');
+	button_addPoint.classList.add('calc__button_enabled');
+	button_addPoint.classList.remove('calc__button_disabled');
+	resultButton.classList.add('calc__button_enabled');
+	resultButton.classList.remove('calc__button_disabled');
+	button_Percent.classList.add('calc__button_enabled');
+	button_Percent.classList.remove('calc__button_disabled');
+	button_Sqrt.classList.add('calc__button_enabled');
+	button_Sqrt.classList.remove('calc__button_disabled');
+	button_Pow.classList.add('calc__button_enabled');
+	button_Pow.classList.remove('calc__button_disabled');
+	button_Frac.classList.add('calc__button_enabled');
+	button_Frac.classList.remove('calc__button_disabled');
+	operationList.forEach((element) => {
+		element.classList.add('calc__button_enabled');
+		element.classList.remove('calc__button_disabled');
+	});
 }
 
 export default new Calc();

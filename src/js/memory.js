@@ -1,4 +1,4 @@
-import Storage from './localStorage.js'
+import calc from './calculator.js'
 
 class Memory {
 	constructor() {
@@ -34,7 +34,7 @@ class Memory {
 		btn_mc.addEventListener('click', (event) => {
 			this.clear(event.target.parentElement);
 			this.storageMemoryData.memoryValues = this.memoryValues;
-			Storage.dataset = this.storageMemoryData;
+			calc.storage.dataset = this.storageMemoryData;			
 		});
 
 		let btn_m_plus = document.createElement('div');
@@ -50,7 +50,7 @@ class Memory {
 
 			this.plus(value, displayValue, position);
 			this.storageMemoryData.memoryValues = this.memoryValues;
-			Storage.dataset = this.storageMemoryData;
+			calc.storage.dataset = this.storageMemoryData;
 			event.target.parentElement.childNodes[0].innerHTML = this.memoryValues[position];
 		});
 
@@ -67,7 +67,7 @@ class Memory {
 
 			this.minus(value, displayValue, position);
 			this.storageMemoryData.memoryValues = this.memoryValues;
-			Storage.dataset = this.storageMemoryData;
+			calc.storage.dataset = this.storageMemoryData;
 			event.target.parentElement.childNodes[0].innerHTML = this.memoryValues[position];
 		});
 

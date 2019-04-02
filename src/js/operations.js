@@ -1,11 +1,12 @@
-import {MESSAGES, STYLES, OPERATIONS} from './const.js';
-import {disableButtons, activateButtons} from './index.js';
+import {MESSAGES, STYLES, OPERATIONS, MAX_LENGTH_DISPLAY} from './const.js';
+import {disableButtons, activateButtons} from './calculator.js';
+import calc from './calculator.js';
 
 let display = document.querySelector('.js_display');
 
 class Operations {
 	constructor() {	
-		this.operationsDisabled = false;
+		this.maxLength = MAX_LENGTH_DISPLAY;
 	}		
 
 	sendOperation(operation, resultPressed) {
@@ -77,7 +78,9 @@ class Operations {
 
 	_divide(resultPressed) {
 		if (this.valueForProgressive === 0 || parseFloat(this.display.innerHTML) === 0) {	
-			this.operationsDisabled = true;
+			console.log(calc.operationsDisabled);
+			calc.operationsDisabled = true;
+				console.log(calc.operationsDisabled);
 			disableButtons();
 			this.display.style.fontSize = STYLES.SMALL;
 			this.display.innerHTML = MESSAGES.DIVIDE_BY_ZERO;
@@ -104,7 +107,7 @@ class Operations {
 
 	_frac() {
 		if (parseFloat(this.display.innerHTML) === 0) {	
-			this.operationsDisabled = true;
+			calc.operationsDisabled = true;
 			disableButtons();
 			this.display.style.fontSize = STYLES.SMALL;
 			this.display.innerHTML = MESSAGES.DIVIDE_BY_ZERO;
@@ -124,7 +127,7 @@ class Operations {
 			disableButtons();
 			this.display.style.fontSize = STYLES.SMALL;
 			this.display.innerHTML =  MESSAGES.UNCORRECT_DATA;
-			this.operationsDisabled = true;
+			calc.operationsDisabled = true;
 
 			return;
 		}
@@ -153,7 +156,7 @@ class Operations {
 				this.display.innerHTML = 0;
 
 				return;
-			}	
+			}
 
 			return this.trimmer(temp);
 		}
@@ -161,10 +164,10 @@ class Operations {
 
 	trimmer(temp) {
 		temp = parseFloat(temp)
-		temp.toPrecision(6);
 		if (String(temp).length > this.maxLength) {
 			temp = temp.toPrecision(6);
 		}
+
 		return temp;
 	}
 
@@ -173,7 +176,7 @@ class Operations {
 			disableButtons();
 			this.display.style.fontSize = STYLES.SMALL;
 			this.display.innerHTML = MESSAGES.OVERFLOW;
-			this.operationsDisabled = true;
+			calc.operationsDisabled = true;
 
 			return false;
 		} else {			

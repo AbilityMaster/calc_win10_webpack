@@ -1,15 +1,11 @@
 import {MAX_WIDTH_DISPLAY, MAX_LENGTH_DISPLAY, NAME_FOR_DISPLAY, OPERATIONS, MESSAGES, STYLES} from './const.js';
-import {disableButtons, activateButtons} from './index.js';
+import {disableButtons, activateButtons} from './calculator.js';
+import calc from './calculator.js';
 
 
 class Display {
 	constructor() {
 		this.valueArray = [];
-		//this.display = display;
-		//this.smallDisplay = smallDisplay;
-		//this.hiddenDisplay = hiddenDisplay;
-		//this.arrowLeft = arrowLeft;
-		//this.arrowRight = arrowRight;
 		this.needNewValue = false;
 		this.maxLength = MAX_LENGTH_DISPLAY;
 	}
@@ -26,15 +22,12 @@ class Display {
 		this.arrowRight.style.visibility = 'hidden';
 		this.isEnteredNewValue = false;
 		this.isPressedSingleOperation = false;
-
 	}
 
 	numberPress(number) {
-
-
-		if (this.operationsDisabled) {
-			this.operationsDisabled = false;
-			this.clear();
+		if (calc.operationsDisabled) {
+			calc.operationsDisabled = false;
+			this.displayClear();
 			activateButtons();
 		}
 
@@ -74,19 +67,19 @@ class Display {
 
 	get template() {
 		return `
-				<div class="group-small-display js_group-small-display">
-			<div class="small-display__button small-display__button_left js_small-display__button_left"></div>
-			<div class="small-display">
-				<div class="small-display__block js_small-display__block"></div>
-				<div class="small-display__add js_small-display__add"></div>
-			</div>
-			<div class="small-display__button small-display__button_right js_small-display__button_right"></div>
+		<div class="group-small-display js_group-small-display">
+		<div class="small-display__button small-display__button_left js_small-display__button_left"></div>
+		<div class="small-display">
+		<div class="small-display__block js_small-display__block"></div>
+		<div class="small-display__add js_small-display__add"></div>
+		</div>
+		<div class="small-display__button small-display__button_right js_small-display__button_right"></div>
 		</div>
 		<div class="display js_display">0</div> `
 	}
 
 	addPoint() {
-		if (this.operationsDisabled) {
+		if (calc.operationsDisabled) {
 			return;
 		}
 
@@ -113,7 +106,7 @@ class Display {
 		if (this.display.innerHTML === MESSAGES.DIVIDE_BY_ZERO || this.display.innerHTML === MESSAGES.OVERFLOW || this.display.innerHTML === MESSAGES.UNCORRECT_DATA) {
 			this.smallDisplay.innerHTML = '';
 			this.display.style.fontSize = STYLES.NORMAL;
-			this.operationsDisabled = false;
+			calc.operationsDisabled = false;
 			this.display.innerHTML = '0';
 			activateButtons();
 
@@ -129,25 +122,40 @@ class Display {
 				if (!this.isPressedSingleOperation) {
 					this.data = this.smallDisplay.innerHTML;
 					this.dataWidth = this.smallDisplay.clientWidth;
+
 					if (operation === OPERATIONS.PERCENT) {
-						this.valueArray.push(this.percent());
+						this.valueArray.push(calc.operations.percent());
 						this.smallDisplay.innerHTML += `&nbsp;${this.valueArray[this.valueArray.length-1]}`;
 					} else {
 						this.valueArray.push(`${NAME_FOR_DISPLAY[operation]}(${this.display.innerHTML})`);
-						this.hiddenDisplay.innerHTML = `&nbsp;${this.valueArray[this.valueArray.length-1]}`;
-						this.addDisplayWidth();
+						this.hiddenDisplay.innerHTML = `&nbsp;${this.valueArray[this.valueArray.length-1]}&nbsp;`;
+
+						if ((this.dataWidth + this.hiddenDisplay.clientWidth) >= MAX_WIDTH_DISPLAY) {
+							this.arrowLeft.style.visibility = 'visible';
+							this.arrowRight.style.visibility = 'visible';
+							this.smallDisplay.style.left = '';
+							this.smallDisplay.style.width = this.dataWidth + this.hiddenDisplay.clientWidth;
+						}
+
 						this.smallDisplay.innerHTML += `&nbsp;${NAME_FOR_DISPLAY[operation]}(${this.display.innerHTML})&nbsp;`;
 					}
 				}
 				if (this.isPressedSingleOperation) {
 					if (operation ===  OPERATIONS.PERCENT) {
 						this.valueArray[this.valueArray.length-1] = this.percent();
-						this.smallDisplay.innerHTML = `${this.data} ${this.valueArray[this.valueArray.length - 1]}&nbsp;`;
+						this.smallDisplay.innerHTML = `${this.data}&nbsp;${this.valueArray[this.valueArray.length - 1]}&nbsp;`;
 					} else {
 						this.valueArray[this.valueArray.length-1] = `${NAME_FOR_DISPLAY[operation]}(${this.valueArray[this.valueArray.length - 1]})`;
 						this.hiddenDisplay.innerHTML = `&nbsp;${this.valueArray[this.valueArray.length-1]}&nbsp;`;
-						this.addDisplayWidth(); 
-						this.smallDisplay.innerHTML = `${this.data} ${this.valueArray[this.valueArray.length - 1]}&nbsp;`;
+
+						if ((this.dataWidth + this.hiddenDisplay.clientWidth) >= MAX_WIDTH_DISPLAY) {
+							this.arrowLeft.style.visibility = 'visible';
+							this.arrowRight.style.visibility = 'visible';
+							this.smallDisplay.style.left = '';
+							this.smallDisplay.style.width = this.dataWidth + this.hiddenDisplay.clientWidth;
+						}
+
+						this.smallDisplay.innerHTML = `${this.data}&nbsp;${this.valueArray[this.valueArray.length - 1]}&nbsp;`;
 					}
 				}
 
@@ -163,7 +171,12 @@ class Display {
 					this.valueArray.push(this.display.innerHTML);
 					this.valueArray.push(operation);
 					this.hiddenDisplay.innerHTML = `&nbsp;${this.valueArray[this.valueArray.length-2]} ${this.valueArray[this.valueArray.length-1]}`;
-					this.addDisplayWidth();
+					if ((this.smallDisplay.clientWidth + this.hiddenDisplay.clientWidth) >= MAX_WIDTH_DISPLAY) {
+						this.arrowLeft.style.visibility = 'visible';
+						this.arrowRight.style.visibility = 'visible';
+						this.smallDisplay.style.left = '';
+						this.smallDisplay.style.width = this.smallDisplay.clientWidth + this.hiddenDisplay.clientWidth;
+					}
 					this.smallDisplay.innerHTML += `&nbsp;${this.valueArray[this.valueArray.length-2]}`;
 					this.smallDisplay.innerHTML += `&nbsp;${this.valueArray[this.valueArray.length-1]}`;
 				} 
@@ -181,6 +194,7 @@ class Display {
 		if ((this.smallDisplay.clientWidth + this.hiddenDisplay.clientWidth) >= MAX_WIDTH_DISPLAY) {
 			this.arrowLeft.style.visibility = 'visible';
 			this.arrowRight.style.visibility = 'visible';
+			this.smallDisplay.style.left = '';
 			this.smallDisplay.style.width = this.smallDisplay.clientWidth + this.hiddenDisplay.clientWidth;
 		}
 	}
