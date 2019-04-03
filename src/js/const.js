@@ -35,7 +35,24 @@ export const OPERATIONS = {
 	NEGATE: 'NEGATE',
 	PERCENT: 'PERCENT',
 	LABEL_SINGLE_OPERATION: 'single',
-	LABEL_DEFAULT_OPERATION: 'default'
+	LABEL_DEFAULT_OPERATION: 'default',
+	ADD: {
+		PERCENT: '%',
+		SQRT: '√',
+		POW: 'POW',
+		FRAC: 'frac',
+		CLEAR: 'clear',
+		BACKSPACE: 'back',
+		REVERSE: 'reverse',
+		POINT: 'point',
+		RESULT: 'result',
+		MCLEAR: 'maclear',
+		MREAD: 'mread',
+		MPLUS: 'mplus',
+		MMINUS: 'mminus',
+		MSAVE: 'msave',
+		MEMORY: 'memory'
+	}
 };
 
 

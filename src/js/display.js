@@ -8,6 +8,7 @@ class Display {
 		this.valueArray = [];
 		this.needNewValue = false;
 		this.maxLength = MAX_LENGTH_DISPLAY;
+		this.isPressedSingleOperation = false;
 	}
 	
 	displayClear() {
@@ -142,7 +143,7 @@ class Display {
 				}
 				if (this.isPressedSingleOperation) {
 					if (operation ===  OPERATIONS.PERCENT) {
-						this.valueArray[this.valueArray.length-1] = this.percent();
+						this.valueArray[this.valueArray.length-1] = calc.operations.percent();
 						this.smallDisplay.innerHTML = `${this.data}&nbsp;${this.valueArray[this.valueArray.length - 1]}&nbsp;`;
 					} else {
 						this.valueArray[this.valueArray.length-1] = `${NAME_FOR_DISPLAY[operation]}(${this.valueArray[this.valueArray.length - 1]})`;
