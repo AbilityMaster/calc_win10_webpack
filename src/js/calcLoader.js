@@ -1,17 +1,6 @@
 import {CALC_MODES, MESSAGES} from './const';
 import calc from './calculator';
 
-let optionMenu = document.querySelector('.js_option-menu'),
-buttonArea = document.querySelector('.js_button-area'),
-groupSmallDisplay = document.querySelector('.js_group-small-display'),
-openCalc = document.querySelector('.js_open-calculator'),
-display = document.querySelector('.js_display'),
-smallDisplay = document.querySelector('.js_small-display__block'),
-buttonMemory_Clear = document.querySelector('.js_calc-add__button_memory-clear'),
-buttonMemory_Read = document.querySelector('.js_calc-add__button_read'),
-buttonMemory_Open = document.querySelector('.js_calc-add__button_memory'),
-calculator = document.querySelector('.js_calculator');
-
 class CalcLoader {
 	constructor() {
 		this.defaultSettings = {

@@ -3,7 +3,7 @@ import Operations from './operations';
 import Memory from './memory';
 import Storage from './localStorage';
 import CalcLoader from './calcLoader';
-import {MAX_WIDTH_DISPLAY, MESSAGES, STYLES, OPERATIONS, NAME_FOR_DISPLAY, CALC_MODES} from './const';
+import {MAX_WIDTH_DISPLAY, STYLES, OPERATIONS, CALC_MODES} from './const';
 
 class Calc {
 	constructor(tag) {
@@ -193,7 +193,6 @@ class Calc {
 		buttonOpenCalculator = document.querySelector('.js_open-calculator'),
 		calculator = document.querySelector('.js_calculator'),
 		forDrag = document.querySelector('.js_index-menu__title'),
-		buttonArea = document.querySelector('.js_button-area'),
 		memoryBoard = document.querySelector('.js_memory'),
 		buttonMemoryClear = document.querySelector('.js_calc-add__button_memory-clear'),
 		buttonMemoryRead = document.querySelector('.js_calc-add__button_read'),
@@ -292,6 +291,7 @@ class Calc {
 							this.operation(event.target.dataset.operation);
 							this.disp.smallDisplay.style.removeProperty('left');
 							this.disp.smallDisplay.style.right = 0;
+							break;
 						}
 						case 'add': {
 							this.functionsEvent.addFunctionSwitcher();
