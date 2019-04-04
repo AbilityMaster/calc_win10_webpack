@@ -1,6 +1,6 @@
-import {MAX_WIDTH_DISPLAY, MAX_LENGTH_DISPLAY, NAME_FOR_DISPLAY, OPERATIONS, MESSAGES, STYLES} from './const.js';
-import {disableButtons, activateButtons} from './calculator.js';
-import calc from './calculator.js';
+import {MAX_WIDTH_DISPLAY, MAX_LENGTH_DISPLAY, NAME_FOR_DISPLAY, OPERATIONS, MESSAGES, STYLES} from './const';
+import {disableButtons, activateButtons} from './calculator';
+import calc from './calculator';
 
 
 class Display {

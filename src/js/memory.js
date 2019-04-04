@@ -1,4 +1,4 @@
-import calc from './calculator.js'
+import calc from './calculator';
 
 class Memory {
 	constructor() {

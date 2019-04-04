@@ -1,5 +1,5 @@
-import {CALC_MODES, MESSAGES} from './const.js'
-import calc from './calculator.js'
+import {CALC_MODES, MESSAGES} from './const';
+import calc from './calculator';
 
 let optionMenu = document.querySelector('.js_option-menu'),
 buttonArea = document.querySelector('.js_button-area'),

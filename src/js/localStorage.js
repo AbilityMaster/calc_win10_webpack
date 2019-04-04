@@ -1,4 +1,4 @@
-import {VERSION} from './const.js';
+import {VERSION} from './const';
 
 class lc {
 	constructor(version) {

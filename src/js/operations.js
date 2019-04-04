@@ -1,6 +1,6 @@
-import {MESSAGES, STYLES, OPERATIONS, MAX_LENGTH_DISPLAY} from './const.js';
-import {disableButtons, activateButtons} from './calculator.js';
-import calc from './calculator.js';
+import {MESSAGES, STYLES, OPERATIONS, MAX_LENGTH_DISPLAY} from './const';
+import {disableButtons, activateButtons} from './calculator';
+import calc from './calculator';
 
 let display = document.querySelector('.js_display');
 

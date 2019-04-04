@@ -1,9 +1,9 @@
-import Display from './display.js';
-import Operations from './operations.js';
-import Memory from './memory.js';
-import Storage from './localStorage.js';
-import CalcLoader from './calcLoader.js';
-import {MAX_WIDTH_DISPLAY, MESSAGES, STYLES, OPERATIONS, NAME_FOR_DISPLAY, CALC_MODES} from './const.js';
+import Display from './display';
+import Operations from './operations';
+import Memory from './memory';
+import Storage from './localStorage';
+import CalcLoader from './calcLoader';
+import {MAX_WIDTH_DISPLAY, MESSAGES, STYLES, OPERATIONS, NAME_FOR_DISPLAY, CALC_MODES} from './const';
 
 class Calc {
 	constructor(tag) {
