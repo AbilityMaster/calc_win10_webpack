@@ -33,6 +33,7 @@ class Calc {
 		this.isEnteredNewValue = false;	
 		this.typeOperation = '';		
 		this.currentValue = null;
+		this.operations.currentValue = null;
 	}
 
 	singleOperation(operation) {
