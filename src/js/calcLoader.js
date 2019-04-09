@@ -78,8 +78,6 @@ class CalcLoader {
 				calculator.style.height = '540px';
 				calculator.style.left = this.defaultSettings.x;
 				calculator.style.top = this.defaultSettings.y;		
-				
-				console.log(calculator);
 				calculator.style.display = 'none';
 				break;
 			}
