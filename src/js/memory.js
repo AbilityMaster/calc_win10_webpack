@@ -16,19 +16,19 @@ class Memory {
 
 		let memory__block = document.createElement('div');
 
-		memory__block.className = "memory__block";
+		memory__block.className = 'memory__block';
 		memory__block.setAttribute('data-position', this.positionAttribute);
 		this.memory.insertBefore(memory__block, this.memory.children[0]);
 
 		let memoryValue = document.createElement('div');
 
-		memoryValue.className = "memory__data";
+		memoryValue.className = 'memory__data';
 		memoryValue.innerHTML = String(data);
 		memory__block.appendChild(memoryValue);
 
 		let btn_mc = document.createElement('div');
 
-		btn_mc.className = "memory__btn memory__btn_mc";
+		btn_mc.className = 'memory__btn memory__btn_mc';
 		btn_mc.innerHTML = 'MC';
 		memory__block.appendChild(btn_mc);
 		btn_mc.addEventListener('click', (event) => {
@@ -39,7 +39,7 @@ class Memory {
 
 		let btn_m_plus = document.createElement('div');
 
-		btn_m_plus.className = "memory__btn memory__btn_m_plus";
+		btn_m_plus.className = 'memory__btn memory__btn_m_plus';
 		btn_m_plus.innerHTML = 'M+';
 		memory__block.appendChild(btn_m_plus);
 
@@ -56,7 +56,7 @@ class Memory {
 
 		let btn_m_minus = document.createElement('div');
 
-		btn_m_minus.className = "memory__btn memory__btn_m_minus";
+		btn_m_minus.className = 'memory__btn memory__btn_m_minus';
 		btn_m_minus.innerHTML = 'M-';
 		memory__block.appendChild(btn_m_minus);
 

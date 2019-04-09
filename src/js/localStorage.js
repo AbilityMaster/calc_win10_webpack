@@ -1,7 +1,7 @@
 import {VERSION} from './const';
 
 class lc {
-	constructor(version) {
+	constructor() {
 		this.key = VERSION;
 	}
 
@@ -11,7 +11,7 @@ class lc {
 		if (temp) {
 			for (let key in temp) {
 				if (obj[key]) {
-					temp[key] = obj[key]
+					temp[key] = obj[key];
 				}
 			}
 			for (let key in obj) {

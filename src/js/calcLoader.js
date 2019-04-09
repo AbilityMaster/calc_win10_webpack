@@ -28,13 +28,13 @@ class CalcLoader {
 		
 		if (storage.isActivatedMemoryButtons === true) {
 			calc.memory.isActivatedMemoryButtons = true;
-			buttonMemory_Read.classList.remove("calc-add__button_disabled");
-			buttonMemory_Clear.classList.remove("calc-add__button_disabled");
-			buttonMemory_Open.classList.remove("calc-add__button_disabled");
+			buttonMemory_Read.classList.remove('calc-add__button_disabled');
+			buttonMemory_Clear.classList.remove('calc-add__button_disabled');
+			buttonMemory_Open.classList.remove('calc-add__button_disabled');
 		} else {
-			buttonMemory_Read.classList.add("calc-add__button_disabled");
-			buttonMemory_Clear.classList.add("calc-add__button_disabled");
-			buttonMemory_Open.classList.add("calc-add__button_disabled");
+			buttonMemory_Read.classList.add('calc-add__button_disabled');
+			buttonMemory_Clear.classList.add('calc-add__button_disabled');
+			buttonMemory_Open.classList.add('calc-add__button_disabled');
 		}
 		
 		calculator.style.left = storage.x ? storage.x : this.defaultSettings.x;
@@ -78,6 +78,8 @@ class CalcLoader {
 				calculator.style.height = '540px';
 				calculator.style.left = this.defaultSettings.x;
 				calculator.style.top = this.defaultSettings.y;		
+				
+				console.log(calculator);
 				calculator.style.display = 'none';
 				break;
 			}

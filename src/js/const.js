@@ -7,7 +7,7 @@ export const CALC_MODES = {
 	MINIMIZED: 'minimized',
 	CLOSED: 'closed',
 	DEFAULT: 'default'
-}
+};
 
 export const MESSAGES = {
 	OVERFLOW: 'Переполнение',

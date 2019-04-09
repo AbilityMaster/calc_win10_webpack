@@ -6,7 +6,7 @@ import CalcLoader from './calcLoader';
 import {MAX_WIDTH_DISPLAY, STYLES, OPERATIONS, CALC_MODES} from './const';
 
 class Calc {
-	constructor(tag) {
+	constructor() {
 		this.disp = new Display();		
 		this.operations = new Operations();
 		this.memory = new Memory();
@@ -16,7 +16,8 @@ class Calc {
 		this.isNeedValueForProgressive = false;
 		this.isEnteredNewValue = false;
 		this.typeOperation = '';
-		this.currentValue = null
+		this.currentValue = null;
+		this.a = '';
 	}
 
 	clear() {
@@ -31,7 +32,8 @@ class Calc {
 		this.isOperationPressed = false;		
 		this.isNeedValueForProgressive = false,
 		this.isEnteredNewValue = false;	
-		this.typeOperation = '';		
+		this.typeOperation = '';
+		this.a = '';		
 		this.currentValue = null;
 		this.operations.currentValue = null;
 	}
@@ -171,7 +173,7 @@ class Calc {
 					<div class="memory js_memory">
 					</div>
 				</div>
-			</div> `
+			</div> `;
 
 		tag.innerHTML = data;		
 		this.calcLoader = new CalcLoader();
@@ -202,8 +204,7 @@ class Calc {
 		buttonMemorySave = document.querySelector('.js_calc-add__button_ms'),
 		buttonMemoryOpen = document.querySelector('.js_calc-add__button_memory'),
 		buttonLeft = document.querySelector('.small-display__button_left'),
-		buttonRight = document.querySelector('.small-display__button_right'),
-		buttonaddPoint = document.querySelector('.js_calc__button_add-point'),		
+		buttonRight = document.querySelector('.small-display__button_right'),	
 		buttons = document.querySelector('.js_button-area');	
 
 		let sendToLocalStorage = {}; 
@@ -301,7 +302,7 @@ class Calc {
 					}
 				}
 			},
-			calcPosOnResize: (e) => {
+			calcPosOnResize: () => {
 				if ((calculator.offsetLeft + calculator.clientWidth) > window.innerWidth) {
 					sendToLocalStorage.x = ( window.innerWidth - calculator.clientWidth ) / window.innerWidth * 100 + '%';
 					calculator.style.left = sendToLocalStorage.x;
@@ -350,7 +351,7 @@ class Calc {
 					}
 
 					this.storage.dataset = sendToLocalStorage;
-				}
+				};
 
 				calculator.style.position = 'absolute';
 				calculator.style.bottom = 'auto';
@@ -439,9 +440,9 @@ class Calc {
 				sendToLocalStorage.isActivatedMemoryButtons = this.memory.isActivatedMemoryButtons;
 				this.storage.dataset = sendToLocalStorage;
 
-				buttonMemoryRead.classList.remove("calc-add__button_disabled");
-				buttonMemoryClear.classList.remove("calc-add__button_disabled");
-				buttonMemoryOpen.classList.remove("calc-add__button_disabled");
+				buttonMemoryRead.classList.remove('calc-add__button_disabled');
+				buttonMemoryClear.classList.remove('calc-add__button_disabled');
+				buttonMemoryOpen.classList.remove('calc-add__button_disabled');
 
 				this.memory.addToMemory(this.disp.text, this.disp.display);
 
@@ -453,18 +454,18 @@ class Calc {
 					return;
 				}
 
-				memoryBoard.classList.toggle("visibility");
-				buttonMemoryClear.classList.toggle("calc-add__button_disabled");
-				buttonMemoryRead.classList.toggle("calc-add__button_disabled");
-				buttonMemoryPlus.classList.toggle("calc-add__button_disabled");
-				buttonMemoryMinus.classList.toggle("calc-add__button_disabled");
-				buttonMemorySave.classList.toggle("calc-add__button_disabled");
+				memoryBoard.classList.toggle('visibility');
+				buttonMemoryClear.classList.toggle('calc-add__button_disabled');
+				buttonMemoryRead.classList.toggle('calc-add__button_disabled');
+				buttonMemoryPlus.classList.toggle('calc-add__button_disabled');
+				buttonMemoryMinus.classList.toggle('calc-add__button_disabled');
+				buttonMemorySave.classList.toggle('calc-add__button_disabled');
 
 				if (this.memory.isEmpty()) {
 					this.memory.isActivatedMemoryButtons = false;
-					buttonMemoryRead.classList.add("calc-add__button_disabled");
-					buttonMemoryClear.classList.add("calc-add__button_disabled");
-					buttonMemoryOpen.classList.add("calc-add__button_disabled");
+					buttonMemoryRead.classList.add('calc-add__button_disabled');
+					buttonMemoryClear.classList.add('calc-add__button_disabled');
+					buttonMemoryOpen.classList.add('calc-add__button_disabled');
 					this.memory.isActivatedMemoryButtons = false;
 					sendToLocalStorage.isActivatedMemoryButtons = '0';
 					this.memory.memoryValues = {};
@@ -490,9 +491,9 @@ class Calc {
 				sendToLocalStorage.isActivatedMemoryButtons = this.memory.isActivatedMemoryButtons;
 				this.storage.dataset = sendToLocalStorage;
 
-				buttonMemoryRead.classList.remove("calc-add__button_disabled");
-				buttonMemoryClear.classList.remove("calc-add__button_disabled");
-				buttonMemoryOpen.classList.remove("calc-add__button_disabled");
+				buttonMemoryRead.classList.remove('calc-add__button_disabled');
+				buttonMemoryClear.classList.remove('calc-add__button_disabled');
+				buttonMemoryOpen.classList.remove('calc-add__button_disabled');
 
 				if (this.memory.isEmpty()) {
 					this.memory.addToMemory(this.disp.text, this.disp.display);
@@ -518,9 +519,9 @@ class Calc {
 				sendToLocalStorage.isActivatedMemoryButtons = this.memory.isActivatedMemoryButtons;
 				this.storage.dataset = sendToLocalStorage;
 
-				buttonMemoryRead.classList.remove("calc-add__button_disabled");
-				buttonMemoryClear.classList.remove("calc-add__button_disabled");
-				buttonMemoryOpen.classList.remove("calc-add__button_disabled");
+				buttonMemoryRead.classList.remove('calc-add__button_disabled');
+				buttonMemoryClear.classList.remove('calc-add__button_disabled');
+				buttonMemoryOpen.classList.remove('calc-add__button_disabled');
 
 				if (this.memory.isEmpty()) {
 					this.memory.addToMemory(this.disp.text);
@@ -555,9 +556,9 @@ class Calc {
 				this.memory.isActivatedMemoryButtons = false;
 				sendToLocalStorage.isActivatedMemoryButtons = '0';
 
-				buttonMemoryRead.classList.add("calc-add__button_disabled");
-				buttonMemoryClear.classList.add("calc-add__button_disabled");
-				buttonMemoryOpen.classList.add("calc-add__button_disabled");
+				buttonMemoryRead.classList.add('calc-add__button_disabled');
+				buttonMemoryClear.classList.add('calc-add__button_disabled');
+				buttonMemoryOpen.classList.add('calc-add__button_disabled');
 				memoryBoard.innerHTML = '';
 
 				this.memory.memoryValues = {};
@@ -577,12 +578,13 @@ class Calc {
 				this.calcLoader.manage(CALC_MODES.STANDART);
 			},
 			buttonClose: () => {
-				this.calcLoader.manage(CALC_MODES.CLOSED)		
+				this.calcLoader.manage(CALC_MODES.CLOSED);		
 				sendToLocalStorage.mode = CALC_MODES.CLOSED;
 				this.storage.dataset = sendToLocalStorage;				
 				this.sendToRecycle();
 			},
 			buttonOpenCalculator: () => {
+				this.template(this.tagForInsert);
 				this.calcLoader.manage(CALC_MODES.DEFAULT);
 				sendToLocalStorage.mode = CALC_MODES.DEFAULT;		
 				this.storage.dataset = sendToLocalStorage;	
@@ -592,7 +594,7 @@ class Calc {
 		buttons.addEventListener('click', this.functionsEvent.buttonsEventSwitcher);
 		window.addEventListener('resize', this.functionsEvent.calcPosOnResize);
 		forDrag.addEventListener('mousedown', this.functionsEvent.calculatorDragAndDrop);
-		calculator.addEventListener('dragstart', this.functionsEvent.calculatorDragStart)
+		calculator.addEventListener('dragstart', this.functionsEvent.calculatorDragStart);
 		buttonTrey.addEventListener('click', this.functionsEvent.buttonTrey);
 		buttonOpen.addEventListener('click', this.functionsEvent.buttonOpen);
 		buttonClose.addEventListener('click', this.functionsEvent.buttonClose);
@@ -605,7 +607,6 @@ class Calc {
 		let	buttonOpen = document.querySelector('.js_index-menu__button_open'),
 		buttonTrey = document.querySelector('.js_index-menu__button_trey'),
 		buttonClose = document.querySelector('.js_index-menu__button_close'),
-		buttonOpenCalculator = document.querySelector('.js_open-calculator'),
 		calculator = document.querySelector('.js_calculator'),
 		forDrag = document.querySelector('.js_index-menu__title'),
 		buttonLeft = document.querySelector('.small-display__button_left'),
@@ -615,11 +616,10 @@ class Calc {
 		buttons.removeEventListener('click', this.functionsEvent.buttonsEventSwitcher);
 		window.removeEventListener('resize', this.functionsEvent.calcPosOnResize);
 		forDrag.removeEventListener('mousedown', this.functionsEvent.calculatorDragAndDrop);
-		calculator.removeEventListener('dragstart', this.functionsEvent.calculatorDragStart)
+		calculator.removeEventListener('dragstart', this.functionsEvent.calculatorDragStart);
 		buttonTrey.removeEventListener('click', this.functionsEvent.buttonTrey);
 		buttonOpen.removeEventListener('click', this.functionsEvent.buttonOpen);
 		buttonClose.removeEventListener('click', this.functionsEvent.buttonClose);
-		buttonOpenCalculator.removeEventListener('click', this.functionsEvent.buttonOpenCalculator);
 		buttonLeft.removeEventListener('click', this.functionsEvent.buttonLeft);
 		buttonRight.removeEventListener('click', this.functionsEvent.buttonRight);
 
