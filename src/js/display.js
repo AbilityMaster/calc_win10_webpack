@@ -62,7 +62,7 @@ class Display {
   }
 
   get text() {
-    return this.display.innerHTML;
+    return parseFloat(this.display.innerHTML);
   }
 
   get template() {
