@@ -4,8 +4,8 @@ let CopyPlugin = require('copy-webpack-plugin');
 
 let conf = {
 	entry: [
-	'./src/js/index.js',
-	'./src/scss/st.scss'
+		'./src/js/index.js',
+		'./src/scss/st.scss'
 	],
 	output: {
 		path: path.resolve(__dirname, './dist'),
@@ -19,7 +19,13 @@ let conf = {
 		rules: [
 			{
 				test: /\.js$/,
+				exclude: /node_modules/,
 				loader: 'babel-loader',
+				options: {
+					presets: [{
+							'plugins': ['@babel/plugin-proposal-class-properties']
+						}]
+				}
 			},
 			{
 				test: /\.scss$/,
@@ -27,21 +33,21 @@ let conf = {
 				use: ExtractTextPlugin.extract({
 					//fallback: "style-loader",
 					use: [{
-							loader:"css-loader",
-							options: {
-								url: false
-							}
-						}, {
-							loader:"sass-loader"
-						}]
-				})			
+						loader: "css-loader",
+						options: {
+							url: false
+						}
+					}, {
+						loader: "sass-loader"
+					}]
+				})
 			},
 		]
 	},
 	plugins: [
 		new CopyPlugin([
-      { from: './src/img', to: './img' },
-    ]),    
+			{ from: './src/img', to: './img' },
+		]),
 		new ExtractTextPlugin({
 			filename: "./css/st.css",
 			allChunks: true
