@@ -3,7 +3,7 @@ import calc from './calculator';
 
 
 if (calc.storage.dataset.mode === 'closed') {
-    calc.manage('closed');
+    //calc.manage('closed');
     calc.init(document.querySelector('.root'));
 }
 
