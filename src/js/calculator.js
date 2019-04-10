@@ -30,11 +30,9 @@ class Calc {
 		this.isResultPressed = false;
 		this.isOperationPressed = false;
 		this.isNeedValueForProgressive = false,
-			this.isEnteredNewValue = false;
+		this.isEnteredNewValue = false;
 		this.typeOperation = '';
-		this.a = '';
 		this.currentValue = null;
-		this.operations.currentValue = null;
 	}
 
 	trimmer(temp) {
@@ -59,6 +57,12 @@ class Calc {
 		}
 	}
 
+	sendResult(result) {
+		if (this.checkForFinite(result)) {
+			this.disp.text = this.trimmer(result);
+		}
+	}
+
 	singleOperation(operation) {
 		if (this.operationsDisabled) {
 			return;
@@ -68,6 +72,10 @@ class Calc {
 			return;
 		}
 
+		
+		this.disp.smallDisplay.style.removeProperty('left');
+		this.disp.smallDisplay.style.right = 0;
+
 		this.disp.sendToStatusDisplay(OPERATIONS.LABEL_SINGLE_OPERATION, operation);
 		this.disp.isPressedSingleOperation = true;
 		this.disp.needNewValue = true;
@@ -76,9 +84,7 @@ class Calc {
 
 		if (operation === OPERATIONS.PERCENT) {
 			let result = this.operations.percent(this.currentValue, this.disp.text);
-			if (this.checkForFinite(result)) {
-				this.disp.text = this.trimmer(result);
-			}
+			this.sendResult(result);
 
 			return;
 		}
@@ -87,12 +93,8 @@ class Calc {
 			this.currentValue = this.disp.text;
 		}
 
-
-		let result = this.operations.sendOperation(operation, this.currentValue);
-		this.currentValue = result;
-		if (this.checkForFinite(result)) {
-			this.disp.text = this.trimmer(this.currentValue);
-		}
+		let result = this.operations.sendOperation(operation, this.disp.text);
+		this.sendResult(result);
 	}
 
 	result() {
@@ -102,7 +104,6 @@ class Calc {
 
 		this.disp.smallDisplay.innerHTML = '';
 		this.isResultPressed = true;
-		this.isOperationPressed = false;
 		this.isEnteredNewValue = this.disp.isEnteredNewValue = true;
 
 		if (this.isNeedValueForProgressive) {
@@ -110,12 +111,12 @@ class Calc {
 			this.isNeedValueForProgressive = false;
 		}
 
-		if ((this.isOperationPressed || this.isResultPressed) && this.currentValue !== undefined) {
+		if (this.isResultPressed && this.currentValue !== null) {
 			let result = this.operations.sendOperation(this.typeOperation, this.currentValue, this.valueForProgressive);
-			if (this.checkForFinite(result)) {
-				this.currentValue = this.disp.text = this.trimmer(result);
-			}
+			this.sendResult(result);
+			this.currentValue = this.disp.text;
 		}
+		this.isOperationPressed = false;
 
 	}
 
@@ -181,11 +182,6 @@ class Calc {
 						this.disp.text = this.currentValue = this.trimmer(result);
 					}
 				}
-				/* */
-				//this.currentValue = this.disp.text;
-				/* */
-				//console.log(this.currentValue);
-				//this.currentValue = this.disp.text = this.operations.sendOperation(this.typeOperation, this.isResultPressed, this.currentValue, this.valueForProgressive, this.disp.text);
 				this.isEnteredNewValue = this.disp.isEnteredNewValue = false;
 			}
 			this.typeOperation = operation;
@@ -567,34 +563,24 @@ class Calc {
 		this.disp.backspace();
 	}
 
-	buttonReverse = () => {
-		this.disp.smallDisplay.style.removeProperty('left');
-		this.disp.smallDisplay.style.right = 0;
-		this.singleOperation('NEGATE');
+	buttonReverse = () => {		
+		this.singleOperation(OPERATIONS.NEGATE);
 	}
 
 	buttonPow = () => {
-		this.disp.smallDisplay.style.removeProperty('left');
-		this.disp.smallDisplay.style.right = 0;
-		this.singleOperation('POW');
+		this.singleOperation(OPERATIONS.POW);
 	}
 
 	buttonFrac = () => {
-		this.singleOperation('FRAC');
-		this.disp.smallDisplay.style.removeProperty('left');
-		this.disp.smallDisplay.style.right = 0;
+		this.singleOperation(OPERATIONS.FRAC);
 	}
 
 	buttonSqrt = () => {
-		this.singleOperation('SQRT');
-		this.disp.smallDisplay.style.removeProperty('left');
-		this.disp.smallDisplay.style.right = 0;
+		this.singleOperation(OPERATIONS.SQRT);
 	}
 
 	buttonPercent = () => {
-		this.singleOperation('PERCENT');
-		this.disp.smallDisplay.style.removeProperty('left');
-		this.disp.smallDisplay.style.right = 0;
+		this.singleOperation(OPERATIONS.PERCENT);
 	}
 
 	buttonLeft = () => {

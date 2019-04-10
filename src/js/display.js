@@ -30,12 +30,6 @@ class Display {
       calc.activateButtons();
     }
 
-    this.valueArray = [];    
-    this.smallDisplay.innerHTML = '';
-    this.smallDisplay.style.width = '';
-    this.hiddenDisplay.innerHTML = '';
-    this.hiddenDisplay.style.width = '';
-    calc.currentValue = null;
     this.isEnteredNewValue = true;
     this.display.style.fontSize = STYLES.NORMAL;
 
@@ -65,7 +59,7 @@ class Display {
   }
 
   set text(data) {
-    if (parseFloat(data) >= 1) {
+    if (String(data).indexOf(',') !== -1) {
       let formatter = new Intl.NumberFormat('ru');    
       this.display.innerHTML = formatter.format(data);
 
@@ -185,7 +179,7 @@ class Display {
       this.dataWidth = this.smallDisplay.clientWidth;
 
       if (operation === OPERATIONS.PERCENT) {
-        this.valueArray.push(calc.operations.percent());
+        this.valueArray.push(calc.operations.percent(calc.currentValue, this.text));
         this.smallDisplay.innerHTML += `&nbsp;${this.valueArray[this.valueArray.length - 1]}`;
       } else {
         this.valueArray.push(`${NAME_FOR_DISPLAY[operation]}(${this.text})`);
@@ -196,7 +190,7 @@ class Display {
     }
     if (this.isPressedSingleOperation) {
       if (operation === OPERATIONS.PERCENT) {
-        this.valueArray[this.valueArray.length - 1] = calc.operations.percent();
+        this.valueArray[this.valueArray.length - 1] = calc.operations.percent(calc.currentValue, this.text);
         this.smallDisplay.innerHTML = `${this.data}&nbsp;${this.valueArray[this.valueArray.length - 1]}&nbsp;`;
       } else {
         this.valueArray[this.valueArray.length - 1] = `${NAME_FOR_DISPLAY[operation]}(${this.valueArray[this.valueArray.length - 1]})`;

@@ -1,4 +1,5 @@
 import calc from './calculator';
+import { OPERATIONS } from './const';
 
 class Memory {
 	constructor() {
@@ -16,7 +17,7 @@ class Memory {
 
 		let memory = document.querySelector('.js_memory');
 		let memoryBlock = document.createElement('div');
-		
+
 		memoryBlock.className = 'memory__block';
 		memoryBlock.setAttribute('data-position', this.positionAttribute);
 		memory.insertBefore(memoryBlock, memory.children[0]);
@@ -35,7 +36,7 @@ class Memory {
 		btnMc.addEventListener('click', (event) => {
 			this.clear(event.target.parentElement);
 			this.storageMemoryData.memoryValues = this.memoryValues;
-			calc.localStorage.dataset = this.storageMemoryData;			
+			calc.localStorage.dataset = this.storageMemoryData;
 		});
 
 		let btnMemoryPlus = document.createElement('div');
@@ -45,14 +46,7 @@ class Memory {
 		memoryBlock.appendChild(btnMemoryPlus);
 
 		btnMemoryPlus.addEventListener('click', (event) => {
-			let value = event.target.parentElement.childNodes[0].innerHTML;
-			let displayValue = calc.disp.text;
-			let position = event.target.parentElement.dataset.position;
-
-			this.plus(value, displayValue, position);
-			this.storageMemoryData.memoryValues = this.memoryValues;
-			calc.localStorage.dataset = this.storageMemoryData;
-			event.target.parentElement.childNodes[0].innerHTML = this.memoryValues[position];
+			this.clickBtn(OPERATIONS.PLUS, event);
 		});
 
 		let btnMemoryMinus = document.createElement('div');
@@ -62,17 +56,29 @@ class Memory {
 		memoryBlock.appendChild(btnMemoryMinus);
 
 		btnMemoryMinus.addEventListener('click', (event) => {
-			let value = event.target.parentElement.childNodes[0].innerHTML;
-			let displayValue = calc.disp.text;
-			let position = event.target.parentElement.dataset.position;
-
-			this.minus(value, displayValue, position);
-			this.storageMemoryData.memoryValues = this.memoryValues;
-			calc.localStorage.dataset = this.storageMemoryData;
-			event.target.parentElement.childNodes[0].innerHTML = this.memoryValues[position];
+			this.clickBtn(OPERATIONS.MINUS, event);
 		});
 
 		this.positionAttribute++;
+	}
+
+	clickBtn(type, event) {
+		let value = event.target.parentElement.childNodes[0].innerHTML;
+		let displayValue = calc.disp.text;
+		let position = event.target.parentElement.dataset.position;
+		switch (type) {
+			case OPERATIONS.MINUS: {
+				this.minus(value, displayValue, position);
+				break;
+			}
+			case OPERATIONS.PLUS: {
+				this.plus(value, displayValue, position);
+				break;
+			}
+		}
+		this.storageMemoryData.memoryValues = this.memoryValues;
+		calc.localStorage.dataset = this.storageMemoryData;
+		event.target.parentElement.childNodes[0].innerHTML = this.memoryValues[position];
 	}
 
 
@@ -90,7 +96,7 @@ class Memory {
 	}
 
 	isEmpty() {
-		return (Object.keys(this.memoryValues).length === 0);		
+		return (Object.keys(this.memoryValues).length === 0);
 	}
 }
 
