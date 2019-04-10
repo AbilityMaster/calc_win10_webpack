@@ -1,6 +1,6 @@
 import {MAX_WIDTH_DISPLAY, MAX_LENGTH_DISPLAY, NAME_FOR_DISPLAY, OPERATIONS, MESSAGES, STYLES} from './const';
-import { activateButtons } from './calculator';
 import calc from './calculator';
+import { strict } from 'assert';
 
 class Display {
   constructor() {
@@ -28,7 +28,7 @@ class Display {
     if (calc.operationsDisabled) {
       calc.operationsDisabled = false;
       this.displayClear();
-      activateButtons();
+      calc.activateButtons();
     }
 
 
@@ -50,19 +50,26 @@ class Display {
       this.resultPressed = false;
       this.isPressedSingleOperation = false;
     } else {
-      if (this.display.innerHTML.length > this.maxLength) {
+      if (String(this.text).length >= this.maxLength) {
         return;
       }
-      this.display.innerHTML += number;
+      let a = this.text;
+      a += number;
+      this.text = a;
+
     }
   }
 
   set text(data) {
-    this.display.innerHTML = data;
+    let formatter = new Intl.NumberFormat('ru');    
+    this.display.innerHTML = formatter.format(data);
   }
 
   get text() {
-    return parseFloat(this.display.innerHTML);
+    let data = this.display.innerHTML;
+    data = data.replace(/\&nbsp\;/g,"\xa0");
+    data = data.replace(/\s+/g, '');
+    return parseFloat(data);
   }
 
   get template() {
@@ -96,24 +103,24 @@ class Display {
   }
 
   backspace() {
-    let length = this.display.innerHTML.length;
-    if (length === 2 && this.display.innerHTML[0] === '-' || length === 1) {
-      this.display.innerHTML = '0';
+    let length = String(this.text).length;
+    if (length === 2 && String(this.text)[0] === '-' || length === 1) {
+      this.text = '0';
 
       return;
     }
 
-    if (this.display.innerHTML === MESSAGES.DIVIDE_BY_ZERO || this.display.innerHTML === MESSAGES.OVERFLOW || this.display.innerHTML === MESSAGES.UNCORRECT_DATA) {
+    if (this.text === MESSAGES.DIVIDE_BY_ZERO || this.text === MESSAGES.OVERFLOW || this.text === MESSAGES.UNCORRECT_DATA) {
       this.smallDisplay.innerHTML = '';
       this.display.style.fontSize = STYLES.NORMAL;
       calc.operationsDisabled = false;
-      this.display.innerHTML = '0';
-      activateButtons();
+      this.text = '0';
+      calc.activateButtons();
 
       return;
     }
 
-    this.display.innerHTML = this.display.innerHTML.slice(0,length-1);	
+    this.text = String(this.text).slice(0,length-1);	
   }
 
   sendToStatusDisplay(typeOperation, operation) {
@@ -127,7 +134,7 @@ class Display {
             this.valueArray.push(calc.operations.percent());
             this.smallDisplay.innerHTML += `&nbsp;${this.valueArray[this.valueArray.length-1]}`;
           } else {
-            this.valueArray.push(`${NAME_FOR_DISPLAY[operation]}(${this.display.innerHTML})`);
+            this.valueArray.push(`${NAME_FOR_DISPLAY[operation]}(${this.text})`);
             this.hiddenDisplay.innerHTML = `&nbsp;${this.valueArray[this.valueArray.length-1]}&nbsp;`;
 
             if ((this.dataWidth + this.hiddenDisplay.clientWidth) >= MAX_WIDTH_DISPLAY) {
@@ -137,7 +144,7 @@ class Display {
               this.smallDisplay.style.width = this.dataWidth + this.hiddenDisplay.clientWidth;
             }
 
-            this.smallDisplay.innerHTML += `&nbsp;${NAME_FOR_DISPLAY[operation]}(${this.display.innerHTML})&nbsp;`;
+            this.smallDisplay.innerHTML += `&nbsp;${NAME_FOR_DISPLAY[operation]}(${this.text})&nbsp;`;
           }
         }
         if (this.isPressedSingleOperation) {
@@ -168,7 +175,7 @@ class Display {
           this.addDisplayWidth();
           this.smallDisplay.innerHTML += this.valueArray[this.valueArray.length-1];
         } else if (this.isEnteredNewValue) {
-          this.valueArray.push(this.display.innerHTML);
+          this.valueArray.push(this.text);
           this.valueArray.push(operation);
           this.hiddenDisplay.innerHTML = `&nbsp;${this.valueArray[this.valueArray.length-2]} ${this.valueArray[this.valueArray.length-1]}`;
           if ((this.smallDisplay.clientWidth + this.hiddenDisplay.clientWidth) >= MAX_WIDTH_DISPLAY) {

@@ -1,6 +1,6 @@
 export const MAX_WIDTH_DISPLAY = 286;
 export const VERSION = '1.0.0';
-export const MAX_LENGTH_DISPLAY = 11;
+export const MAX_LENGTH_DISPLAY = 10;
 
 export const CALC_MODES = {
 	STANDART: 'standart',

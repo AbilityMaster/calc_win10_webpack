@@ -18,10 +18,9 @@ class Calc {
 		this.isEnteredNewValue = false;
 		this.typeOperation = '';
 		this.currentValue = null;
-		this.this = this;
 	}
 
-	clear() {
+	clear() {		
 		if (this.operationsDisabled) {
 			this.disp.display.style.fontSize = STYLES.NORMAL;
 			this.disp.operationsDisabled = false;
@@ -85,7 +84,7 @@ class Calc {
 
 			return;
 		}
-
+		console.log(this.disp.text);
 		if (this.checkForFinite(this.operations.sendOperation(operation, this.disp.text))) {
 			this.disp.text = this.trimmer(this.operations.sendOperation(operation, this.disp.text));
 		}
@@ -255,7 +254,7 @@ class Calc {
 		}
 	}
 
-	template(tag) {
+	init(tag) {
 		this.tagForInsert = tag;
 
 		let data = `			
@@ -757,7 +756,7 @@ class Calc {
 	}
 
 	buttonOpenCalculator = () => {
-		this.template(this.tagForInsert);
+		this.init(this.tagForInsert);
 		this.calcLoader.manage(CALC_MODES.DEFAULT);
 		this.sendToLocalStorage.mode = CALC_MODES.DEFAULT;
 		this.storage.dataset = this.sendToLocalStorage;
@@ -813,7 +812,7 @@ class Calc {
 		forDrag.removeEventListener('mousedown', this.calculatorDragAndDrop);
 		calculator.removeEventListener('dragstart',this.calculatorDragStart);
 		buttonTrey.removeEventListener('click', this.buttonTrey);
-		buttonOpen.removeEventListener('click', this.buttonOpen);;
+		buttonOpen.removeEventListener('click', this.buttonOpen);
 		buttonClose.removeEventListener('click', this.buttonClose);
 		buttonLeft.removeEventListener('click', this.buttonLeft);
 		buttonRight.removeEventListener('click', this.buttonRight);
@@ -823,7 +822,7 @@ class Calc {
 				document.body.removeChild(document.body.children[i]);
 			}
 		}
-		
+
 		this.tagForInsert.innerHTML = '';
 	}
 
