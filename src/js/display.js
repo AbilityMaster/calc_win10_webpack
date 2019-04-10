@@ -1,6 +1,5 @@
-import {MAX_WIDTH_DISPLAY, MAX_LENGTH_DISPLAY, NAME_FOR_DISPLAY, OPERATIONS, MESSAGES, STYLES} from './const';
+import { MAX_WIDTH_DISPLAY, MAX_LENGTH_DISPLAY, NAME_FOR_DISPLAY, OPERATIONS, MESSAGES, STYLES } from './const';
 import calc from './calculator';
-import { strict } from 'assert';
 
 class Display {
   constructor() {
@@ -31,7 +30,12 @@ class Display {
       calc.activateButtons();
     }
 
-
+    this.valueArray = [];    
+    this.smallDisplay.innerHTML = '';
+    this.smallDisplay.style.width = '';
+    this.hiddenDisplay.innerHTML = '';
+    this.hiddenDisplay.style.width = '';
+    calc.currentValue = null;
     this.isEnteredNewValue = true;
     this.display.style.fontSize = STYLES.NORMAL;
 
@@ -44,7 +48,7 @@ class Display {
     }
 
     if ((this.display.innerHTML === '0' || (this.needNewValue) || (this.resultPressed) || this.display.innerHTML === MESSAGES.DIVIDE_BY_ZERO)) {
-			
+
       this.display.innerHTML = number;
       this.needNewValue = false;
       this.resultPressed = false;
@@ -61,15 +65,23 @@ class Display {
   }
 
   set text(data) {
-    let formatter = new Intl.NumberFormat('ru');    
-    this.display.innerHTML = formatter.format(data);
+    if (parseFloat(data) >= 1) {
+      let formatter = new Intl.NumberFormat('ru');    
+      this.display.innerHTML = formatter.format(data);
+
+      return;
+    }
+        
+    this.display.innerHTML = data;
   }
 
   get text() {
     let data = this.display.innerHTML;
-    data = data.replace(/\&nbsp\;/g,"\xa0");
+    data = data.replace(/\&nbsp\;/g, "\xa0");
     data = data.replace(/\s+/g, '');
-    return parseFloat(data);
+    data = data.replace(',','.');
+
+    return data;
   }
 
   get template() {
@@ -90,12 +102,16 @@ class Display {
       return;
     }
 
-    if (this.display.innerHTML.indexOf('.') === -1 && this.needNewValue || this.display.innerHTML.indexOf('.') === -1 && this.resultPressed || this.display.innerHTML.indexOf('.') !== -1 && this.needNewValue ||		this.display.innerHTML.indexOf('.') !== -1 && this.resultPressed) {
+    if (this.display.innerHTML.indexOf('.') === -1 && this.needNewValue ||
+      this.display.innerHTML.indexOf('.') === -1 && this.resultPressed ||
+      this.display.innerHTML.indexOf('.') !== -1 && this.needNewValue ||
+      this.display.innerHTML.indexOf('.') !== -1 && this.resultPressed) {
+
       this.display.innerHTML = '0.';
       this.needNewValue = false;
-			
+
       return;
-    } 
+    }
 
     if (this.display.innerHTML.indexOf('.') === -1) {
       this.display.innerHTML += '.';
@@ -120,81 +136,97 @@ class Display {
       return;
     }
 
-    this.text = String(this.text).slice(0,length-1);	
+    this.text = String(this.text).slice(0, length - 1);
   }
 
   sendToStatusDisplay(typeOperation, operation) {
     switch (typeOperation) {
       case OPERATIONS.LABEL_SINGLE_OPERATION: {
-        if (!this.isPressedSingleOperation) {
-          this.data = this.smallDisplay.innerHTML;
-          this.dataWidth = this.smallDisplay.clientWidth;
+        this.sendToStatusDisplaySingleOperation(typeOperation, operation);
 
-          if (operation === OPERATIONS.PERCENT) {
-            this.valueArray.push(calc.operations.percent());
-            this.smallDisplay.innerHTML += `&nbsp;${this.valueArray[this.valueArray.length-1]}`;
-          } else {
-            this.valueArray.push(`${NAME_FOR_DISPLAY[operation]}(${this.text})`);
-            this.hiddenDisplay.innerHTML = `&nbsp;${this.valueArray[this.valueArray.length-1]}&nbsp;`;
+        break;
+      }
+      case OPERATIONS.LABEL_DEFAULT_OPERATION: {
+        this.sendToStatusDisplayDefaultOperation(typeOperation, operation);
 
-            if ((this.dataWidth + this.hiddenDisplay.clientWidth) >= MAX_WIDTH_DISPLAY) {
-              this.arrowLeft.style.visibility = 'visible';
-              this.arrowRight.style.visibility = 'visible';
-              this.smallDisplay.style.left = '';
-              this.smallDisplay.style.width = this.dataWidth + this.hiddenDisplay.clientWidth;
-            }
+        break;
+      }
+    }
+  }
 
-            this.smallDisplay.innerHTML += `&nbsp;${NAME_FOR_DISPLAY[operation]}(${this.text})&nbsp;`;
-          }
-        }
-        if (this.isPressedSingleOperation) {
-          if (operation ===  OPERATIONS.PERCENT) {
-            this.valueArray[this.valueArray.length-1] = calc.operations.percent();
-            this.smallDisplay.innerHTML = `${this.data}&nbsp;${this.valueArray[this.valueArray.length - 1]}&nbsp;`;
-          } else {
-            this.valueArray[this.valueArray.length-1] = `${NAME_FOR_DISPLAY[operation]}(${this.valueArray[this.valueArray.length - 1]})`;
-            this.hiddenDisplay.innerHTML = `&nbsp;${this.valueArray[this.valueArray.length-1]}&nbsp;`;
-
-            if ((this.dataWidth + this.hiddenDisplay.clientWidth) >= MAX_WIDTH_DISPLAY) {
-              this.arrowLeft.style.visibility = 'visible';
-              this.arrowRight.style.visibility = 'visible';
-              this.smallDisplay.style.left = '';
-              this.smallDisplay.style.width = this.dataWidth + this.hiddenDisplay.clientWidth;
-            }
-
-            this.smallDisplay.innerHTML = `${this.data}&nbsp;${this.valueArray[this.valueArray.length - 1]}&nbsp;`;
-          }
+  detectMaxWidth(typeOperation) {
+    switch (typeOperation) {
+      case OPERATIONS.LABEL_SINGLE_OPERATION: {
+        if ((this.dataWidth + this.hiddenDisplay.clientWidth) >= MAX_WIDTH_DISPLAY) {
+          this.arrowLeft.style.visibility = 'visible';
+          this.arrowRight.style.visibility = 'visible';
+          this.smallDisplay.style.left = '';
+          this.smallDisplay.style.width = this.dataWidth + this.hiddenDisplay.clientWidth;
         }
 
         break;
       }
       case OPERATIONS.LABEL_DEFAULT_OPERATION: {
-        if (this.isEnteredNewValue && this.isPressedSingleOperation) {
-          this.valueArray.push(operation);
-          this.hiddenDisplay.innerHTML = `&nbsp;${this.valueArray[this.valueArray.length-1]}`;
-          this.addDisplayWidth();
-          this.smallDisplay.innerHTML += this.valueArray[this.valueArray.length-1];
-        } else if (this.isEnteredNewValue) {
-          this.valueArray.push(this.text);
-          this.valueArray.push(operation);
-          this.hiddenDisplay.innerHTML = `&nbsp;${this.valueArray[this.valueArray.length-2]} ${this.valueArray[this.valueArray.length-1]}`;
-          if ((this.smallDisplay.clientWidth + this.hiddenDisplay.clientWidth) >= MAX_WIDTH_DISPLAY) {
-            this.arrowLeft.style.visibility = 'visible';
-            this.arrowRight.style.visibility = 'visible';
-            this.smallDisplay.style.left = '';
-            this.smallDisplay.style.width = this.smallDisplay.clientWidth + this.hiddenDisplay.clientWidth;
-          }
-          this.smallDisplay.innerHTML += `&nbsp;${this.valueArray[this.valueArray.length-2]}`;
-          this.smallDisplay.innerHTML += `&nbsp;${this.valueArray[this.valueArray.length-1]}`;
-        } 
-
-        this.valueArray[this.valueArray.length - 1] = operation;	
-        this.hiddenDisplay.innerHTML = `&nbsp;${this.valueArray[this.valueArray.length-2]} ${this.valueArray[this.valueArray.length-1]}`;
-        this.smallDisplay.innerHTML = this.smallDisplay.innerHTML.slice(0, this.smallDisplay.innerHTML.length-1) + this.valueArray[this.valueArray.length-1];
+        if ((this.smallDisplay.clientWidth + this.hiddenDisplay.clientWidth) >= MAX_WIDTH_DISPLAY) {
+          this.arrowLeft.style.visibility = 'visible';
+          this.arrowRight.style.visibility = 'visible';
+          this.smallDisplay.style.left = '';
+          this.smallDisplay.style.width = this.smallDisplay.clientWidth + this.hiddenDisplay.clientWidth;
+        }
 
         break;
       }
     }
+  }
+
+  sendToStatusDisplaySingleOperation(typeOperation, operation) {
+    if (!this.isPressedSingleOperation) {
+      this.data = this.smallDisplay.innerHTML;
+      this.dataWidth = this.smallDisplay.clientWidth;
+
+      if (operation === OPERATIONS.PERCENT) {
+        this.valueArray.push(calc.operations.percent());
+        this.smallDisplay.innerHTML += `&nbsp;${this.valueArray[this.valueArray.length - 1]}`;
+      } else {
+        this.valueArray.push(`${NAME_FOR_DISPLAY[operation]}(${this.text})`);
+        this.hiddenDisplay.innerHTML = `&nbsp;${this.valueArray[this.valueArray.length - 1]}&nbsp;`;
+        this.detectMaxWidth(typeOperation);
+        this.smallDisplay.innerHTML += `&nbsp;${NAME_FOR_DISPLAY[operation]}(${this.text})&nbsp;`;
+      }
+    }
+    if (this.isPressedSingleOperation) {
+      if (operation === OPERATIONS.PERCENT) {
+        this.valueArray[this.valueArray.length - 1] = calc.operations.percent();
+        this.smallDisplay.innerHTML = `${this.data}&nbsp;${this.valueArray[this.valueArray.length - 1]}&nbsp;`;
+      } else {
+        this.valueArray[this.valueArray.length - 1] = `${NAME_FOR_DISPLAY[operation]}(${this.valueArray[this.valueArray.length - 1]})`;
+        this.hiddenDisplay.innerHTML = `&nbsp;${this.valueArray[this.valueArray.length - 1]}&nbsp;`;
+
+        this.detectMaxWidth(typeOperation);
+
+        this.smallDisplay.innerHTML = `${this.data}&nbsp;${this.valueArray[this.valueArray.length - 1]}&nbsp;`;
+      }
+    }
+  }
+
+  sendToStatusDisplayDefaultOperation(typeOperation, operation) {
+    if (this.isEnteredNewValue && this.isPressedSingleOperation) {
+      this.valueArray.push(operation);
+      this.hiddenDisplay.innerHTML = `&nbsp;${this.valueArray[this.valueArray.length - 1]}`;
+      this.addDisplayWidth();
+      this.smallDisplay.innerHTML += this.valueArray[this.valueArray.length - 1];
+    } else if (this.isEnteredNewValue) {
+      this.valueArray.push(this.text);
+      this.valueArray.push(operation);
+      this.hiddenDisplay.innerHTML = `&nbsp;${this.valueArray[this.valueArray.length - 2]} ${this.valueArray[this.valueArray.length - 1]}`;
+      this.detectMaxWidth(typeOperation);
+      this.smallDisplay.innerHTML += `&nbsp;${this.valueArray[this.valueArray.length - 2]}`;
+      this.smallDisplay.innerHTML += `&nbsp;${this.valueArray[this.valueArray.length - 1]}`;
+    }
+
+    this.valueArray[this.valueArray.length - 1] = operation;
+    this.hiddenDisplay.innerHTML = `&nbsp;${this.valueArray[this.valueArray.length - 2]} ${this.valueArray[this.valueArray.length - 1]}`;
+    this.smallDisplay.innerHTML = this.smallDisplay.innerHTML.slice(0, this.smallDisplay.innerHTML.length - 1) + this.valueArray[this.valueArray.length - 1];
   }
 
   addDisplayWidth() {

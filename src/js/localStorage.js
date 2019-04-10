@@ -1,6 +1,6 @@
 import {VERSION} from './const';
 
-class lc {
+class LocalStorage {
 	constructor() {
 		this.key = VERSION;
 	}
@@ -31,4 +31,4 @@ class lc {
 	}
 }
 
-export default lc;
+export default LocalStorage;

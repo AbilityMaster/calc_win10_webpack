@@ -12,62 +12,63 @@ class Memory {
 	addToMemory(data) {
 		this.memoryValues[this.positionAttribute] = data;
 
-		this.needNewValue = true;
+		calc.needNewValue = true;
 
-		let memory__block = document.createElement('div');
-
-		memory__block.className = 'memory__block';
-		memory__block.setAttribute('data-position', this.positionAttribute);
-		this.memory.insertBefore(memory__block, this.memory.children[0]);
+		let memory = document.querySelector('.js_memory');
+		let memoryBlock = document.createElement('div');
+		
+		memoryBlock.className = 'memory__block';
+		memoryBlock.setAttribute('data-position', this.positionAttribute);
+		memory.insertBefore(memoryBlock, memory.children[0]);
 
 		let memoryValue = document.createElement('div');
 
 		memoryValue.className = 'memory__data';
 		memoryValue.innerHTML = String(data);
-		memory__block.appendChild(memoryValue);
+		memoryBlock.appendChild(memoryValue);
 
-		let btn_mc = document.createElement('div');
+		let btnMc = document.createElement('div');
 
-		btn_mc.className = 'memory__btn memory__btn_mc';
-		btn_mc.innerHTML = 'MC';
-		memory__block.appendChild(btn_mc);
-		btn_mc.addEventListener('click', (event) => {
+		btnMc.className = 'memory__btn memory__btn_mc';
+		btnMc.innerHTML = 'MC';
+		memoryBlock.appendChild(btnMc);
+		btnMc.addEventListener('click', (event) => {
 			this.clear(event.target.parentElement);
 			this.storageMemoryData.memoryValues = this.memoryValues;
-			calc.storage.dataset = this.storageMemoryData;			
+			calc.localStorage.dataset = this.storageMemoryData;			
 		});
 
-		let btn_m_plus = document.createElement('div');
+		let btnMemoryPlus = document.createElement('div');
 
-		btn_m_plus.className = 'memory__btn memory__btn_m_plus';
-		btn_m_plus.innerHTML = 'M+';
-		memory__block.appendChild(btn_m_plus);
+		btnMemoryPlus.className = 'memory__btn memory__btn_m_plus';
+		btnMemoryPlus.innerHTML = 'M+';
+		memoryBlock.appendChild(btnMemoryPlus);
 
-		btn_m_plus.addEventListener('click', (event) => {
+		btnMemoryPlus.addEventListener('click', (event) => {
 			let value = event.target.parentElement.childNodes[0].innerHTML;
-			let displayValue = this.display.innerHTML;
+			let displayValue = calc.disp.text;
 			let position = event.target.parentElement.dataset.position;
 
 			this.plus(value, displayValue, position);
 			this.storageMemoryData.memoryValues = this.memoryValues;
-			calc.storage.dataset = this.storageMemoryData;
+			calc.localStorage.dataset = this.storageMemoryData;
 			event.target.parentElement.childNodes[0].innerHTML = this.memoryValues[position];
 		});
 
-		let btn_m_minus = document.createElement('div');
+		let btnMemoryMinus = document.createElement('div');
 
-		btn_m_minus.className = 'memory__btn memory__btn_m_minus';
-		btn_m_minus.innerHTML = 'M-';
-		memory__block.appendChild(btn_m_minus);
+		btnMemoryMinus.className = 'memory__btn memory__btn_m_minus';
+		btnMemoryMinus.innerHTML = 'M-';
+		memoryBlock.appendChild(btnMemoryMinus);
 
-		btn_m_minus.addEventListener('click', (event) => {
+		btnMemoryMinus.addEventListener('click', (event) => {
 			let value = event.target.parentElement.childNodes[0].innerHTML;
-			let displayValue = this.display.innerHTML;
+			let displayValue = calc.disp.text;
 			let position = event.target.parentElement.dataset.position;
 
 			this.minus(value, displayValue, position);
 			this.storageMemoryData.memoryValues = this.memoryValues;
-			calc.storage.dataset = this.storageMemoryData;
+			calc.localStorage.dataset = this.storageMemoryData;
 			event.target.parentElement.childNodes[0].innerHTML = this.memoryValues[position];
 		});
 
@@ -89,7 +90,7 @@ class Memory {
 	}
 
 	isEmpty() {
-		return (Object.keys(this.memoryValues).length === 0) ? true : false;		
+		return (Object.keys(this.memoryValues).length === 0);		
 	}
 }
 

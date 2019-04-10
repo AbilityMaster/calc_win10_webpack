@@ -1,37 +1,37 @@
-import {MESSAGES, OPERATIONS} from './const';
+import { MESSAGES, OPERATIONS } from './const';
 
 class Operations {
-	constructor() {	
-	}		
+	constructor() {
+	}
 
 	sendOperation(operation, a, b) {
 		switch (operation) {
 			case OPERATIONS.PLUS:
-			return this._plus(a, b);
-			break;
+				return this._plus(a, b);
+				break;
 			case OPERATIONS.MINUS:
-			return this._minus(a, b);
-			break;
+				return this._minus(a, b);
+				break;
 			case OPERATIONS.MULTIPLY:
-			return this._multiply(a, b);
-			break;
+				return this._multiply(a, b);
+				break;
 			case OPERATIONS.DIVIDE:
-			return this._divide(a, b);
-			break;
+				return this._divide(a, b);
+				break;
 			case OPERATIONS.POW:
-			return this._pow(a);
-			break;
+				return this._pow(a);
+				break;
 			case OPERATIONS.FRAC:
-			return this._frac(a);
-			break;
+				return this._frac(a);
+				break;
 			case OPERATIONS.SQRT:
-			return this._sqrt(a);
-			break;
-			case OPERATIONS.NEGATE: 
-			return this._negate(a);
-			break;
+				return this._sqrt(a);
+				break;
+			case OPERATIONS.NEGATE:
+				return this._negate(a);
+				break;
 			default:
-			console.log(MESSAGES.ERROR.OPERATIONS);
+				console.log(MESSAGES.ERROR.OPERATIONS);
 		}
 	}
 
@@ -39,7 +39,7 @@ class Operations {
 		return a + b;
 	}
 
-	_minus(a, b) {		
+	_minus(a, b) {
 		return a - b;
 	}
 
@@ -52,7 +52,7 @@ class Operations {
 	}
 
 	_pow(a) {
-		return Math.pow(a , 2);
+		return Math.pow(a, 2);
 	}
 
 	_frac(a) {
