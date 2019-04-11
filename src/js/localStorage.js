@@ -1,6 +1,6 @@
 class LocalStorage {
-	constructor(version) {
-		this.key = version;
+	constructor(version, name) {
+		this.key = `${name}_${version}`;
 	}
 
 	set dataset(obj) {

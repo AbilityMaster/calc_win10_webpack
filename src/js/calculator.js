@@ -3,14 +3,16 @@ import Operations from './operations';
 import Memory from './memory';
 import LocalStorage from './localStorage';
 import { MAX_WIDTH_DISPLAY, MAX_LENGTH_DISPLAY, STYLES, OPERATIONS, CALC_MODES, MESSAGES } from './const';
+import projectInfo from '../../package.json';
 
 class Calculator {
 	constructor() {
-		this.getVersionProject();
 		this.disp = new Display();
 		this.operations = new Operations();
 		this.memory = new Memory();
-		this.localStorage = new LocalStorage(this.VERSION);
+		this.NAME = projectInfo.name;
+		this.VERSION = projectInfo.version;
+		this.localStorage = new LocalStorage(this.VERSION, this.NAME);
 		this.isResultPressed = false;
 		this.maxLength = MAX_LENGTH_DISPLAY;
 		this.isOperationPressed = false;
@@ -19,25 +21,12 @@ class Calculator {
 		this.typeOperation = '';
 		this.currentValue = null;
 	}
-
-	getVersionProject() {
-		let projectInfo;
-		let xhr = new XMLHttpRequest();
-		xhr.open('GET', 'package.json', false);
-		xhr.send();
-		if (xhr.status != 200) {
-			console.log(xhr.status + ': ' + xhr.statusText);
-		} else {
-			projectInfo = JSON.parse(xhr.responseText);
-		}
-		this.VERSION = projectInfo.version;
-	}
 	
 	clear() {
 		if (this.operationsDisabled) {
 			this.disp.display.style.fontSize = STYLES.NORMAL;
 			this.disp.operationsDisabled = false;
-			this.activateButtons();
+			this.toggleVisualStateButtons();
 		}
 
 		this.disp.displayClear();
