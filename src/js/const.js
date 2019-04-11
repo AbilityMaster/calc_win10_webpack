@@ -1,5 +1,4 @@
 export const MAX_WIDTH_DISPLAY = 286;
-export const VERSION = '1.0.0';
 export const MAX_LENGTH_DISPLAY = 10;
 
 export const CALC_MODES = {
@@ -36,7 +35,12 @@ export const OPERATIONS = {
 	PERCENT: 'PERCENT',
 	LABEL_SINGLE_OPERATION: 'single',
 	LABEL_DEFAULT_OPERATION: 'default',
-	ADD: {
+	NAME_OF_DATASET_ATTRIBUTE: {
+		VALUE: 'value',
+		OPERATION: 'operation',
+		ADDITIONAL: 'add'
+	},
+	ADDITIONAL: {
 		PERCENT: '%',
 		SQRT: '√',
 		POW: 'POW',

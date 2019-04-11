@@ -4,12 +4,13 @@ import Memory from './memory';
 import LocalStorage from './localStorage';
 import { MAX_WIDTH_DISPLAY, MAX_LENGTH_DISPLAY, STYLES, OPERATIONS, CALC_MODES, MESSAGES } from './const';
 
-class Calc {
+class Calculator {
 	constructor() {
+		this.getVersionProject();
 		this.disp = new Display();
 		this.operations = new Operations();
 		this.memory = new Memory();
-		this.localStorage = new LocalStorage();
+		this.localStorage = new LocalStorage(this.VERSION);
 		this.isResultPressed = false;
 		this.maxLength = MAX_LENGTH_DISPLAY;
 		this.isOperationPressed = false;
@@ -19,6 +20,19 @@ class Calc {
 		this.currentValue = null;
 	}
 
+	getVersionProject() {
+		let projectInfo;
+		let xhr = new XMLHttpRequest();
+		xhr.open('GET', 'package.json', false);
+		xhr.send();
+		if (xhr.status != 200) {
+			console.log(xhr.status + ': ' + xhr.statusText);
+		} else {
+			projectInfo = JSON.parse(xhr.responseText);
+		}
+		this.VERSION = projectInfo.version;
+	}
+	
 	clear() {
 		if (this.operationsDisabled) {
 			this.disp.display.style.fontSize = STYLES.NORMAL;
@@ -30,7 +44,7 @@ class Calc {
 		this.isResultPressed = false;
 		this.isOperationPressed = false;
 		this.isNeedValueForProgressive = false,
-		this.isEnteredNewValue = false;
+			this.isEnteredNewValue = false;
 		this.typeOperation = '';
 		this.currentValue = null;
 	}
@@ -46,7 +60,7 @@ class Calc {
 
 	checkForFinite(temp) {
 		if (!isFinite(temp)) {
-			this.disableButtons();
+			this.toggleVisualStateButtons();
 			this.disp.display.style.fontSize = STYLES.SMALL;
 			this.disp.text = MESSAGES.OVERFLOW;
 			this.operationsDisabled = true;
@@ -57,8 +71,8 @@ class Calc {
 		}
 	}
 
-	sendResult(result) {
-		if (this.checkForFinite(result)) {
+	sendResult(operation, result) {
+		if (this.checkException(operation, result)) {
 			this.disp.text = this.trimmer(result);
 		}
 	}
@@ -72,7 +86,6 @@ class Calc {
 			return;
 		}
 
-		
 		this.disp.smallDisplay.style.removeProperty('left');
 		this.disp.smallDisplay.style.right = 0;
 
@@ -83,18 +96,18 @@ class Calc {
 		this.disp.isEnteredNewValue = this.isEnteredNewValue = true;
 
 		if (operation === OPERATIONS.PERCENT) {
-			let result = this.operations.percent(this.currentValue, this.disp.text);
-			this.sendResult(result);
+			let result = this.operations.percent(this.currentValue, parseFloat(this.disp.text));
+			this.sendResult(operation, result);
 
 			return;
 		}
 
 		if (this.currentValue === null) {
-			this.currentValue = this.disp.text;
+			this.currentValue = parseFloat(this.disp.text);
 		}
 
-		let result = this.operations.sendOperation(operation, this.disp.text);
-		this.sendResult(result);
+		let result = this.operations.sendOperation(operation, parseFloat(this.disp.text));
+		this.sendResult(operation, result);
 	}
 
 	result() {
@@ -107,55 +120,68 @@ class Calc {
 		this.isEnteredNewValue = this.disp.isEnteredNewValue = true;
 
 		if (this.isNeedValueForProgressive) {
-			this.valueForProgressive = this.disp.text;
+			this.valueForProgressive = parseFloat(this.disp.text);
 			this.isNeedValueForProgressive = false;
 		}
 
 		if (this.isResultPressed && this.currentValue !== null) {
 			let result = this.operations.sendOperation(this.typeOperation, this.currentValue, this.valueForProgressive);
-			this.sendResult(result);
-			this.currentValue = this.disp.text;
+			this.sendResult(this.typeOperation, result);
+			this.currentValue = parseFloat(this.disp.text);
 		}
 		this.isOperationPressed = false;
 
 	}
 
-	checkException(operation) {
+	checkException(operation, result) {
 		switch (operation) {
-			case OPERATIONS.DIVIDE: {
-				if (this.valueForProgressive === 0 || this.disp.text === 0) {
+			case OPERATIONS.PLUS, OPERATIONS.MINUS, OPERATIONS.MULTIPLY, OPERATIONS.NEGATE: {
+				if (!isFinite(result)) {
+					this.toggleVisualStateButtons();
+					this.disp.display.style.fontSize = STYLES.SMALL;
+					this.disp.text = MESSAGES.OVERFLOW;
 					this.operationsDisabled = true;
-					this.disableButtons();
-					this.display.style.fontSize = STYLES.SMALL;
-					this.disp.text = MESSAGES.DIVIDE_BY_ZERO;
-
-					return;
 				}
+
+				break;
+			}
+			case OPERATIONS.DIVIDE: {
+				if (this.valueForProgressive === 0 || parseFloat(this.disp.text) === 0) {
+					this.operationsDisabled = true;
+					this.toggleVisualStateButtons();
+					this.disp.display.style.fontSize = STYLES.SMALL;
+					this.disp.text = MESSAGES.DIVIDE_BY_ZERO;
+				}
+
 				break;
 			}
 			case OPERATIONS.FRAC: {
-				if (this.disp.text === 0) {
+				if (parseFloat(this.disp.text) === 0) {
 					this.operationsDisabled = true;
-					this.disableButtons();
-					this.display.style.fontSize = STYLES.SMALL;
+					this.toggleVisualStateButtons();
+					this.disp.display.style.fontSize = STYLES.SMALL;
 					this.disp.text = MESSAGES.DIVIDE_BY_ZERO;
-
-					return;
 				}
+
 				break;
 			}
 			case OPERATIONS.SQRT: {
-				if (this.disp.text < 0) {
-					this.disableButtons();
-					this.display.style.fontSize = STYLES.SMALL;
+				if (parseFloat(this.disp.text) < 0) {
+					this.toggleVisualStateButtons();
+					this.disp.display.style.fontSize = STYLES.SMALL;
 					this.disp.text = MESSAGES.UNCORRECT_DATA;
 					this.operationsDisabled = true;
-
-					return;
 				}
+
 				break;
 			}
 		}
+
+		if (this.operationsDisabled) {
+			return false;
+		}
+
+		return true;
 	}
 
 	operation(operation) {
@@ -170,23 +196,18 @@ class Calc {
 
 		if (this.isOperationPressed) {
 			if (this.isEnteredNewValue) {
-				this.checkException(operation);
 				if (this.isResultPressed) {
-					let result = this.operations.sendOperation(this.typeOperation, this.currentValue, this.valueForProgressive);
-					if (this.checkForFinite(result)) {
-						this.disp.text = this.currentValue = this.trimmer(result);
-					}
+					let result = this.currentValue = this.operations.sendOperation(this.typeOperation, this.currentValue, this.valueForProgressive);
+					this.sendResult(operation, result);
 				} else {
-					let result = this.operations.sendOperation(this.typeOperation, this.currentValue, this.disp.text);
-					if (this.checkForFinite(result)) {
-						this.disp.text = this.currentValue = this.trimmer(result);
-					}
+					let result = this.currentValue = this.operations.sendOperation(this.typeOperation, this.currentValue, parseFloat(this.disp.text));
+					this.sendResult(operation, result);
 				}
 				this.isEnteredNewValue = this.disp.isEnteredNewValue = false;
 			}
 			this.typeOperation = operation;
 		} else {
-			this.currentValue = this.disp.text;
+			this.currentValue = parseFloat(this.disp.text);
 			this.typeOperation = operation;
 			this.isOperationPressed = true;
 			this.isEnteredNewValue = this.disp.isEnteredNewValue = false;
@@ -195,91 +216,86 @@ class Calc {
 		this.disp.needNewValue = true;
 	}
 
-	init(tag) {
-		this.tagForInsert = tag;
-
-		let data = `			
-			<div class="calculator js_calculator">
+	get template() {
+		return `
+		<div class="calculator js-calculator">
 				<div class="index-menu">
-					<p class="index-menu__title js_index-menu__title">Калькулятор</p>
-					<div class="index-menu__button index-menu__button_trey js_index-menu__button_trey">–</div>
-					<div class="index-menu__button index-menu__button_open js_index-menu__button_open">☐</div>
-					<div class="index-menu__button index-menu__button_close js_index-menu__button_close">✕</div>
+					<p class="index-menu__title js-index-menu__title">Калькулятор</p>
+					<div class="index-menu__button index-menu__button_trey js-index-menu__button_trey">–</div>
+					<div class="index-menu__button index-menu__button_open js-index-menu__button_open">☐</div>
+					<div class="index-menu__button index-menu__button_close js-index-menu__button_close">✕</div>
 				</div>
-				<div class="option-menu js_option-menu">
+				<div class="option-menu js-option-menu">
 					<div class="option-menu__btn-menu">☰</div>
 					<p class="option-menu__title">Обычный</p>
 					<div class="option-menu__btn-journal"></div>
 				</div>
 				${this.disp.template}
-				<div class="button-area js_button-area">
-					<div class="calc calc-add">
-						<div class="calc-add__button calc-add__button_memory-clear js_calc-add__button_memory-clear calc-add__button_disabled" data-add="${OPERATIONS.ADD.MCLEAR}">MC</div>
-						<div class="calc-add__button calc-add__button_read js_calc-add__button_read calc-add__button_disabled" data-add="${OPERATIONS.ADD.MREAD}">MR</div>
-						<div class="calc-add__button calc-add__button_plus js_calc-add__button_plus" data-add="${OPERATIONS.ADD.MPLUS}">M<span>+</span></div>
-						<div class="calc-add__button calc-add__button_minus js_calc-add__button_minus" data-add="${OPERATIONS.ADD.MMINUS}">M<span>-</span></div>
-						<div class="calc-add__button calc-add__button_ms js_calc-add__button_ms" data-add="${OPERATIONS.ADD.MSAVE}">MS</div>
-						<div class="calc-add__button calc-add__button_memory js_calc-add__button_memory calc-add__button_disabled" data-add="${OPERATIONS.ADD.MEMORY}">M</div>
-					</div>
+				<div class="button-area js-button-area">
+					${this.memory.template.buttons}
 					<div class="calc">
-						<div class="calc__button calc__button_enabled calc__button_percent js_calc__button_percent" data-add="${OPERATIONS.ADD.PERCENT}">%</div>
-						<div class="calc__button calc__button_enabled calc__button_sqrt js_calc__button_sqrt" data-add="${OPERATIONS.ADD.SQRT}">√</div>
-						<div class="calc__button calc__button_enabled calc__button_pow js_calc__button_pow" data-add="${OPERATIONS.ADD.POW}"><span class="span">x</span></div>
-						<div class="calc__button calc__button_enabled calc__button_frac js_calc__button_frac" data-add="${OPERATIONS.ADD.FRAC}"><span class="span">/</span></div>
+						<div class="calc__button calc__button_percent js-calc__button_percent" data-add="${OPERATIONS.ADDITIONAL.PERCENT}">%</div>
+						<div class="calc__button calc__button_sqrt js-calc__button_sqrt" data-add="${OPERATIONS.ADDITIONAL.SQRT}">√</div>
+						<div class="calc__button calc__button_pow js-calc__button_pow" data-add="${OPERATIONS.ADDITIONAL.POW}"><span class="span">x</span></div>
+						<div class="calc__button calc__button_frac js-calc__button_frac" data-add="${OPERATIONS.ADDITIONAL.FRAC}"><span class="span">/</span></div>
 					</div>
 					<div class="calc">
 						<div class="calc__button calc__button_disabled">CE</div>
-						<div class="calc__button calc__button_enabled calc__button_clear js_calc__button_clear" data-add="${OPERATIONS.ADD.CLEAR}">C</div>
-						<div class="calc__button calc__button_enabled calc__button_backspace js_calc__button_backspace" data-add="${OPERATIONS.ADD.BACKSPACE}"><-</div>
-						<div class="calc__button calc__button_enabled calc__button_operation js_calc__button_operation" data-operation="${OPERATIONS.DIVIDE}">÷</div>
+						<div class="calc__button calc__button_clear js-calc__button_clear" data-add="${OPERATIONS.ADDITIONAL.CLEAR}">C</div>
+						<div class="calc__button calc__button_backspace js-calc__button_backspace" data-add="${OPERATIONS.ADDITIONAL.BACKSPACE}"><-</div>
+						<div class="calc__button calc__button_operation js-calc__button_operation" data-operation="${OPERATIONS.DIVIDE}">÷</div>
 					</div>
 					<div class="calc">
-						<div class="calc__button calc__button_enabled calc__button_number js_calc__button_number" data-value="7">7</div>
-						<div class="calc__button calc__button_enabled calc__button_number js_calc__button_number" data-value="8">8</div>
-						<div class="calc__button calc__button_enabled calc__button_number js_calc__button_number" data-value="9">9</div>
-						<div class="calc__button calc__button_enabled calc__button_operation js_calc__button_operation" data-operation="${OPERATIONS.MULTIPLY}">*</div>
+						<div class="calc__button calc__button_number js-calc__button_number" data-value="7">7</div>
+						<div class="calc__button calc__button_number js-calc__button_number" data-value="8">8</div>
+						<div class="calc__button calc__button_number js-calc__button_number" data-value="9">9</div>
+						<div class="calc__button calc__button_operation js-calc__button_operation" data-operation="${OPERATIONS.MULTIPLY}">*</div>
 					</div>
 					<div class="calc">
-						<div class="calc__button calc__button_enabled calc__button_number js_calc__button_number" data-value="4">4</div>
-						<div class="calc__button calc__button_enabled calc__button_number js_calc__button_number" data-value="5">5</div>
-						<div class="calc__button calc__button_enabled calc__button_number js_calc__button_number" data-value="6">6</div>
-						<div class="calc__button calc__button_enabled calc__button_operation js_calc__button_operation" data-operation="${OPERATIONS.MINUS}">-</div>
+						<div class="calc__button calc__button_number js-calc__button_number" data-value="4">4</div>
+						<div class="calc__button calc__button_number js-calc__button_number" data-value="5">5</div>
+						<div class="calc__button calc__button_number js-calc__button_number" data-value="6">6</div>
+						<div class="calc__button calc__button_operation js-calc__button_operation" data-operation="${OPERATIONS.MINUS}">-</div>
 					</div>
 					<div class="calc">
-						<div class="calc__button calc__button_enabled calc__button_number js_calc__button_number" data-value="1">1</div>
-						<div class="calc__button calc__button_enabled calc__button_number js_calc__button_number" data-value="2">2</div>
-						<div class="calc__button calc__button_enabled calc__button_number js_calc__button_number" data-value="3">3</div>
-						<div class="calc__button calc__button_enabled calc__button_operation js_calc__button_operation" data-operation="${OPERATIONS.PLUS}">+</div>
+						<div class="calc__button calc__button_number js-calc__button_number" data-value="1">1</div>
+						<div class="calc__button calc__button_number js-calc__button_number" data-value="2">2</div>
+						<div class="calc__button calc__button_number js-calc__button_number" data-value="3">3</div>
+						<div class="calc__button calc__button_operation js-calc__button_operation" data-operation="${OPERATIONS.PLUS}">+</div>
 					</div>
 					<div class="calc">
-						<div class="calc__button calc__button_enabled calc__button_reverse js_calc__button_reverse" data-add="${OPERATIONS.ADD.REVERSE}">±</div>
-						<div class="calc__button calc__button_enabled calc__button_number js_calc__button_number" data-value="0">0</div>
-						<div class="calc__button calc__button_enabled calc__button_add-point js_calc__button_add-point" data-add="${OPERATIONS.ADD.POINT}">,</div>
-						<div class="calc__button calc__button_enabled calc__button_get-result js_calc__button_get-result" data-add="${OPERATIONS.ADD.RESULT}">=</div>
+						<div class="calc__button calc__button_reverse js-calc__button_reverse" data-add="${OPERATIONS.ADDITIONAL.REVERSE}">±</div>
+						<div class="calc__button calc__button_number js-calc__button_number" data-value="0">0</div>
+						<div class="calc__button calc__button_add-point js-calc__button_add-point" data-add="${OPERATIONS.ADDITIONAL.POINT}">,</div>
+						<div class="calc__button calc__button_get-result js-calc__button_get-result" data-add="${OPERATIONS.ADDITIONAL.RESULT}">=</div>
 					</div>
-					<div class="memory js_memory">
+					${this.memory.template.memoryArea}
 					</div>
 				</div>
-			</div> `;
+			</div> 
+		`;
+	}
 
-		tag.innerHTML = data;
+	init(tag) {
+		this.tagForInsert = tag;
+		tag.innerHTML = this.template;
 		this.sendToLocalStorage = {};
-		this.initDisplayProperties();
+		this.disp.init();
 		this.addEvents();
 		this.loadStateFromLocalStorage();
 	}
 
 	loadStateFromLocalStorage() {
 		this.defaultSettings = {
-			mode: 'default',
-			x: (window.innerWidth - document.querySelector('.js_calculator').offsetWidth) / window.innerWidth * 100 + '%',
-			y: (window.innerHeight - document.querySelector('.js_calculator').offsetHeight) / window.innerHeight * 100 + '%'
+			mode: CALC_MODES.DEFAULT,
+			x: (window.innerWidth - document.querySelector('.js-calculator').offsetWidth) / window.innerWidth * 100 + '%',
+			y: (window.innerHeight - document.querySelector('.js-calculator').offsetHeight) / window.innerHeight * 100 + '%'
 		};
 
-		let buttonMemory_Clear = document.querySelector('.js_calc-add__button_memory-clear'),
-			buttonMemory_Read = document.querySelector('.js_calc-add__button_read'),
-			buttonMemory_Open = document.querySelector('.js_calc-add__button_memory'),
-			calculator = document.querySelector('.js_calculator');
+		let buttonMemory_Clear = document.querySelector('.js-calc-add__button_memory-clear'),
+			buttonMemory_Read = document.querySelector('.js-calc-add__button_read'),
+			buttonMemory_Open = document.querySelector('.js-calc-add__button_memory'),
+			calculator = document.querySelector('.js-calculator');
 
 		if (!this.localStorage.dataset) {
 			this.localStorage.dataset = this.defaultSettings;
@@ -287,11 +303,12 @@ class Calc {
 
 		let storage = this.localStorage.dataset;
 
-		for (var key in storage.memoryValues) {
+		for (let key in storage.memoryValues) {
+			if (!storage.memoryValues.hasOwnProperty(key)) continue;
 			this.memory.addToMemory(storage.memoryValues[key]);
 		}
 
-		if (storage.isActivatedMemoryButtons === true) {
+		if (storage.isActivatedMemoryButtons) {
 			this.memory.isActivatedMemoryButtons = true;
 			buttonMemory_Read.classList.remove('calc-add__button_disabled');
 			buttonMemory_Clear.classList.remove('calc-add__button_disabled');
@@ -308,12 +325,12 @@ class Calc {
 	}
 
 	manage(mode) {
-		let optionMenu = document.querySelector('.js_option-menu'),
-			buttonArea = document.querySelector('.js_button-area'),
-			groupSmallDisplay = document.querySelector('.js_group-small-display'),
-			openCalc = document.querySelector('.js_open-calculator'),
-			display = document.querySelector('.js_display'),
-			calculator = document.querySelector('.js_calculator');
+		let optionMenu = document.querySelector('.js-option-menu'),
+			buttonArea = document.querySelector('.js-button-area'),
+			groupSmallDisplay = document.querySelector('.js-group-small-display'),
+			openCalc = document.querySelector('.js-open-calculator'),
+			display = document.querySelector('.js-display'),
+			calculator = document.querySelector('.js-calculator');
 
 		switch (mode) {
 			case CALC_MODES.STANDART: {
@@ -337,14 +354,6 @@ class Calc {
 			}
 			case CALC_MODES.CLOSED: {
 				openCalc.style.display = 'block';
-				//	optionMenu.style.display = 'flex';
-				//	groupSmallDisplay.style.display = 'flex';
-				//	display.style.display = 'block';
-				//	calculator.style.height = '540px';
-				///	calculator.style.left = this.defaultSettings.x;
-				//	calculator.style.top = this.defaultSettings.y;		
-
-				//	console.log(calculator);
 				calculator.style.display = 'none';
 				break;
 			}
@@ -367,69 +376,69 @@ class Calc {
 		}
 	}
 
-	addFunctionSwitcher = () => {
-		switch (event.target.dataset.add) {
+	addFunctionSwitcher = (typeFunction) => {
+		switch (typeFunction) {
 			case '±': {
 				this.buttonReverse();
 				break;
 			}
-			case OPERATIONS.ADD.PERCENT: {
+			case OPERATIONS.ADDITIONAL.PERCENT: {
 				this.buttonPercent();
 				break;
 			}
-			case OPERATIONS.ADD.SQRT: {
+			case OPERATIONS.ADDITIONAL.SQRT: {
 				this.buttonSqrt();
 				break;
 			}
-			case OPERATIONS.ADD.POW: {
+			case OPERATIONS.ADDITIONAL.POW: {
 				this.buttonPow();
 				break;
 			}
-			case OPERATIONS.ADD.FRAC: {
+			case OPERATIONS.ADDITIONAL.FRAC: {
 				this.buttonFrac();
 				break;
 			}
-			case OPERATIONS.ADD.CLEAR: {
+			case OPERATIONS.ADDITIONAL.CLEAR: {
 				this.buttonClear();
 				break;
 			}
-			case OPERATIONS.ADD.BACKSPACE: {
+			case OPERATIONS.ADDITIONAL.BACKSPACE: {
 				this.buttonBackspace();
 				break;
 			}
-			case OPERATIONS.ADD.REVERSE: {
+			case OPERATIONS.ADDITIONAL.REVERSE: {
 				this.buttonReverse();
 				break;
 			}
-			case OPERATIONS.ADD.POINT: {
+			case OPERATIONS.ADDITIONAL.POINT: {
 				this.buttonaddPoint();
 				break;
 			}
-			case OPERATIONS.ADD.RESULT: {
+			case OPERATIONS.ADDITIONAL.RESULT: {
 				this.resultButton();
 				break;
 			}
-			case OPERATIONS.ADD.MCLEAR: {
+			case OPERATIONS.ADDITIONAL.MCLEAR: {
 				this.buttonMemoryClear();
 				break;
 			}
-			case OPERATIONS.ADD.MREAD: {
+			case OPERATIONS.ADDITIONAL.MREAD: {
 				this.buttonMemoryRead();
 				break;
 			}
-			case OPERATIONS.ADD.MPLUS: {
+			case OPERATIONS.ADDITIONAL.MPLUS: {
 				this.buttonMemoryPlus();
 				break;
 			}
-			case OPERATIONS.ADD.MMINUS: {
+			case OPERATIONS.ADDITIONAL.MMINUS: {
 				this.buttonMemoryMinus();
 				break;
 			}
-			case OPERATIONS.ADD.MSAVE: {
+			case OPERATIONS.ADDITIONAL.MSAVE: {
 				this.buttonMemorySave();
 				break;
 			}
-			case OPERATIONS.ADD.MEMORY: {
+			case OPERATIONS.ADDITIONAL.MEMORY: {
 				this.buttonMemoryOpen();
 				break;
 			}
@@ -437,9 +446,9 @@ class Calc {
 	}
 
 	buttonsEventSwitcher = (event) => {
-		for (var key in event.target.dataset) {
+		for (let key in event.target.dataset) {
 			switch (key) {
-				case 'value': {
+				case OPERATIONS.NAME_OF_DATASET_ATTRIBUTE.VALUE: {
 					this.disp.smallDisplay.style.removeProperty('left');
 					this.disp.smallDisplay.style.right = 0;
 					this.disp.numberPress(event.target.dataset.value);
@@ -447,14 +456,14 @@ class Calc {
 					this.disp.isPressedSingleOperation = false;
 					break;
 				}
-				case 'operation': {
+				case OPERATIONS.NAME_OF_DATASET_ATTRIBUTE.OPERATION: {
 					this.operation(event.target.dataset.operation);
 					this.disp.smallDisplay.style.removeProperty('left');
 					this.disp.smallDisplay.style.right = 0;
 					break;
 				}
-				case 'add': {
-					this.addFunctionSwitcher();
+				case OPERATIONS.NAME_OF_DATASET_ATTRIBUTE.ADDITIONAL: {
+					this.addFunctionSwitcher(event.target.dataset.add);
 					break;
 				}
 			}
@@ -462,41 +471,41 @@ class Calc {
 	}
 
 	calcPosOnResize = () => {
-		let calculator = document.querySelector('.js_calculator');
+		let calculator = document.querySelector('.js-calculator');
 
 		if ((calculator.offsetLeft + calculator.clientWidth) > window.innerWidth) {
-			this.sendToLocalStorage.x = (window.innerWidth - calculator.clientWidth) / window.innerWidth * 100 + '%';
+			this.sendToLocalStorage.x = `${(window.innerWidth - calculator.clientWidth) / window.innerWidth * 100}%`;
 			calculator.style.left = this.sendToLocalStorage.x;
 		}
 		if ((calculator.offsetTop + calculator.clientHeight) > window.innerHeight) {
-			this.sendToLocalStorage.y = (window.innerHeight - calculator.clientHeight) / window.innerHeight * 100 + '%';
+			this.sendToLocalStorage.y = `${(window.innerHeight - calculator.clientHeight) / window.innerHeight * 100}%`;
 			calculator.style.top = this.sendToLocalStorage.y;
 		}
 		if (calculator.offsetLeft < 0) {
-			this.sendToLocalStorage.x = 0 + '%';
+			this.sendToLocalStorage.x = '0%';
 			calculator.style.left = this.sendToLocalStorage.x;
 		}
 		if (calculator.offsetTop < 0) {
-			this.sendToLocalStorage.y = 0 + '%';
+			this.sendToLocalStorage.y = '0%';
 			calculator.style.top = this.sendToLocalStorage.y;
 		}
 		this.localStorage.dataset = this.sendToLocalStorage;
 	}
 
 	calculatorDragAndDrop = (e) => {
-		let calculator = document.querySelector('.js_calculator');
+		let calculator = document.querySelector('.js-calculator');
 
 		let moveAt = (e) => {
 			if ((e.pageX - shiftX + calculator.clientWidth) > window.innerWidth) {
-				calculator.style.left = (window.innerWidth - calculator.clientWidth) / window.innerWidth * 100 + '%';
+				calculator.style.left = `${(window.innerWidth - calculator.clientWidth) / window.innerWidth * 100}%`;
 			} else {
-				calculator.style.left = (e.pageX - shiftX) / window.innerWidth * 100 + '%';
+				calculator.style.left = `${(e.pageX - shiftX) / window.innerWidth * 100}%`;
 			}
 
 			if ((e.pageY - shiftY + calculator.clientHeight) > window.innerHeight) {
-				calculator.style.top = (window.innerHeight - calculator.clientHeight) / window.innerHeight * 100 + '%';
+				calculator.style.top = `${(window.innerHeight - calculator.clientHeight) / window.innerHeight * 100}%`;
 			} else {
-				calculator.style.top = (e.pageY - shiftY) / window.innerHeight * 100 + '%';
+				calculator.style.top = `${(e.pageY - shiftY) / window.innerHeight * 100}%`;
 			}
 
 			if ((e.pageY - shiftY) <= 0) {
@@ -563,7 +572,7 @@ class Calc {
 		this.disp.backspace();
 	}
 
-	buttonReverse = () => {		
+	buttonReverse = () => {
 		this.singleOperation(OPERATIONS.NEGATE);
 	}
 
@@ -604,9 +613,9 @@ class Calc {
 			return;
 		}
 
-		let buttonMemoryClear = document.querySelector('.js_calc-add__button_memory-clear'),
-			buttonMemoryRead = document.querySelector('.js_calc-add__button_read'),
-			buttonMemoryOpen = document.querySelector('.js_calc-add__button_memory');
+		let buttonMemoryClear = document.querySelector('.js-calc-add__button_memory-clear'),
+			buttonMemoryRead = document.querySelector('.js-calc-add__button_read'),
+			buttonMemoryOpen = document.querySelector('.js-calc-add__button_memory');
 
 		this.memory.isActivatedMemoryButtons = true;
 		this.sendToLocalStorage.isActivatedMemoryButtons = this.memory.isActivatedMemoryButtons;
@@ -626,13 +635,13 @@ class Calc {
 			return;
 		}
 
-		let memoryBoard = document.querySelector('.js_memory'),
-			buttonMemoryClear = document.querySelector('.js_calc-add__button_memory-clear'),
-			buttonMemoryRead = document.querySelector('.js_calc-add__button_read'),
-			buttonMemoryPlus = document.querySelector('.js_calc-add__button_plus'),
-			buttonMemoryMinus = document.querySelector('.js_calc-add__button_minus'),
-			buttonMemorySave = document.querySelector('.js_calc-add__button_ms'),
-			buttonMemoryOpen = document.querySelector('.js_calc-add__button_memory');
+		let memoryBoard = document.querySelector('.js-memory'),
+			buttonMemoryClear = document.querySelector('.js-calc-add__button_memory-clear'),
+			buttonMemoryRead = document.querySelector('.js-calc-add__button_read'),
+			buttonMemoryPlus = document.querySelector('.js-calc-add__button_plus'),
+			buttonMemoryMinus = document.querySelector('.js-calc-add__button_minus'),
+			buttonMemorySave = document.querySelector('.js-calc-add__button_ms'),
+			buttonMemoryOpen = document.querySelector('.js-calc-add__button_memory');
 
 		memoryBoard.classList.toggle('visibility');
 		buttonMemoryClear.classList.toggle('calc-add__button_disabled');
@@ -668,9 +677,9 @@ class Calc {
 			return;
 		}
 
-		let buttonMemoryClear = document.querySelector('.js_calc-add__button_memory-clear'),
-			buttonMemoryRead = document.querySelector('.js_calc-add__button_read'),
-			buttonMemoryOpen = document.querySelector('.js_calc-add__button_memory');
+		let buttonMemoryClear = document.querySelector('.js-calc-add__button_memory-clear'),
+			buttonMemoryRead = document.querySelector('.js-calc-add__button_read'),
+			buttonMemoryOpen = document.querySelector('.js-calc-add__button_memory');
 
 		this.memory.isActivatedMemoryButtons = true;
 		this.sendToLocalStorage.isActivatedMemoryButtons = this.memory.isActivatedMemoryButtons;
@@ -701,9 +710,9 @@ class Calc {
 			return;
 		}
 
-		let buttonMemoryClear = document.querySelector('.js_calc-add__button_memory-clear'),
-			buttonMemoryRead = document.querySelector('.js_calc-add__button_read'),
-			buttonMemoryOpen = document.querySelector('.js_calc-add__button_memory');
+		let buttonMemoryClear = document.querySelector('.js-calc-add__button_memory-clear'),
+			buttonMemoryRead = document.querySelector('.js-calc-add__button_read'),
+			buttonMemoryOpen = document.querySelector('.js-calc-add__button_memory');
 
 		this.memory.isActivatedMemoryButtons = true;
 		this.sendToLocalStorage.isActivatedMemoryButtons = this.memory.isActivatedMemoryButtons;
@@ -745,10 +754,10 @@ class Calc {
 			return;
 		}
 
-		let memoryBoard = document.querySelector('.js_memory'),
-			buttonMemoryClear = document.querySelector('.js_calc-add__button_memory-clear'),
-			buttonMemoryRead = document.querySelector('.js_calc-add__button_read'),
-			buttonMemoryOpen = document.querySelector('.js_calc-add__button_memory');
+		let memoryBoard = document.querySelector('.js-memory'),
+			buttonMemoryClear = document.querySelector('.js-calc-add__button_memory-clear'),
+			buttonMemoryRead = document.querySelector('.js-calc-add__button_read'),
+			buttonMemoryOpen = document.querySelector('.js-calc-add__button_memory');
 
 		this.memory.isActivatedMemoryButtons = false;
 		this.sendToLocalStorage.isActivatedMemoryButtons = '0';
@@ -791,24 +800,16 @@ class Calc {
 		this.localStorage.dataset = this.sendToLocalStorage;
 	}
 
-	initDisplayProperties() {
-		this.disp.display = document.querySelector('.js_display');
-		this.disp.arrowLeft = document.querySelector('.js_small-display__button_left');
-		this.disp.arrowRight = document.querySelector('.js_small-display__button_right');
-		this.disp.smallDisplay = document.querySelector('.js_small-display__block');
-		this.disp.hiddenDisplay = document.querySelector('.js_small-display__add');
-	}
-
 	addEvents() {
-		let buttonOpen = document.querySelector('.js_index-menu__button_open'),
-			buttonTrey = document.querySelector('.js_index-menu__button_trey'),
-			buttonClose = document.querySelector('.js_index-menu__button_close'),
-			buttonOpenCalculator = document.querySelector('.js_open-calculator'),
-			calculator = document.querySelector('.js_calculator'),
-			forDrag = document.querySelector('.js_index-menu__title'),
+		let buttonOpen = document.querySelector('.js-index-menu__button_open'),
+			buttonTrey = document.querySelector('.js-index-menu__button_trey'),
+			buttonClose = document.querySelector('.js-index-menu__button_close'),
+			buttonOpenCalculator = document.querySelector('.js-open-calculator'),
+			calculator = document.querySelector('.js-calculator'),
+			forDrag = document.querySelector('.js-index-menu__title'),
 			buttonLeft = document.querySelector('.small-display__button_left'),
 			buttonRight = document.querySelector('.small-display__button_right'),
-			buttons = document.querySelector('.js_button-area');
+			buttons = document.querySelector('.js-button-area');
 
 		buttons.addEventListener('click', this.buttonsEventSwitcher);
 		window.addEventListener('resize', this.calcPosOnResize);
@@ -823,14 +824,14 @@ class Calc {
 	}
 
 	sendToRecycle() {
-		let buttonOpen = document.querySelector('.js_index-menu__button_open'),
-			buttonTrey = document.querySelector('.js_index-menu__button_trey'),
-			buttonClose = document.querySelector('.js_index-menu__button_close'),
-			calculator = document.querySelector('.js_calculator'),
-			forDrag = document.querySelector('.js_index-menu__title'),
+		let buttonOpen = document.querySelector('.js-index-menu__button_open'),
+			buttonTrey = document.querySelector('.js-index-menu__button_trey'),
+			buttonClose = document.querySelector('.js-index-menu__button_close'),
+			calculator = document.querySelector('.js-calculator'),
+			forDrag = document.querySelector('.js-index-menu__title'),
 			buttonLeft = document.querySelector('.small-display__button_left'),
 			buttonRight = document.querySelector('.small-display__button_right'),
-			buttons = document.querySelector('.js_button-area');
+			buttons = document.querySelector('.js-button-area');
 
 		buttons.removeEventListener('click', this.buttonsEventSwitcher);
 
@@ -844,7 +845,7 @@ class Calc {
 		buttonRight.removeEventListener('click', this.buttonRight);
 
 		for (let i = 0; i < document.body.children.length; i++) {
-			if (document.body.children[i].classList.contains('js_calculator')) {
+			if (document.body.children[i].classList.contains('js-calculator')) {
 				document.body.removeChild(document.body.children[i]);
 			}
 		}
@@ -852,67 +853,27 @@ class Calc {
 		this.tagForInsert.innerHTML = '';
 	}
 
-	disableButtons() {
-		let resultButton = document.querySelector('.js_calc__button_get-result'),
-			button_Sqrt = document.querySelector('.js_calc__button_sqrt'),
-			button_Pow = document.querySelector('.js_calc__button_pow'),
-			button_Frac = document.querySelector('.js_calc__button_frac'),
-			button_Percent = document.querySelector('.js_calc__button_percent'),
-			button_Reverse = document.querySelector('.js_calc__button_reverse'),
-			operationList = document.querySelectorAll('.js_calc__button_operation'),
-			button_addPoint = document.querySelector('.js_calc__button_add-point');
+	toggleVisualStateButtons() {
+		let resultButton = document.querySelector('.js-calc__button_get-result'),
+			button_Sqrt = document.querySelector('.js-calc__button_sqrt'),
+			button_Pow = document.querySelector('.js-calc__button_pow'),
+			button_Frac = document.querySelector('.js-calc__button_frac'),
+			button_Percent = document.querySelector('.js-calc__button_percent'),
+			button_Reverse = document.querySelector('.js-calc__button_reverse'),
+			operationList = document.querySelectorAll('.js-calc__button_operation'),
+			button_addPoint = document.querySelector('.js-calc__button_add-point');
 
-		button_Reverse.classList.remove('calc__button_enabled');
-		button_Reverse.classList.add('calc__button_disabled');
-		button_Percent.classList.remove('calc__button_enabled');
-		button_Percent.classList.add('calc__button_disabled');
-		button_Sqrt.classList.remove('calc__button_enabled');
-		button_Sqrt.classList.add('calc__button_disabled');
-		button_Pow.classList.remove('calc__button_enabled');
-		button_Pow.classList.add('calc__button_disabled');
-		button_Frac.classList.remove('calc__button_enabled');
-		button_Frac.classList.add('calc__button_disabled');
-		button_addPoint.classList.remove('calc__button_enabled');
-		button_addPoint.classList.add('calc__button_disabled');
-		resultButton.classList.remove('calc__button_enabled');
-		resultButton.classList.add('calc__button_disabled');
+		button_Reverse.classList.toggle('calc__button_disabled');
+		button_Percent.classList.toggle('calc__button_disabled');
+		button_Sqrt.classList.toggle('calc__button_disabled');
+		button_Pow.classList.toggle('calc__button_disabled');
+		button_Frac.classList.toggle('calc__button_disabled');
+		button_addPoint.classList.toggle('calc__button_disabled');
+		resultButton.classList.toggle('calc__button_disabled');
 		operationList.forEach((element) => {
-			element.classList.remove('calc__button_enabled');
-			element.classList.add('calc__button_disabled');
+			element.classList.toggle('calc__button_disabled');
 		});
 	}
-
-
-	activateButtons() {
-		let resultButton = document.querySelector('.js_calc__button_get-result'),
-			button_Sqrt = document.querySelector('.js_calc__button_sqrt'),
-			button_Pow = document.querySelector('.js_calc__button_pow'),
-			button_Frac = document.querySelector('.js_calc__button_frac'),
-			button_Percent = document.querySelector('.js_calc__button_percent'),
-			button_Reverse = document.querySelector('.js_calc__button_reverse'),
-			operationList = document.querySelectorAll('.js_calc__button_operation'),
-			button_addPoint = document.querySelector('.js_calc__button_add-point');
-
-		button_Reverse.classList.add('calc__button_enabled');
-		button_Reverse.classList.remove('calc__button_disabled');
-		button_addPoint.classList.add('calc__button_enabled');
-		button_addPoint.classList.remove('calc__button_disabled');
-		resultButton.classList.add('calc__button_enabled');
-		resultButton.classList.remove('calc__button_disabled');
-		button_Percent.classList.add('calc__button_enabled');
-		button_Percent.classList.remove('calc__button_disabled');
-		button_Sqrt.classList.add('calc__button_enabled');
-		button_Sqrt.classList.remove('calc__button_disabled');
-		button_Pow.classList.add('calc__button_enabled');
-		button_Pow.classList.remove('calc__button_disabled');
-		button_Frac.classList.add('calc__button_enabled');
-		button_Frac.classList.remove('calc__button_disabled');
-		operationList.forEach((element) => {
-			element.classList.add('calc__button_enabled');
-			element.classList.remove('calc__button_disabled');
-		});
-	}
-
 }
 
-export default new Calc();
+export default Calculator;

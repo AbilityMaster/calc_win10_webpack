@@ -1,5 +1,5 @@
 import { MAX_WIDTH_DISPLAY, MAX_LENGTH_DISPLAY, NAME_FOR_DISPLAY, OPERATIONS, MESSAGES, STYLES } from './const';
-import calc from './calculator';
+import { calc } from './index';
 
 class Display {
   constructor() {
@@ -27,7 +27,7 @@ class Display {
     if (calc.operationsDisabled) {
       calc.operationsDisabled = false;
       this.displayClear();
-      calc.activateButtons();
+      calc.toggleVisualStateButtons();
     }
 
     this.isEnteredNewValue = true;
@@ -60,12 +60,12 @@ class Display {
 
   set text(data) {
     if (String(data).indexOf(',') !== -1) {
-      let formatter = new Intl.NumberFormat('ru');    
+      let formatter = new Intl.NumberFormat('ru');
       this.display.innerHTML = formatter.format(data);
 
       return;
     }
-        
+
     this.display.innerHTML = data;
   }
 
@@ -73,22 +73,30 @@ class Display {
     let data = this.display.innerHTML;
     data = data.replace(/\&nbsp\;/g, "\xa0");
     data = data.replace(/\s+/g, '');
-    data = data.replace(',','.');
+    data = data.replace(',', '.');
 
     return data;
   }
 
   get template() {
     return `
-		<div class="group-small-display js_group-small-display">
-		<div class="small-display__button small-display__button_left js_small-display__button_left"></div>
-		<div class="small-display">
-		<div class="small-display__block js_small-display__block"></div>
-		<div class="small-display__add js_small-display__add"></div>
+		<div class="group-small-display js-group-small-display">
+		  <div class="small-display__button small-display__button_left js-small-display__button_left"></div>
+		  <div class="small-display">
+		    <div class="small-display__block js-small-display__block"></div>
+		    <div class="small-display__add js-small-display__add"></div>
+		  </div>
+		  <div class="small-display__button small-display__button_right js-small-display__button_right"></div>
 		</div>
-		<div class="small-display__button small-display__button_right js_small-display__button_right"></div>
-		</div>
-		<div class="display js_display">0</div> `;
+		<div class="display js-display">0</div> `;
+  }
+
+  init() {
+    this.display = document.querySelector('.js-display');
+		this.arrowLeft = document.querySelector('.js-small-display__button_left');
+		this.arrowRight = document.querySelector('.js-small-display__button_right');
+		this.smallDisplay = document.querySelector('.js-small-display__block');
+		this.hiddenDisplay = document.querySelector('.js-small-display__add');
   }
 
   addPoint() {
@@ -125,7 +133,7 @@ class Display {
       this.display.style.fontSize = STYLES.NORMAL;
       calc.operationsDisabled = false;
       this.text = '0';
-      calc.activateButtons();
+      calc.toggleVisualStateButtons();
 
       return;
     }

@@ -199,12 +199,14 @@ body, html {
 		cursor: pointer;
 		&:hover {
 			background: #dbdbdb;
+			outline: 1px solid #bcbbbb;
 		}
 		&_disabled {
 			opacity: 0.2;
 			cursor: default;
 			&:hover {
-				background: none;
+				background: none;				
+				outline: none;
 			}
 		}
 	}
@@ -221,13 +223,15 @@ body, html {
 		line-height: 50px;
 		text-align: center;
 		margin: 1px;
-		&_disabled:hover {
-			cursor: default;
-		}
-		&_enabled:hover {
+		&:hover {
 			cursor: pointer;
 			background: #dbdbdb;
 			outline: 1px solid #bcbbbb;
+		}
+		&_disabled:hover {
+			cursor: default;
+			background: $background-color___calc__button;
+			outline: none;
 		}
 		&_disabled {
 			color: rgba(0,0,0,0.15);

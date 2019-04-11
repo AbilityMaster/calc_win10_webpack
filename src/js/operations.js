@@ -4,67 +4,59 @@ class Operations {
 	constructor() {
 	}
 
-	sendOperation(operation, a, b) {
+	sendOperation(operation, first, second) {
 		switch (operation) {
 			case OPERATIONS.PLUS:
-				return this._plus(a, b);
-				break;
+				return this._plus(first, second);
 			case OPERATIONS.MINUS:
-				return this._minus(a, b);
-				break;
+				return this._minus(first, second);
 			case OPERATIONS.MULTIPLY:
-				return this._multiply(a, b);
-				break;
+				return this._multiply(first, second);
 			case OPERATIONS.DIVIDE:
-				return this._divide(a, b);
-				break;
+				return this._divide(first, second);
 			case OPERATIONS.POW:
-				return this._pow(a);
-				break;
+				return this._pow(first);
 			case OPERATIONS.FRAC:
-				return this._frac(a);
-				break;
+				return this._frac(first);
 			case OPERATIONS.SQRT:
-				return this._sqrt(a);
-				break;
+				return this._sqrt(first);
 			case OPERATIONS.NEGATE:
-				return this._negate(a);
-				break;
+				return this._negate(first);
 			default:
 				console.log(MESSAGES.ERROR.OPERATIONS);
 		}
 	}
 
-	_plus(a, b) {
-		return a + b;
+	_plus(first, second) {
+		return first + second;
 	}
 
-	_minus(a, b) {
-		return a - b;
+	_minus(first, second) {
+		return first - second;
 	}
 
-	_multiply(a, b) {
-		return a * b;
+	_multiply(first, second) {
+		return first * second;
 	}
 
-	_divide(a, b) {
-		return a / b;
+	_divide(first, second) {
+		return first / second;
 	}
 
-	_pow(a) {
-		return Math.pow(a, 2);
+	_pow(first) {
+		return Math.pow(first, 2);
 	}
 
-	_frac(a) {
-		return 1 / a;
+	_frac(first) {
+		return 1 / first;
 	}
 
-	_sqrt(a) {
-		return Math.sqrt(a);
+	_sqrt(first) {
+		return Math.sqrt(first);
 	}
 
-	_negate(a) {
-		return a * -1;
+	_negate(first) {
+		return first * -1;
 	}
 
 	percent(...props) {

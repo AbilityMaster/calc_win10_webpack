@@ -1,8 +1,6 @@
-import {VERSION} from './const';
-
 class LocalStorage {
-	constructor() {
-		this.key = VERSION;
+	constructor(version) {
+		this.key = version;
 	}
 
 	set dataset(obj) {
@@ -10,11 +8,15 @@ class LocalStorage {
 
 		if (temp) {
 			for (let key in temp) {
+				if (!temp.hasOwnProperty(key)) continue;
+
 				if (obj[key]) {
 					temp[key] = obj[key];
 				}
 			}
 			for (let key in obj) {
+				if (!obj.hasOwnProperty(key)) continue;
+
 				if (temp[key] === undefined) {
 					temp[key] = obj[key];
 				}
