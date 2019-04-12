@@ -2,14 +2,35 @@ import Display from './display';
 import Operations from './operations';
 import Memory from './memory';
 import LocalStorage from './localStorage';
-import { MAX_WIDTH_DISPLAY, MAX_LENGTH_DISPLAY, STYLES, OPERATIONS, CALC_MODES, MESSAGES } from './const';
+import {MAX_LENGTH_DISPLAY, STYLES, OPERATIONS, CALC_MODES, MESSAGES } from './const';
 import projectInfo from '../../package.json';
 
 class Calculator {
 	constructor() {
-		this.disp = new Display();
+		this.display = new Display({
+			updateStateDisabledButtons: () => {
+				this.operationsDisabled = false;
+				this.toggleVisualStateButtons();
+			},
+			getResultPercentOperation: () => {
+				return this.operations.percent(this.currentValue, this.display.text);
+			},
+			getOperationPressed: () => {
+				return this.isOperationPressed;
+			}
+		});
 		this.operations = new Operations();
-		this.memory = new Memory();
+		this.memory = new Memory({
+			updateLSData: data => {
+				this.localStorage.dataset = data;
+			},
+			getDisplayData: () => {
+				return this.display.text;
+			},
+			isNeedNewValueToDisplay: () => {
+				this.display.needNewValue = true;
+			}
+		});
 		this.NAME = projectInfo.name;
 		this.VERSION = projectInfo.version;
 		this.localStorage = new LocalStorage(this.VERSION, this.NAME);
@@ -17,29 +38,46 @@ class Calculator {
 		this.maxLength = MAX_LENGTH_DISPLAY;
 		this.isOperationPressed = false;
 		this.isNeedValueForProgressive = false;
-		this.isEnteredNewValue = false;
 		this.typeOperation = '';
 		this.currentValue = null;
+		this.sendToLocalStorage = {};
+		this.$optionMenu = null;
+		this.$buttonArea = null;
+		this.$groupSmallDisplay = null;
+		this.$openCalc = null;
+		this.$calculator = null;
+		this.$buttonMemoryClear = null;
+		this.$buttonMemoryRead = null;
+		this.$buttonMemoryOpen = null;
+		this.$memoryBoard = null;
+		this.$buttonMemoryPlus = null;
+		this.$buttonMemoryMinus = null;
+		this.$buttonMemorySave = null;
+		this.$buttonMemoryOpen = null;
+		this.$buttonOpen = null;
+		this.$buttonTrey = null;
+		this.$buttonClose = null;
+		this.$buttonOpenCalculator = null;
+		this.$calculator = null;
+		this.$forDrag = null;
+		this.$buttons = null;
 	}
-	
+
 	clear() {
 		if (this.operationsDisabled) {
-			this.disp.display.style.fontSize = STYLES.NORMAL;
-			this.disp.operationsDisabled = false;
+			this.display.$display.style.fontSize = STYLES.NORMAL;
 			this.toggleVisualStateButtons();
 		}
 
-		this.disp.displayClear();
+		this.display.clear();
 		this.isResultPressed = false;
 		this.isOperationPressed = false;
-		this.isNeedValueForProgressive = false,
-			this.isEnteredNewValue = false;
+		this.isNeedValueForProgressive = false;
 		this.typeOperation = '';
 		this.currentValue = null;
 	}
 
 	trimmer(temp) {
-		temp = parseFloat(temp);
 		if (String(temp).length > this.maxLength) {
 			temp = temp.toPrecision(6);
 		}
@@ -47,55 +85,32 @@ class Calculator {
 		return temp;
 	}
 
-	checkForFinite(temp) {
-		if (!isFinite(temp)) {
-			this.toggleVisualStateButtons();
-			this.disp.display.style.fontSize = STYLES.SMALL;
-			this.disp.text = MESSAGES.OVERFLOW;
-			this.operationsDisabled = true;
-
-			return false;
-		} else {
-			return true;
-		}
-	}
-
 	sendResult(operation, result) {
-		if (this.checkException(operation, result)) {
-			this.disp.text = this.trimmer(result);
+		this.checkException(operation, result);
+		if (!this.operationsDisabled) {
+			this.display.text = this.trimmer(result);
 		}
 	}
 
 	singleOperation(operation) {
-		if (this.operationsDisabled) {
+		if (this.operationsDisabled || operation === OPERATIONS.PERCENT && this.currentValue === null) {
 			return;
 		}
 
-		if (operation === OPERATIONS.PERCENT && this.currentValue === null) {
-			return;
-		}
-
-		this.disp.smallDisplay.style.removeProperty('left');
-		this.disp.smallDisplay.style.right = 0;
-
-		this.disp.sendToStatusDisplay(OPERATIONS.LABEL_SINGLE_OPERATION, operation);
-		this.disp.isPressedSingleOperation = true;
-		this.disp.needNewValue = true;
-
-		this.disp.isEnteredNewValue = this.isEnteredNewValue = true;
+		this.display.sendToStatusDisplay(OPERATIONS.LABEL_SINGLE_OPERATION, operation);
 
 		if (operation === OPERATIONS.PERCENT) {
-			let result = this.operations.percent(this.currentValue, parseFloat(this.disp.text));
+			let result = this.operations.percent(this.currentValue, parseFloat(this.display.text));
 			this.sendResult(operation, result);
 
 			return;
 		}
 
 		if (this.currentValue === null) {
-			this.currentValue = parseFloat(this.disp.text);
+			this.currentValue = parseFloat(this.display.text);
 		}
 
-		let result = this.operations.sendOperation(operation, parseFloat(this.disp.text));
+		let result = this.operations.sendOperation(operation, parseFloat(this.display.text));
 		this.sendResult(operation, result);
 	}
 
@@ -104,22 +119,22 @@ class Calculator {
 			return;
 		}
 
-		this.disp.smallDisplay.innerHTML = '';
+		this.display.$smallDisplay.innerHTML = '';
 		this.isResultPressed = true;
-		this.isEnteredNewValue = this.disp.isEnteredNewValue = true;
+		this.display.isEnteredNewValue = true;
 
 		if (this.isNeedValueForProgressive) {
-			this.valueForProgressive = parseFloat(this.disp.text);
+			this.valueForProgressive = parseFloat(this.display.text);
 			this.isNeedValueForProgressive = false;
 		}
 
 		if (this.isResultPressed && this.currentValue !== null) {
 			let result = this.operations.sendOperation(this.typeOperation, this.currentValue, this.valueForProgressive);
 			this.sendResult(this.typeOperation, result);
-			this.currentValue = parseFloat(this.disp.text);
+			this.currentValue = parseFloat(this.display.text);
 		}
-		this.isOperationPressed = false;
 
+		this.isOperationPressed = false;
 	}
 
 	checkException(operation, result) {
@@ -127,50 +142,44 @@ class Calculator {
 			case OPERATIONS.PLUS, OPERATIONS.MINUS, OPERATIONS.MULTIPLY, OPERATIONS.NEGATE: {
 				if (!isFinite(result)) {
 					this.toggleVisualStateButtons();
-					this.disp.display.style.fontSize = STYLES.SMALL;
-					this.disp.text = MESSAGES.OVERFLOW;
+					this.display.$display.style.fontSize = STYLES.SMALL;
+					this.display.text = MESSAGES.OVERFLOW;
 					this.operationsDisabled = true;
 				}
 
 				break;
 			}
 			case OPERATIONS.DIVIDE: {
-				if (this.valueForProgressive === 0 || parseFloat(this.disp.text) === 0) {
+				if (this.valueForProgressive === 0 || parseFloat(this.display.text) === 0) {
 					this.operationsDisabled = true;
 					this.toggleVisualStateButtons();
-					this.disp.display.style.fontSize = STYLES.SMALL;
-					this.disp.text = MESSAGES.DIVIDE_BY_ZERO;
+					this.display.$display.style.fontSize = STYLES.SMALL;
+					this.display.text = MESSAGES.DIVIDE_BY_ZERO;
 				}
 
 				break;
 			}
 			case OPERATIONS.FRAC: {
-				if (parseFloat(this.disp.text) === 0) {
+				if (parseFloat(this.display.text) === 0) {
 					this.operationsDisabled = true;
 					this.toggleVisualStateButtons();
-					this.disp.display.style.fontSize = STYLES.SMALL;
-					this.disp.text = MESSAGES.DIVIDE_BY_ZERO;
+					this.display.$display.style.fontSize = STYLES.SMALL;
+					this.display.text = MESSAGES.DIVIDE_BY_ZERO;
 				}
 
 				break;
 			}
 			case OPERATIONS.SQRT: {
-				if (parseFloat(this.disp.text) < 0) {
+				if (parseFloat(this.display.text) < 0) {
 					this.toggleVisualStateButtons();
-					this.disp.display.style.fontSize = STYLES.SMALL;
-					this.disp.text = MESSAGES.UNCORRECT_DATA;
+					this.display.$display.style.fontSize = STYLES.SMALL;
+					this.display.text = MESSAGES.UNCORRECT_DATA;
 					this.operationsDisabled = true;
 				}
 
 				break;
 			}
 		}
-
-		if (this.operationsDisabled) {
-			return false;
-		}
-
-		return true;
 	}
 
 	operation(operation) {
@@ -179,30 +188,30 @@ class Calculator {
 		}
 
 		this.isResultPressed = false;
-		this.disp.sendToStatusDisplay(OPERATIONS.LABEL_DEFAULT_OPERATION, operation);
-		this.disp.isPressedSingleOperation = false;
 		this.isNeedValueForProgressive = true;
+		this.display.sendToStatusDisplay(OPERATIONS.LABEL_DEFAULT_OPERATION, operation);
 
 		if (this.isOperationPressed) {
-			if (this.isEnteredNewValue) {
+			if (this.display.isEnteredNewValue)	{
 				if (this.isResultPressed) {
 					let result = this.currentValue = this.operations.sendOperation(this.typeOperation, this.currentValue, this.valueForProgressive);
 					this.sendResult(operation, result);
 				} else {
-					let result = this.currentValue = this.operations.sendOperation(this.typeOperation, this.currentValue, parseFloat(this.disp.text));
+					let result = this.currentValue = this.operations.sendOperation(this.typeOperation, this.currentValue, parseFloat(this.display.text));
 					this.sendResult(operation, result);
 				}
-				this.isEnteredNewValue = this.disp.isEnteredNewValue = false;
 			}
+			
+			this.display.isEnteredNewValue = false;
 			this.typeOperation = operation;
-		} else {
-			this.currentValue = parseFloat(this.disp.text);
-			this.typeOperation = operation;
-			this.isOperationPressed = true;
-			this.isEnteredNewValue = this.disp.isEnteredNewValue = false;
+
+			return;
 		}
 
-		this.disp.needNewValue = true;
+		this.currentValue = parseFloat(this.display.text);
+		this.typeOperation = operation;
+		this.isOperationPressed = true;
+		this.display.isEnteredNewValue = false;
 	}
 
 	get template() {
@@ -219,7 +228,7 @@ class Calculator {
 					<p class="option-menu__title">Обычный</p>
 					<div class="option-menu__btn-journal"></div>
 				</div>
-				${this.disp.template}
+				${this.display.template}
 				<div class="button-area js-button-area">
 					${this.memory.template.buttons}
 					<div class="calc">
@@ -268,23 +277,49 @@ class Calculator {
 	init(tag) {
 		this.tagForInsert = tag;
 		tag.innerHTML = this.template;
-		this.sendToLocalStorage = {};
-		this.disp.init();
+		this.setPropertiesDom();
+		this.display.init();
 		this.addEvents();
 		this.loadStateFromLocalStorage();
+	}
+
+	setPropertiesDom() {
+		this.$buttonOpen = document.querySelector('.js-index-menu__button_open');
+		this.$buttonTrey = document.querySelector('.js-index-menu__button_trey');
+		this.$buttonClose = document.querySelector('.js-index-menu__button_close');
+		this.$buttonOpenCalculator = document.querySelector('.js-open-calculator');
+		this.$calculator = document.querySelector('.js-calculator');
+		this.$forDrag = document.querySelector('.js-index-menu__title');
+		this.$buttons = document.querySelector('.js-button-area');
+		this.$optionMenu = document.querySelector('.js-option-menu');
+		this.$buttonArea = document.querySelector('.js-button-area');
+		this.$groupSmallDisplay = document.querySelector('.js-group-small-display');
+		this.$openCalc = document.querySelector('.js-open-calculator');
+		this.$calculator = document.querySelector('.js-calculator');
+		this.$buttonMemoryClear = document.querySelector('.js-calc-add__button_memory-clear');
+		this.$buttonMemoryRead = document.querySelector('.js-calc-add__button_read');
+		this.$buttonMemoryOpen = document.querySelector('.js-calc-add__button_memory');
+		this.$memoryBoard = document.querySelector('.js-memory');
+		this.$buttonMemoryPlus = document.querySelector('.js-calc-add__button_plus');
+		this.$buttonMemoryMinus = document.querySelector('.js-calc-add__button_minus');
+		this.$buttonMemorySave = document.querySelector('.js-calc-add__button_ms');
+		this.$buttonMemoryOpen = document.querySelector('.js-calc-add__button_memory');
+		this.$resultButton = document.querySelector('.js-calc__button_get-result');
+		this.$buttonSqrt = document.querySelector('.js-calc__button_sqrt');
+		this.$buttonPow = document.querySelector('.js-calc__button_pow');
+		this.$buttonFrac = document.querySelector('.js-calc__button_frac');
+		this.$buttonPercent = document.querySelector('.js-calc__button_percent');
+		this.$buttonReverse = document.querySelector('.js-calc__button_reverse');
+		this.$operationList = document.querySelectorAll('.js-calc__button_operation');
+		this.$buttonaddPoint = document.querySelector('.js-calc__button_add-point');
 	}
 
 	loadStateFromLocalStorage() {
 		this.defaultSettings = {
 			mode: CALC_MODES.DEFAULT,
-			x: (window.innerWidth - document.querySelector('.js-calculator').offsetWidth) / window.innerWidth * 100 + '%',
-			y: (window.innerHeight - document.querySelector('.js-calculator').offsetHeight) / window.innerHeight * 100 + '%'
+			x: (window.innerWidth - this.$calculator.offsetWidth) / window.innerWidth * 100 + '%',
+			y: (window.innerHeight - this.$calculator.offsetHeight) / window.innerHeight * 100 + '%'
 		};
-
-		let buttonMemory_Clear = document.querySelector('.js-calc-add__button_memory-clear'),
-			buttonMemory_Read = document.querySelector('.js-calc-add__button_read'),
-			buttonMemory_Open = document.querySelector('.js-calc-add__button_memory'),
-			calculator = document.querySelector('.js-calculator');
 
 		if (!this.localStorage.dataset) {
 			this.localStorage.dataset = this.defaultSettings;
@@ -293,69 +328,65 @@ class Calculator {
 		let storage = this.localStorage.dataset;
 
 		for (let key in storage.memoryValues) {
-			if (!storage.memoryValues.hasOwnProperty(key)) continue;
+			if (!storage.memoryValues.hasOwnProperty(key)) {
+				continue;
+			}
+
 			this.memory.addToMemory(storage.memoryValues[key]);
 		}
 
 		if (storage.isActivatedMemoryButtons) {
 			this.memory.isActivatedMemoryButtons = true;
-			buttonMemory_Read.classList.remove('calc-add__button_disabled');
-			buttonMemory_Clear.classList.remove('calc-add__button_disabled');
-			buttonMemory_Open.classList.remove('calc-add__button_disabled');
+			this.$buttonMemoryRead.classList.remove('calc-add__button_disabled');
+			this.$buttonMemoryClear.classList.remove('calc-add__button_disabled');
+			this.$buttonMemoryOpen.classList.remove('calc-add__button_disabled');
 		} else {
-			buttonMemory_Read.classList.add('calc-add__button_disabled');
-			buttonMemory_Clear.classList.add('calc-add__button_disabled');
-			buttonMemory_Open.classList.add('calc-add__button_disabled');
+			this.$buttonMemoryRead.classList.add('calc-add__button_disabled');
+			this.$buttonMemoryClear.classList.add('calc-add__button_disabled');
+			this.$buttonMemoryOpen.classList.add('calc-add__button_disabled');
 		}
 
-		calculator.style.left = storage.x ? storage.x : this.defaultSettings.x;
-		calculator.style.top = storage.y ? storage.y : this.defaultSettings.y;
+		this.$calculator.style.left = storage.x ? storage.x : this.defaultSettings.x;
+		this.$calculator.style.top = storage.y ? storage.y : this.defaultSettings.y;
 		this.manage(storage.mode);
 	}
 
 	manage(mode) {
-		let optionMenu = document.querySelector('.js-option-menu'),
-			buttonArea = document.querySelector('.js-button-area'),
-			groupSmallDisplay = document.querySelector('.js-group-small-display'),
-			openCalc = document.querySelector('.js-open-calculator'),
-			display = document.querySelector('.js-display'),
-			calculator = document.querySelector('.js-calculator');
-
 		switch (mode) {
 			case CALC_MODES.STANDART: {
-				optionMenu.style.display = 'flex';
-				groupSmallDisplay.style.display = 'flex';
-				display.style.display = 'block';
-				buttonArea.style.display = 'block';
-				calculator.style.height = '540px';
+				this.$optionMenu.style.display = 'flex';
+				this.$groupSmallDisplay.style.display = 'flex';
+				this.display.$display.style.display = 'block';
+				this.$buttonArea.style.display = 'block';
+				this.$calculator.style.height = '540px';
 				break;
 			}
 			case CALC_MODES.MINIMIZED: {
-				let offsetTop = calculator.offsetTop;
-				optionMenu.style.display = 'none';
-				groupSmallDisplay.style.display = 'none';
-				display.style.display = 'none';
-				buttonArea.style.display = 'none';
-				calculator.style.height = '32px';
-				calculator.style.top = offsetTop;
-				calculator.style.bottom = 'auto';
+				let offsetTop = this.$calculator.offsetTop;
+				this.$optionMenu.style.display = 'none';
+				this.$groupSmallDisplay.style.display = 'none';
+				this.display.$display.style.display = 'none';
+				this.$buttonArea.style.display = 'none';
+				this.$calculator.style.height = '32px';
+				this.$calculator.style.top = offsetTop;
+				this.$calculator.style.bottom = 'auto';
 				break;
 			}
 			case CALC_MODES.CLOSED: {
-				openCalc.style.display = 'block';
-				calculator.style.display = 'none';
+				this.$openCalc.style.display = 'block';
+				this.$calculator.style.display = 'none';
 				break;
 			}
 			case CALC_MODES.DEFAULT: {
-				openCalc.style.display = 'none';
-				optionMenu.style.display = 'flex';
-				groupSmallDisplay.style.display = 'flex';
-				display.style.display = 'block';
-				buttonArea.style.display = 'block';
-				calculator.style.height = '540px';
-				calculator.style.display = 'block';
-				calculator.style.left = this.defaultSettings.x;
-				calculator.style.top = this.defaultSettings.y;
+				this.$openCalc.style.display = 'none';
+				this.$optionMenu.style.display = 'flex';
+				this.$groupSmallDisplay.style.display = 'flex';
+				this.display.$display.style.display = 'block';
+				this.$buttonArea.style.display = 'block';
+				this.$calculator.style.height = '540px';
+				this.$calculator.style.display = 'block';
+				this.$calculator.style.left = this.defaultSettings.x;
+				this.$calculator.style.top = this.defaultSettings.y;
 				break;
 			}
 			default: {
@@ -367,7 +398,7 @@ class Calculator {
 
 	addFunctionSwitcher = (typeFunction) => {
 		switch (typeFunction) {
-			case '±': {
+			case OPERATIONS.ADDITIONAL.PLUS_MINUS: {
 				this.buttonReverse();
 				break;
 			}
@@ -432,23 +463,23 @@ class Calculator {
 				break;
 			}
 		}
-	}
+	};
 
 	buttonsEventSwitcher = (event) => {
 		for (let key in event.target.dataset) {
 			switch (key) {
 				case OPERATIONS.NAME_OF_DATASET_ATTRIBUTE.VALUE: {
-					this.disp.smallDisplay.style.removeProperty('left');
-					this.disp.smallDisplay.style.right = 0;
-					this.disp.numberPress(event.target.dataset.value);
-					this.isEnteredNewValue = true;
-					this.disp.isPressedSingleOperation = false;
+					if (this.operationsDisabled) {
+						this.operationsDisabled = false;
+						this.display.clear();
+						this.toggleVisualStateButtons();
+					}
+					this.display.numberPress(event.target.dataset.value);
+					this.display.isPressedSingleOperation = false;
 					break;
 				}
 				case OPERATIONS.NAME_OF_DATASET_ATTRIBUTE.OPERATION: {
 					this.operation(event.target.dataset.operation);
-					this.disp.smallDisplay.style.removeProperty('left');
-					this.disp.smallDisplay.style.right = 0;
 					break;
 				}
 				case OPERATIONS.NAME_OF_DATASET_ATTRIBUTE.ADDITIONAL: {
@@ -457,56 +488,56 @@ class Calculator {
 				}
 			}
 		}
-	}
+	};
 
 	calcPosOnResize = () => {
-		let calculator = document.querySelector('.js-calculator');
+		if ((this.$calculator.offsetLeft + this.$calculator.clientWidth) > window.innerWidth) {
+			this.sendToLocalStorage.x = `${(window.innerWidth - this.$calculator.clientWidth) / window.innerWidth * 100}%`;
+			this.$calculator.style.left = this.sendToLocalStorage.x;
+		}
 
-		if ((calculator.offsetLeft + calculator.clientWidth) > window.innerWidth) {
-			this.sendToLocalStorage.x = `${(window.innerWidth - calculator.clientWidth) / window.innerWidth * 100}%`;
-			calculator.style.left = this.sendToLocalStorage.x;
+		if ((this.$calculator.offsetTop + this.$calculator.clientHeight) > window.innerHeight) {
+			this.sendToLocalStorage.y = `${(window.innerHeight - this.$calculator.clientHeight) / window.innerHeight * 100}%`;
+			this.$calculator.style.top = this.sendToLocalStorage.y;
 		}
-		if ((calculator.offsetTop + calculator.clientHeight) > window.innerHeight) {
-			this.sendToLocalStorage.y = `${(window.innerHeight - calculator.clientHeight) / window.innerHeight * 100}%`;
-			calculator.style.top = this.sendToLocalStorage.y;
-		}
-		if (calculator.offsetLeft < 0) {
+
+		if (this.$calculator.offsetLeft < 0) {
 			this.sendToLocalStorage.x = '0%';
-			calculator.style.left = this.sendToLocalStorage.x;
+			this.$calculator.style.left = this.sendToLocalStorage.x;
 		}
-		if (calculator.offsetTop < 0) {
+
+		if (this.$calculator.offsetTop < 0) {
 			this.sendToLocalStorage.y = '0%';
-			calculator.style.top = this.sendToLocalStorage.y;
+			this.$calculator.style.top = this.sendToLocalStorage.y;
 		}
+
 		this.localStorage.dataset = this.sendToLocalStorage;
-	}
+	};
 
 	calculatorDragAndDrop = (e) => {
-		let calculator = document.querySelector('.js-calculator');
-
 		let moveAt = (e) => {
-			if ((e.pageX - shiftX + calculator.clientWidth) > window.innerWidth) {
-				calculator.style.left = `${(window.innerWidth - calculator.clientWidth) / window.innerWidth * 100}%`;
+			if ((e.pageX - shiftX + this.$calculator.clientWidth) > window.innerWidth) {
+				this.$calculator.style.left = `${(window.innerWidth - this.$calculator.clientWidth) / window.innerWidth * 100}%`;
 			} else {
-				calculator.style.left = `${(e.pageX - shiftX) / window.innerWidth * 100}%`;
+				this.$calculator.style.left = `${(e.pageX - shiftX) / window.innerWidth * 100}%`;
 			}
 
-			if ((e.pageY - shiftY + calculator.clientHeight) > window.innerHeight) {
-				calculator.style.top = `${(window.innerHeight - calculator.clientHeight) / window.innerHeight * 100}%`;
+			if ((e.pageY - shiftY + this.$calculator.clientHeight) > window.innerHeight) {
+				this.$calculator.style.top = `${(window.innerHeight - this.$calculator.clientHeight) / window.innerHeight * 100}%`;
 			} else {
-				calculator.style.top = `${(e.pageY - shiftY) / window.innerHeight * 100}%`;
+				this.$calculator.style.top = `${(e.pageY - shiftY) / window.innerHeight * 100}%`;
 			}
 
 			if ((e.pageY - shiftY) <= 0) {
-				calculator.style.top = 0;
+				this.$calculator.style.top = 0;
 			}
 
 			if ((e.pageX - shiftX) <= 0) {
-				calculator.style.left = 0;
+				this.$calculator.style.left = 0;
 			}
 
-			this.sendToLocalStorage.x = calculator.style.left;
-			this.sendToLocalStorage.y = calculator.style.top;
+			this.sendToLocalStorage.x = this.$calculator.style.left;
+			this.sendToLocalStorage.y = this.$calculator.style.top;
 
 			if (this.localStorage.dataset.mode === CALC_MODES.DEFAULT) {
 				this.sendToLocalStorage.mode = CALC_MODES.STANDART;
@@ -515,15 +546,15 @@ class Calculator {
 			this.localStorage.dataset = this.sendToLocalStorage;
 		};
 
-		calculator.style.position = 'absolute';
-		calculator.style.bottom = 'auto';
-		calculator.style.right = 'auto';
-		document.body.appendChild(calculator);
+		this.$calculator.style.position = 'absolute';
+		this.$calculator.style.bottom = 'auto';
+		this.$calculator.style.right = 'auto';
+		document.body.appendChild(this.$calculator);
 		this.tagForInsert.innerHTML = '';
-		let shiftX = e.pageX - calculator.offsetLeft;
-		let shiftY = e.pageY - calculator.offsetTop;
+		let shiftX = e.pageX - this.$calculator.offsetLeft;
+		let shiftY = e.pageY - this.$calculator.offsetTop;
 		moveAt(e);
-		calculator.style.zIndex = 1000;
+		this.$calculator.style.zIndex = 1000;
 
 		document.onmousemove = function (e) {
 			if (window.innerWidth < 350) {
@@ -532,124 +563,96 @@ class Calculator {
 			moveAt(e);
 		};
 
-		calculator.onmouseup = function () {
+		this.$calculator.onmouseup = () => {
 			document.onmousemove = null;
-			calculator.onmouseup = null;
+			this.$calculator.onmouseup = null;
 		};
-	}
+	};
 
 	calculatorDragStart = () => {
 		return false;
-	}
+	};
 
 	resultButton = () => {
 		this.result();
-	}
+	};
 
 	buttonaddPoint = () => {
-		this.disp.smallDisplay.style.removeProperty('left');
-		this.disp.smallDisplay.style.right = 0;
-		this.disp.addPoint();
-	}
-
-	buttonClear = () => {
-		this.clear();
-	}
-
-	buttonBackspace = () => {
-		this.operationsDisabled = false;
-		this.disp.backspace();
-	}
-
-	buttonReverse = () => {
-		this.singleOperation(OPERATIONS.NEGATE);
-	}
-
-	buttonPow = () => {
-		this.singleOperation(OPERATIONS.POW);
-	}
-
-	buttonFrac = () => {
-		this.singleOperation(OPERATIONS.FRAC);
-	}
-
-	buttonSqrt = () => {
-		this.singleOperation(OPERATIONS.SQRT);
-	}
-
-	buttonPercent = () => {
-		this.singleOperation(OPERATIONS.PERCENT);
-	}
-
-	buttonLeft = () => {
-		if (this.disp.smallDisplay.clientWidth > MAX_WIDTH_DISPLAY) {
-			this.disp.smallDisplay.style.removeProperty('right');
-			this.disp.smallDisplay.style.left = 0;
-			this.disp.smallDisplay.style.textAlign = 'left';
-		}
-	}
-
-	buttonRight = () => {
-		if (this.disp.smallDisplay.clientWidth > MAX_WIDTH_DISPLAY) {
-			this.disp.smallDisplay.style.removeProperty('left');
-			this.disp.smallDisplay.style.right = 0;
-			this.disp.smallDisplay.style.textAlign = 'right';
-		}
-	}
-
-	buttonMemorySave = () => {
-		if (this.memory.isOpenMemoryWindow || !isFinite(this.disp.text)) {
+		if (this.operationsDisabled) {
 			return;
 		}
 
-		let buttonMemoryClear = document.querySelector('.js-calc-add__button_memory-clear'),
-			buttonMemoryRead = document.querySelector('.js-calc-add__button_read'),
-			buttonMemoryOpen = document.querySelector('.js-calc-add__button_memory');
+		this.display.addPoint();
+	};
+
+	buttonClear = () => {
+		this.clear();
+	};
+
+	buttonBackspace = () => {
+		this.operationsDisabled = false;
+		this.display.backspace();
+	};
+
+	buttonReverse = () => {
+		this.singleOperation(OPERATIONS.NEGATE);
+	};
+
+	buttonPow = () => {
+		this.singleOperation(OPERATIONS.POW);
+	};
+
+	buttonFrac = () => {
+		this.singleOperation(OPERATIONS.FRAC);
+	};
+
+	buttonSqrt = () => {
+		this.singleOperation(OPERATIONS.SQRT);
+	};
+
+	buttonPercent = () => {
+		this.singleOperation(OPERATIONS.PERCENT);
+	};
+
+	buttonMemorySave = () => {
+		if (this.memory.isOpenMemoryWindow || !isFinite(parseFloat(this.display.text))) {
+			return;
+		}
 
 		this.memory.isActivatedMemoryButtons = true;
 		this.sendToLocalStorage.isActivatedMemoryButtons = this.memory.isActivatedMemoryButtons;
 		this.localStorage.dataset = this.sendToLocalStorage;
 
-		buttonMemoryRead.classList.remove('calc-add__button_disabled');
-		buttonMemoryClear.classList.remove('calc-add__button_disabled');
-		buttonMemoryOpen.classList.remove('calc-add__button_disabled');
+		this.$buttonMemoryRead.classList.remove('calc-add__button_disabled');
+		this.$buttonMemoryClear.classList.remove('calc-add__button_disabled');
+		this.$buttonMemoryOpen.classList.remove('calc-add__button_disabled');
 
-		this.memory.addToMemory(this.disp.text, this.disp.display);
+		this.memory.addToMemory(this.display.text, this.display.$display);
 		this.sendToLocalStorage.memoryValues = this.memory.memoryValues;
 		this.localStorage.dataset = this.sendToLocalStorage;
-	}
+	};
 
 	buttonMemoryOpen = () => {
 		if (!this.memory.isActivatedMemoryButtons) {
 			return;
 		}
 
-		let memoryBoard = document.querySelector('.js-memory'),
-			buttonMemoryClear = document.querySelector('.js-calc-add__button_memory-clear'),
-			buttonMemoryRead = document.querySelector('.js-calc-add__button_read'),
-			buttonMemoryPlus = document.querySelector('.js-calc-add__button_plus'),
-			buttonMemoryMinus = document.querySelector('.js-calc-add__button_minus'),
-			buttonMemorySave = document.querySelector('.js-calc-add__button_ms'),
-			buttonMemoryOpen = document.querySelector('.js-calc-add__button_memory');
-
-		memoryBoard.classList.toggle('visibility');
-		buttonMemoryClear.classList.toggle('calc-add__button_disabled');
-		buttonMemoryRead.classList.toggle('calc-add__button_disabled');
-		buttonMemoryPlus.classList.toggle('calc-add__button_disabled');
-		buttonMemoryMinus.classList.toggle('calc-add__button_disabled');
-		buttonMemorySave.classList.toggle('calc-add__button_disabled');
+		this.$memoryBoard.classList.toggle('visibility');
+		this.$buttonMemoryClear.classList.toggle('calc-add__button_disabled');
+		this.$buttonMemoryRead.classList.toggle('calc-add__button_disabled');
+		this.$buttonMemoryPlus.classList.toggle('calc-add__button_disabled');
+		this.$buttonMemoryMinus.classList.toggle('calc-add__button_disabled');
+		this.$buttonMemorySave.classList.toggle('calc-add__button_disabled');
 
 		if (this.memory.isEmpty()) {
 			this.memory.isActivatedMemoryButtons = false;
-			buttonMemoryRead.classList.add('calc-add__button_disabled');
-			buttonMemoryClear.classList.add('calc-add__button_disabled');
-			buttonMemoryOpen.classList.add('calc-add__button_disabled');
+			this.$buttonMemoryRead.classList.add('calc-add__button_disabled');
+			this.$buttonMemoryClear.classList.add('calc-add__button_disabled');
+			this.$buttonMemoryOpen.classList.add('calc-add__button_disabled');
 			this.memory.isActivatedMemoryButtons = false;
 			this.sendToLocalStorage.isActivatedMemoryButtons = '0';
-			this.memory.memoryValues = {};
 			this.memory.storageMemoryData = {};
-			this.sendToLocalStorage.memoryValues = this.memory.memoryValues;
-
+			this.sendToLocalStorage.memoryValues = {};
 			this.localStorage.dataset = this.sendToLocalStorage;
 		}
 
@@ -659,73 +662,69 @@ class Calculator {
 		}
 
 		this.memory.isOpenMemoryWindow = true;
-	}
+	};
 
 	buttonMemoryPlus = () => {
-		if (this.memory.isOpenMemoryWindow || !isFinite(this.disp.text)) {
+		if (this.memory.isOpenMemoryWindow || !isFinite(parseFloat(this.display.text))) {
 			return;
 		}
-
-		let buttonMemoryClear = document.querySelector('.js-calc-add__button_memory-clear'),
-			buttonMemoryRead = document.querySelector('.js-calc-add__button_read'),
-			buttonMemoryOpen = document.querySelector('.js-calc-add__button_memory');
 
 		this.memory.isActivatedMemoryButtons = true;
 		this.sendToLocalStorage.isActivatedMemoryButtons = this.memory.isActivatedMemoryButtons;
 		this.localStorage.dataset = this.sendToLocalStorage;
 
-		buttonMemoryRead.classList.remove('calc-add__button_disabled');
-		buttonMemoryClear.classList.remove('calc-add__button_disabled');
-		buttonMemoryOpen.classList.remove('calc-add__button_disabled');
+		this.$buttonMemoryRead.classList.remove('calc-add__button_disabled');
+		this.$buttonMemoryClear.classList.remove('calc-add__button_disabled');
+		this.$buttonMemoryOpen.classList.remove('calc-add__button_disabled');
 
 		if (this.memory.isEmpty()) {
-			this.memory.addToMemory(this.disp.text, this.disp.display);
+			this.memory.addToMemory(this.display.text, this.display.$display);
 		} else {
-			let value = document.querySelector('.memory__block').childNodes[0].innerHTML;
-			let displayValue = this.disp.text;
-			let position = document.querySelector('.memory__block').dataset.position;
+			let memoryBlock = document.querySelector('.memory__block');
+
+			let value = memoryBlock.childNodes[0].innerHTML;
+			let displayValue = this.display.text;
+			let position = memoryBlock.dataset.position;
 
 			this.memory.plus(value, displayValue, position);
 
-			document.querySelector('.memory__block').childNodes[0].innerHTML = this.memory.memoryValues[position];
+			memoryBlock.childNodes[0].innerHTML = this.memory.memoryValues[position];
 		}
 
 		this.sendToLocalStorage.memoryValues = this.memory.memoryValues;
 		this.localStorage.dataset = this.sendToLocalStorage;
-	}
+	};
 
 	buttonMemoryMinus = () => {
-		if (this.memory.isOpenMemoryWindow || !isFinite(this.disp.text)) {
+		if (this.memory.isOpenMemoryWindow || !isFinite(parseFloat(this.display.text))) {
 			return;
 		}
-
-		let buttonMemoryClear = document.querySelector('.js-calc-add__button_memory-clear'),
-			buttonMemoryRead = document.querySelector('.js-calc-add__button_read'),
-			buttonMemoryOpen = document.querySelector('.js-calc-add__button_memory');
 
 		this.memory.isActivatedMemoryButtons = true;
 		this.sendToLocalStorage.isActivatedMemoryButtons = this.memory.isActivatedMemoryButtons;
 		this.localStorage.dataset = this.sendToLocalStorage;
 
-		buttonMemoryRead.classList.remove('calc-add__button_disabled');
-		buttonMemoryClear.classList.remove('calc-add__button_disabled');
-		buttonMemoryOpen.classList.remove('calc-add__button_disabled');
+		this.$buttonMemoryRead.classList.remove('calc-add__button_disabled');
+		this.$buttonMemoryClear.classList.remove('calc-add__button_disabled');
+		this.$buttonMemoryOpen.classList.remove('calc-add__button_disabled');
 
 		if (this.memory.isEmpty()) {
-			this.memory.addToMemory(this.disp.text);
+			this.memory.addToMemory(this.display.text);
 		} else {
-			let value = document.querySelector('.memory__block').childNodes[0].innerHTML;
-			let displayValue = this.disp.text;
-			let position = document.querySelector('.memory__block').dataset.position;
+			let memoryBlock = document.querySelector('.memory__block');
+
+			let value = memoryBlock.childNodes[0].innerHTML;
+			let displayValue = this.display.text;
+			let position = memoryBlock.dataset.position;
 
 			this.memory.minus(value, displayValue, position);
 
-			document.querySelector('.memory__block').childNodes[0].innerHTML = this.memory.memoryValues[position];
+			memoryBlock.childNodes[0].innerHTML = this.memory.memoryValues[position];
 		}
 
 		this.sendToLocalStorage.memoryValues = this.memory.memoryValues;
 		this.localStorage.dataset = this.sendToLocalStorage;
-	}
+	};
 
 	buttonMemoryRead = () => {
 		if (!this.memory.isActivatedMemoryButtons || this.memory.isOpenMemoryWindow) {
@@ -734,104 +733,75 @@ class Calculator {
 
 		let position = document.querySelector('.memory__block').dataset.position;
 
-		this.disp.text = this.memory.memoryValues[position];
+		this.display.text = this.memory.memoryValues[position];
 		this.enteredNewValue = true;
-	}
+	};
 
 	buttonMemoryClear = () => {
 		if (!this.memory.isActivatedMemoryButtons || this.memory.isOpenMemoryWindow) {
 			return;
 		}
 
-		let memoryBoard = document.querySelector('.js-memory'),
-			buttonMemoryClear = document.querySelector('.js-calc-add__button_memory-clear'),
-			buttonMemoryRead = document.querySelector('.js-calc-add__button_read'),
-			buttonMemoryOpen = document.querySelector('.js-calc-add__button_memory');
-
 		this.memory.isActivatedMemoryButtons = false;
 		this.sendToLocalStorage.isActivatedMemoryButtons = '0';
 
-		buttonMemoryRead.classList.add('calc-add__button_disabled');
-		buttonMemoryClear.classList.add('calc-add__button_disabled');
-		buttonMemoryOpen.classList.add('calc-add__button_disabled');
-		memoryBoard.innerHTML = '';
+		this.$buttonMemoryRead.classList.add('calc-add__button_disabled');
+		this.$buttonMemoryClear.classList.add('calc-add__button_disabled');
+		this.$buttonMemoryOpen.classList.add('calc-add__button_disabled');
+		this.$memoryBoard.innerHTML = '';
 
-		this.memory.memoryValues = {};
 		this.memory.storageMemoryData = {};
-		this.sendToLocalStorage.memoryValues = this.memory.memoryValues;
+		this.sendToLocalStorage.memoryValues = {};
 
 		this.localStorage.dataset = this.sendToLocalStorage;
-	}
+	};
 
 	buttonTrey = () => {
 		this.sendToLocalStorage.mode = CALC_MODES.MINIMIZED;
 		this.localStorage.dataset = this.sendToLocalStorage;
 		this.manage(CALC_MODES.MINIMIZED);
-	}
+	};
 
 	buttonOpen = () => {
 		this.sendToLocalStorage.mode = CALC_MODES.STANDART;
 		this.localStorage.dataset = this.sendToLocalStorage;
 		this.manage(CALC_MODES.STANDART);
-	}
+	};
 
 	buttonClose = () => {
 		this.manage(CALC_MODES.CLOSED);
 		this.sendToLocalStorage.mode = CALC_MODES.CLOSED;
 		this.localStorage.dataset = this.sendToLocalStorage;
 		this.sendToRecycle();
-	}
+	};
 
 	buttonOpenCalculator = () => {
 		this.init(this.tagForInsert);
 		this.manage(CALC_MODES.DEFAULT);
 		this.sendToLocalStorage.mode = CALC_MODES.DEFAULT;
 		this.localStorage.dataset = this.sendToLocalStorage;
-	}
+	};
 
 	addEvents() {
-		let buttonOpen = document.querySelector('.js-index-menu__button_open'),
-			buttonTrey = document.querySelector('.js-index-menu__button_trey'),
-			buttonClose = document.querySelector('.js-index-menu__button_close'),
-			buttonOpenCalculator = document.querySelector('.js-open-calculator'),
-			calculator = document.querySelector('.js-calculator'),
-			forDrag = document.querySelector('.js-index-menu__title'),
-			buttonLeft = document.querySelector('.small-display__button_left'),
-			buttonRight = document.querySelector('.small-display__button_right'),
-			buttons = document.querySelector('.js-button-area');
-
-		buttons.addEventListener('click', this.buttonsEventSwitcher);
+		this.$buttons.addEventListener('click', this.buttonsEventSwitcher);
 		window.addEventListener('resize', this.calcPosOnResize);
-		forDrag.addEventListener('mousedown', this.calculatorDragAndDrop);
-		calculator.addEventListener('dragstart', this.calculatorDragStart);
-		buttonTrey.addEventListener('click', this.buttonTrey);
-		buttonOpen.addEventListener('click', this.buttonOpen);
-		buttonClose.addEventListener('click', this.buttonClose.bind(this));
-		buttonOpenCalculator.addEventListener('click', this.buttonOpenCalculator.bind(this));
-		buttonLeft.addEventListener('click', this.buttonLeft);
-		buttonRight.addEventListener('click', this.buttonRight);
+		this.$forDrag.addEventListener('mousedown', this.calculatorDragAndDrop);
+		this.$calculator.addEventListener('dragstart', this.calculatorDragStart);
+		this.$buttonTrey.addEventListener('click', this.buttonTrey);
+		this.$buttonOpen.addEventListener('click', this.buttonOpen);
+		this.$buttonClose.addEventListener('click', this.buttonClose.bind(this));
+		this.$buttonOpenCalculator.addEventListener('click', this.buttonOpenCalculator.bind(this));
 	}
 
 	sendToRecycle() {
-		let buttonOpen = document.querySelector('.js-index-menu__button_open'),
-			buttonTrey = document.querySelector('.js-index-menu__button_trey'),
-			buttonClose = document.querySelector('.js-index-menu__button_close'),
-			calculator = document.querySelector('.js-calculator'),
-			forDrag = document.querySelector('.js-index-menu__title'),
-			buttonLeft = document.querySelector('.small-display__button_left'),
-			buttonRight = document.querySelector('.small-display__button_right'),
-			buttons = document.querySelector('.js-button-area');
-
-		buttons.removeEventListener('click', this.buttonsEventSwitcher);
-
+		this.$buttons.removeEventListener('click', this.buttonsEventSwitcher);
 		window.removeEventListener('resize', this.calcPosOnResize);
-		forDrag.removeEventListener('mousedown', this.calculatorDragAndDrop);
-		calculator.removeEventListener('dragstart', this.calculatorDragStart);
-		buttonTrey.removeEventListener('click', this.buttonTrey);
-		buttonOpen.removeEventListener('click', this.buttonOpen);
-		buttonClose.removeEventListener('click', this.buttonClose);
-		buttonLeft.removeEventListener('click', this.buttonLeft);
-		buttonRight.removeEventListener('click', this.buttonRight);
+		this.$forDrag.removeEventListener('mousedown', this.calculatorDragAndDrop);
+		this.$calculator.removeEventListener('dragstart', this.calculatorDragStart);
+		this.$buttonTrey.removeEventListener('click', this.buttonTrey);
+		this.$buttonOpen.removeEventListener('click', this.buttonOpen);
+		this.$buttonClose.removeEventListener('click', this.buttonClose);
+		this.display.sendToRecycle();
 
 		for (let i = 0; i < document.body.children.length; i++) {
 			if (document.body.children[i].classList.contains('js-calculator')) {
@@ -843,23 +813,14 @@ class Calculator {
 	}
 
 	toggleVisualStateButtons() {
-		let resultButton = document.querySelector('.js-calc__button_get-result'),
-			button_Sqrt = document.querySelector('.js-calc__button_sqrt'),
-			button_Pow = document.querySelector('.js-calc__button_pow'),
-			button_Frac = document.querySelector('.js-calc__button_frac'),
-			button_Percent = document.querySelector('.js-calc__button_percent'),
-			button_Reverse = document.querySelector('.js-calc__button_reverse'),
-			operationList = document.querySelectorAll('.js-calc__button_operation'),
-			button_addPoint = document.querySelector('.js-calc__button_add-point');
-
-		button_Reverse.classList.toggle('calc__button_disabled');
-		button_Percent.classList.toggle('calc__button_disabled');
-		button_Sqrt.classList.toggle('calc__button_disabled');
-		button_Pow.classList.toggle('calc__button_disabled');
-		button_Frac.classList.toggle('calc__button_disabled');
-		button_addPoint.classList.toggle('calc__button_disabled');
-		resultButton.classList.toggle('calc__button_disabled');
-		operationList.forEach((element) => {
+		this.$buttonReverse.classList.toggle('calc__button_disabled');
+		this.$buttonPercent.classList.toggle('calc__button_disabled');
+		this.$buttonSqrt.classList.toggle('calc__button_disabled');
+		this.$buttonPow.classList.toggle('calc__button_disabled');
+		this.$buttonFrac.classList.toggle('calc__button_disabled');
+		this.$buttonaddPoint.classList.toggle('calc__button_disabled');
+		this.$resultButton.classList.toggle('calc__button_disabled');
+		this.$operationList.forEach((element) => {
 			element.classList.toggle('calc__button_disabled');
 		});
 	}

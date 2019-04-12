@@ -41,6 +41,7 @@ export const OPERATIONS = {
 		ADDITIONAL: 'add'
 	},
 	ADDITIONAL: {
+		PLUS_MINUS: '±',
 		PERCENT: '%',
 		SQRT: '√',
 		POW: 'POW',

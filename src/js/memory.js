@@ -1,8 +1,8 @@
-import { calc } from './index';
 import { OPERATIONS } from './const';
 
 class Memory {
-	constructor() {
+	constructor(props) {
+		this.calc = props;
 		this.isActivatedMemoryButtons = false;
 		this.isOpenMemoryWindow = false;
 		this.positionAttribute = 0;
@@ -29,7 +29,7 @@ class Memory {
 	addToMemory(data) {
 		this.memoryValues[this.positionAttribute] = data;
 
-		calc.needNewValue = true;
+		this.calc.isNeedNewValueToDisplay();
 
 		let memory = document.querySelector('.js-memory');
 		let memoryBlock = document.createElement('div');
@@ -53,7 +53,7 @@ class Memory {
 		btnMemoryClear.addEventListener('click', (event) => {
 			this.clear(event.target.parentElement);
 			this.storageMemoryData.memoryValues = this.memoryValues;
-			calc.localStorage.dataset = this.storageMemoryData;
+			this.calc.updateLSData(this.storageMemoryData);
 		});
 
 		let btnMemoryPlus = document.createElement('div');
@@ -98,7 +98,7 @@ class Memory {
 
 	clickBtn(type, event) {
 		let value = event.target.parentElement.childNodes[0].innerHTML;
-		let displayValue = calc.disp.text;
+		let displayValue = this.calc.getDisplayData();
 		let position = event.target.parentElement.dataset.position;
 		switch (type) {
 			case OPERATIONS.MINUS: {
@@ -111,7 +111,7 @@ class Memory {
 			}
 		}
 		this.storageMemoryData.memoryValues = this.memoryValues;
-		calc.localStorage.dataset = this.storageMemoryData;
+		this.calc.updateLSData(this.storageMemoryData);
 		event.target.parentElement.childNodes[0].innerHTML = this.memoryValues[position];
 	}
 
