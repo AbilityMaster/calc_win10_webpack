@@ -34,6 +34,15 @@ class Display {
       this.valueArray = [];
     }
 
+    if (this.isPressedSingleOperation && this.calc.getOperationPressed()) {
+      this.$smallDisplay.innerHTML = '';
+      this.valueArray.pop();
+      for( let i = 0; i < this.valueArray.length; i++) {
+        this.$smallDisplay.innerHTML += this.valueArray[i];
+      }
+      this.valueArray = [];
+    }
+
     this.isEnteredNewValue = true;
     this.$display.style.fontSize = STYLES.NORMAL;   
 
@@ -62,7 +71,7 @@ class Display {
   }
 
   formatText(data) {
-    if (String(data).indexOf(',') === -1 && String(data).indexOf('.') === -1) {
+    if (String(data).indexOf(',') === -1 && String(data).indexOf('.') === -1 && !isNaN(data)) {
       let formatter = new Intl.NumberFormat('ru');
 
       return formatter.format(data);
@@ -137,11 +146,25 @@ class Display {
     this.$smallDisplay.style.removeProperty('left');
     this.$smallDisplay.style.right = 0;
 
+    if (this.isPressedSingleOperation && !this.calc.getOperationPressed()) {
+      this.$smallDisplay.innerHTML = '';
+      this.valueArray = [];
+    }
+
+    if (this.isPressedSingleOperation && this.calc.getOperationPressed()) {
+      this.$smallDisplay.innerHTML = '';
+      this.valueArray.pop();
+      for( let i = 0; i < this.valueArray.length; i++) {
+        this.$smallDisplay.innerHTML += this.valueArray[i];
+      }
+      this.valueArray = [];
+    }
+
     if (this.$display.innerHTML.indexOf('.') === -1 && this.needNewValue ||
       this.$display.innerHTML.indexOf('.') === -1 && this.resultPressed ||
       this.$display.innerHTML.indexOf('.') !== -1 && this.needNewValue ||
       this.$display.innerHTML.indexOf('.') !== -1 && this.resultPressed) {
-
+        
       this.$display.innerHTML = '0.';
       this.needNewValue = false;
 
@@ -154,20 +177,18 @@ class Display {
   }
 
   backspace() {
-    let length = String(this.text).length;
-
-    if (this.text.indexOf('e') !== -1) {
+    if (this.text.indexOf('e') !== -1 || this.isPressedSingleOperation) {
       return;
     }
 
-    if (length === 2 && String(this.text)[0] === '-' || length === 1) {
+    if (this.text.length === 2 && this.text[0] === '-' || this.text.length === 1) {
       this.text = '0';
 
       return;
     }
-
+  
     if (this.$display.innerHTML === MESSAGES.DIVIDE_BY_ZERO || this.$display.innerHTML === MESSAGES.OVERFLOW || this.$display.innerHTML === MESSAGES.UNCORRECT_DATA) {
-      this.smallDisplay.innerHTML = '';
+      this.$smallDisplay.innerHTML = '';
       this.$display.style.fontSize = STYLES.NORMAL;
       this.text = '0';
       this.calc.updateStateDisabledButtons();
@@ -175,7 +196,7 @@ class Display {
       return;
     }
 
-    this.text = String(this.text).slice(0, length - 1);
+    this.text = this.text.slice(0, this.text.length - 1);
   }
 
   sendToStatusDisplay(typeOperation, operation) {    

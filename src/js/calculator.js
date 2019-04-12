@@ -17,6 +17,9 @@ class Calculator {
 			},
 			getOperationPressed: () => {
 				return this.isOperationPressed;
+			},
+			getResultPressed: () => {
+				return this.isResultPressed;
 			}
 		});
 		this.operations = new Operations();
@@ -109,13 +112,46 @@ class Calculator {
 		if (this.currentValue === null) {
 			this.currentValue = parseFloat(this.display.text);
 		}
-
+		
 		let result = this.operations.sendOperation(operation, parseFloat(this.display.text));
 		this.sendResult(operation, result);
 	}
+	
+	operation(operation) {
+		if (this.operationsDisabled) {
+			return;
+		}
+
+		this.isResultPressed = false;
+		this.isNeedValueForProgressive = true;
+		this.isHasOperationNow = true;
+		this.display.sendToStatusDisplay(OPERATIONS.LABEL_DEFAULT_OPERATION, operation);
+
+		if (this.isOperationPressed) {
+			if (this.display.isEnteredNewValue)	{
+				if (this.isResultPressed) {
+					let result = this.currentValue = this.operations.sendOperation(this.typeOperation, this.currentValue, this.valueForProgressive);
+					this.sendResult(operation, result);
+				} else {
+					let result = this.currentValue = this.operations.sendOperation(this.typeOperation, this.currentValue, parseFloat(this.display.text));
+					this.sendResult(operation, result);
+				}
+			}
+			
+			this.display.isEnteredNewValue = false;
+			this.typeOperation = operation;
+
+			return;
+		}
+
+		this.currentValue = parseFloat(this.display.text);
+		this.typeOperation = operation;
+		this.isOperationPressed = true;
+		this.display.isEnteredNewValue = false;
+	}
 
 	result() {
-		if (this.operationsDisabled) {
+		if (this.operationsDisabled || !this.isHasOperationNow) {
 			return;
 		}
 
@@ -180,38 +216,6 @@ class Calculator {
 				break;
 			}
 		}
-	}
-
-	operation(operation) {
-		if (this.operationsDisabled) {
-			return;
-		}
-
-		this.isResultPressed = false;
-		this.isNeedValueForProgressive = true;
-		this.display.sendToStatusDisplay(OPERATIONS.LABEL_DEFAULT_OPERATION, operation);
-
-		if (this.isOperationPressed) {
-			if (this.display.isEnteredNewValue)	{
-				if (this.isResultPressed) {
-					let result = this.currentValue = this.operations.sendOperation(this.typeOperation, this.currentValue, this.valueForProgressive);
-					this.sendResult(operation, result);
-				} else {
-					let result = this.currentValue = this.operations.sendOperation(this.typeOperation, this.currentValue, parseFloat(this.display.text));
-					this.sendResult(operation, result);
-				}
-			}
-			
-			this.display.isEnteredNewValue = false;
-			this.typeOperation = operation;
-
-			return;
-		}
-
-		this.currentValue = parseFloat(this.display.text);
-		this.typeOperation = operation;
-		this.isOperationPressed = true;
-		this.display.isEnteredNewValue = false;
 	}
 
 	get template() {
@@ -590,6 +594,10 @@ class Calculator {
 	};
 
 	buttonBackspace = () => {
+		if (!this.operationsDisabled && this.isResultPressed) {
+			return;
+		}
+		
 		this.operationsDisabled = false;
 		this.display.backspace();
 	};
