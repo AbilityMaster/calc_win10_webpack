@@ -12,10 +12,12 @@ class Display {
     this.$hiddenDisplay = null;
     this.$buttonMoveLeft = null;
     this.$buttonMoveRight = null;
+    this.displayValueNow = null;
+    this.isEnteredNewValue = true;
+    this.values = [];
   }
 
   clear() {
-    this.valueArray = [];
     this.needNewValue = false;
     this.$display.innerHTML = '0';
     this.$smallDisplay.innerHTML = '';
@@ -26,39 +28,44 @@ class Display {
     this.$buttonMoveRight.style.visibility = 'hidden';
     this.isEnteredNewValue = false;
     this.isPressedSingleOperation = false;
+    this.values = [];
   }
 
-  numberPress(number) {
+  updateSmallDisplay() {
     if (this.isPressedSingleOperation && !this.calc.getOperationPressed()) {
       this.$smallDisplay.innerHTML = '';
-      this.valueArray = [];
-    }
+      this.values = [];
+    }   
 
     if (this.isPressedSingleOperation && this.calc.getOperationPressed()) {
       this.$smallDisplay.innerHTML = '';
-      this.valueArray.pop();
-      for( let i = 0; i < this.valueArray.length; i++) {
-        this.$smallDisplay.innerHTML += this.valueArray[i];
+      this.values.pop();
+      for (let i = 0; i < this.values.length; i++) {
+        this.$hiddenDisplay.innerHTML += this.values[i];
+        this.$smallDisplay.innerHTML += this.values[i];
       }
-      this.valueArray = [];
     }
+  }
+
+  numberPress(number) {
+    this.updateSmallDisplay();
 
     this.isEnteredNewValue = true;
-    this.$display.style.fontSize = STYLES.NORMAL;   
+    this.$display.style.fontSize = STYLES.NORMAL;
 
-    if (this.$display.innerHTML === '0.') {
-      this.$display.innerHTML += number;
-      this.needNewValue = false;
-      this.resultPressed = false;
-
-      return;
-    }
-
+       console.log(this.resultPressed);
     if ((this.$display.innerHTML === '0' || (this.needNewValue) || (this.resultPressed) || this.$display.innerHTML === MESSAGES.DIVIDE_BY_ZERO)) {
       this.$display.innerHTML = number;
       this.needNewValue = false;
       this.resultPressed = false;
       this.isPressedSingleOperation = false;
+
+      return;
+    }
+
+    if (this.$display.innerHTML === '0.' && !this.needNewValue) {
+      this.$display.innerHTML += number;
+      this.resultPressed = false;
 
       return;
     }
@@ -142,29 +149,15 @@ class Display {
     }
   };
 
-  addPoint() {
-    this.$smallDisplay.style.removeProperty('left');
-    this.$smallDisplay.style.right = 0;
+  addPoint() {    
+    this.updateSmallDisplay();
 
-    if (this.isPressedSingleOperation && !this.calc.getOperationPressed()) {
-      this.$smallDisplay.innerHTML = '';
-      this.valueArray = [];
-    }
-
-    if (this.isPressedSingleOperation && this.calc.getOperationPressed()) {
-      this.$smallDisplay.innerHTML = '';
-      this.valueArray.pop();
-      for( let i = 0; i < this.valueArray.length; i++) {
-        this.$smallDisplay.innerHTML += this.valueArray[i];
-      }
-      this.valueArray = [];
-    }
-
-    if (this.$display.innerHTML.indexOf('.') === -1 && this.needNewValue ||
+    if (this.resultPressed ||
+      this.$display.innerHTML.indexOf('.') === -1 && this.needNewValue ||
       this.$display.innerHTML.indexOf('.') === -1 && this.resultPressed ||
       this.$display.innerHTML.indexOf('.') !== -1 && this.needNewValue ||
       this.$display.innerHTML.indexOf('.') !== -1 && this.resultPressed) {
-        
+
       this.$display.innerHTML = '0.';
       this.needNewValue = false;
 
@@ -186,7 +179,7 @@ class Display {
 
       return;
     }
-  
+
     if (this.$display.innerHTML === MESSAGES.DIVIDE_BY_ZERO || this.$display.innerHTML === MESSAGES.OVERFLOW || this.$display.innerHTML === MESSAGES.UNCORRECT_DATA) {
       this.$smallDisplay.innerHTML = '';
       this.$display.style.fontSize = STYLES.NORMAL;
@@ -199,109 +192,98 @@ class Display {
     this.text = this.text.slice(0, this.text.length - 1);
   }
 
-  sendToStatusDisplay(typeOperation, operation) {    
+  sendToSmallDisplay(type, operation) {
+    this.needNewValue = true;
     this.$smallDisplay.style.removeProperty('left');
     this.$smallDisplay.style.right = 0;
-    switch (typeOperation) {
+    this.$smallDisplay.style.textAlign = 'right';
+
+    switch (type) {
+      case OPERATIONS.PERCENT: {
+        if (!this.isPressedSingleOperation) {
+          this.values.push(parseFloat(this.text));
+          this.updateWitdhDisplay(type);
+          this.sendData();
+          this.isPressedSingleOperation = true;
+
+          return;
+        }
+
+        this.values[this.values.length - 1] = parseFloat(this.text);
+        this.updateWitdhDisplay(type);
+        this.sendData();
+
+        break;
+      }
       case OPERATIONS.LABEL_SINGLE_OPERATION: {
-        this.sendToStatusDisplaySingleOperation(typeOperation, operation);
-        this.isPressedSingleOperation = true;
         this.needNewValue = true;
         this.isEnteredNewValue = true;
 
-        break;
-      }
-      case OPERATIONS.LABEL_DEFAULT_OPERATION: {
-        this.sendToStatusDisplayDefaultOperation(typeOperation, operation);
-        this.isPressedSingleOperation = false;
-        this.needNewValue = true;
+        if (!this.isPressedSingleOperation) {
+          this.values.push(`${NAME_FOR_DISPLAY[operation]}(${this.text})`);
+          this.updateWitdhDisplay(type);
+          this.sendData();
+          this.isPressedSingleOperation = true;
 
-        break;
-      }
-    }
-  }
-
-  detectMaxWidth(typeOperation) {
-    switch (typeOperation) {
-      case OPERATIONS.LABEL_SINGLE_OPERATION: {
-        if ((this.dataWidth + this.$hiddenDisplay.clientWidth) >= MAX_WIDTH_DISPLAY) {
-          this.$buttonMoveLeft.style.visibility = 'visible';
-          this.$buttonMoveRight.style.visibility = 'visible';
-          this.$smallDisplay.style.left = '';
-          this.$smallDisplay.style.width = this.dataWidth + this.$hiddenDisplay.clientWidth;
+          return;
         }
+
+        this.values[this.values.length - 1] = `${NAME_FOR_DISPLAY[operation]}(${this.values[this.values.length - 1]})`;
+        this.updateWitdhDisplay();
+        this.sendData();
 
         break;
       }
       case OPERATIONS.LABEL_DEFAULT_OPERATION: {
-        if ((this.$smallDisplay.clientWidth + this.$hiddenDisplay.clientWidth) >= MAX_WIDTH_DISPLAY) {
-          this.$buttonMoveLeft.style.visibility = 'visible';
-          this.$buttonMoveRight.style.visibility = 'visible';
-          this.$smallDisplay.style.left = '';
-          this.$smallDisplay.style.width = this.$smallDisplay.clientWidth + this.$hiddenDisplay.clientWidth;
+        if (this.isPressedSingleOperation) {
+          this.values.push(`&nbsp;${operation}&nbsp;`);
+          this.updateWitdhDisplay(type);
+          this.sendData();
+          this.isPressedSingleOperation = false;
+
+          return;
         }
+
+        if (this.isEnteredNewValue) {
+          this.values.push(parseFloat(this.text));
+          this.values.push(`&nbsp;${operation}&nbsp;`);
+          this.updateWitdhDisplay(type);
+          this.sendData();
+
+          return;
+        }
+
+        this.values[this.values.length - 1] = `&nbsp;${operation}&nbsp;`;
+        this.updateWitdhDisplay(type);
+        this.sendData();
 
         break;
       }
     }
   }
 
-  sendToStatusDisplaySingleOperation(typeOperation, operation) {
-    if (!this.isPressedSingleOperation) {
-      this.data = this.$smallDisplay.innerHTML;
-      this.dataWidth = this.$smallDisplay.clientWidth;
-
-      if (operation === OPERATIONS.PERCENT) {
-        this.valueArray.push(this.calc.resultPercentOperation());
-        this.$smallDisplay.innerHTML += `&nbsp;${this.valueArray[this.valueArray.length - 1]}`;
-      } else {
-        this.valueArray.push(`${NAME_FOR_DISPLAY[operation]}(${this.text})`);
-        this.$hiddenDisplay.innerHTML = `&nbsp;${this.valueArray[this.valueArray.length - 1]}&nbsp;`;
-        this.detectMaxWidth(typeOperation);
-        this.$smallDisplay.innerHTML += `&nbsp;${NAME_FOR_DISPLAY[operation]}(${this.text})&nbsp;`;
-      }
-    }
-    if (this.isPressedSingleOperation) {
-      if (operation === OPERATIONS.PERCENT) {
-        this.valueArray[this.valueArray.length - 1] = this.calc.resultPercentOperation();
-        this.$smallDisplay.innerHTML = `${this.data}&nbsp;${this.valueArray[this.valueArray.length - 1]}&nbsp;`;
-      } else {
-        this.valueArray[this.valueArray.length - 1] = `${NAME_FOR_DISPLAY[operation]}(${this.valueArray[this.valueArray.length - 1]})`;
-        this.$hiddenDisplay.innerHTML = `&nbsp;${this.valueArray[this.valueArray.length - 1]}&nbsp;`;
-
-        this.detectMaxWidth(typeOperation);
-
-        this.$smallDisplay.innerHTML = `${this.data}&nbsp;${this.valueArray[this.valueArray.length - 1]}&nbsp;`;
-      }
+  sendData() {
+    this.$smallDisplay.innerHTML = '';
+    for (let i = 0; i < this.values.length; i++) {
+      this.$smallDisplay.innerHTML += this.values[i];
     }
   }
 
-  sendToStatusDisplayDefaultOperation(typeOperation, operation) {
-    if (this.isEnteredNewValue && this.isPressedSingleOperation) {
-      this.valueArray.push(operation);
-      this.$hiddenDisplay.innerHTML = `&nbsp;${this.valueArray[this.valueArray.length - 1]}`;
-      this.addDisplayWidth();
-      this.$smallDisplay.innerHTML += this.valueArray[this.valueArray.length - 1];
-    } else if (this.isEnteredNewValue) {
-      this.valueArray.push(this.text);
-      this.valueArray.push(operation);
-      this.$hiddenDisplay.innerHTML = `&nbsp;${this.valueArray[this.valueArray.length - 2]} ${this.valueArray[this.valueArray.length - 1]}`;
-      this.detectMaxWidth(typeOperation);
-      this.$smallDisplay.innerHTML += `&nbsp;${this.valueArray[this.valueArray.length - 2]}`;
-      this.$smallDisplay.innerHTML += `&nbsp;${this.valueArray[this.valueArray.length - 1]}`;
+  updateWitdhDisplay(type) {
+    if (type === OPERATIONS.LABEL_DEFAULT_OPERATION && !this.isPressedSingleOperation) {
+      this.$hiddenDisplay.innerHTML = `${this.values[this.values.length - 2]}${this.values[this.values.length - 1]}`;
+    } else {      
+      this.$hiddenDisplay.innerHTML = this.values[this.values.length - 1];
     }
-
-    this.valueArray[this.valueArray.length - 1] = operation;
-    this.$hiddenDisplay.innerHTML = `&nbsp;${this.valueArray[this.valueArray.length - 2]} ${this.valueArray[this.valueArray.length - 1]}`;
-    this.$smallDisplay.innerHTML = this.$smallDisplay.innerHTML.slice(0, this.$smallDisplay.innerHTML.length - 1) + this.valueArray[this.valueArray.length - 1];
-  }
-
-  addDisplayWidth() {
-    if ((this.$smallDisplay.clientWidth + this.$hiddenDisplay.clientWidth) >= MAX_WIDTH_DISPLAY) {
+    let width = this.$smallDisplay.clientWidth;
+    if (this.values.length === 1) {
+      width = 0;
+    }
+    if ((width + this.$hiddenDisplay.clientWidth) >= MAX_WIDTH_DISPLAY) {
       this.$buttonMoveLeft.style.visibility = 'visible';
       this.$buttonMoveRight.style.visibility = 'visible';
       this.$smallDisplay.style.left = '';
-      this.$smallDisplay.style.width = this.$smallDisplay.clientWidth + this.$hiddenDisplay.clientWidth;
+      this.$smallDisplay.style.width = width + this.$hiddenDisplay.clientWidth;
     }
   }
 

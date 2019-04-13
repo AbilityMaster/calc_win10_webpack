@@ -2,7 +2,7 @@ import Display from './display';
 import Operations from './operations';
 import Memory from './memory';
 import LocalStorage from './localStorage';
-import {MAX_LENGTH_DISPLAY, STYLES, OPERATIONS, CALC_MODES, MESSAGES } from './const';
+import { MAX_LENGTH_DISPLAY, STYLES, OPERATIONS, CALC_MODES, MESSAGES } from './const';
 import projectInfo from '../../package.json';
 
 class Calculator {
@@ -20,6 +20,9 @@ class Calculator {
 			},
 			getResultPressed: () => {
 				return this.isResultPressed;
+			},
+			getIsOperationPressed: () => {
+				return this.isOperationPressed;
 			}
 		});
 		this.operations = new Operations();
@@ -41,6 +44,7 @@ class Calculator {
 		this.maxLength = MAX_LENGTH_DISPLAY;
 		this.isOperationPressed = false;
 		this.isNeedValueForProgressive = false;
+		this.valueForProgressive = null;
 		this.typeOperation = '';
 		this.currentValue = null;
 		this.sendToLocalStorage = {};
@@ -76,16 +80,17 @@ class Calculator {
 		this.isResultPressed = false;
 		this.isOperationPressed = false;
 		this.isNeedValueForProgressive = false;
+		this.valueForProgressive = null;
 		this.typeOperation = '';
 		this.currentValue = null;
 	}
 
 	trimmer(temp) {
 		if (String(temp).length > this.maxLength) {
-			temp = temp.toPrecision(6);
+			temp = temp.toPrecision(6);	
 		}
 
-		return temp;
+		return parseFloat(temp);
 	}
 
 	sendResult(operation, result) {
@@ -95,28 +100,37 @@ class Calculator {
 		}
 	}
 
+	percent() {
+		if (this.operationsDisabled || this.currentValue === null) {
+			return;
+		}
+
+		let result = this.operations.percent(this.currentValue, parseFloat(this.display.text));
+
+		this.sendResult(OPERATIONS.PERCENT, result);
+
+
+		this.display.sendToSmallDisplay(OPERATIONS.PERCENT);
+
+		console.log(this.trimmer(result));
+	}
+
+
 	singleOperation(operation) {
 		if (this.operationsDisabled || operation === OPERATIONS.PERCENT && this.currentValue === null) {
 			return;
 		}
 
-		this.display.sendToStatusDisplay(OPERATIONS.LABEL_SINGLE_OPERATION, operation);
-
-		if (operation === OPERATIONS.PERCENT) {
-			let result = this.operations.percent(this.currentValue, parseFloat(this.display.text));
-			this.sendResult(operation, result);
-
-			return;
-		}
+		this.display.sendToSmallDisplay(OPERATIONS.LABEL_SINGLE_OPERATION, operation);
 
 		if (this.currentValue === null) {
 			this.currentValue = parseFloat(this.display.text);
 		}
-		
+
 		let result = this.operations.sendOperation(operation, parseFloat(this.display.text));
 		this.sendResult(operation, result);
 	}
-	
+
 	operation(operation) {
 		if (this.operationsDisabled) {
 			return;
@@ -125,10 +139,12 @@ class Calculator {
 		this.isResultPressed = false;
 		this.isNeedValueForProgressive = true;
 		this.isHasOperationNow = true;
-		this.display.sendToStatusDisplay(OPERATIONS.LABEL_DEFAULT_OPERATION, operation);
+
+		this.display.needNewValue = true;
+		this.display.sendToSmallDisplay(OPERATIONS.LABEL_DEFAULT_OPERATION, operation);
 
 		if (this.isOperationPressed) {
-			if (this.display.isEnteredNewValue)	{
+			if (this.display.isEnteredNewValue) {
 				if (this.isResultPressed) {
 					let result = this.currentValue = this.operations.sendOperation(this.typeOperation, this.currentValue, this.valueForProgressive);
 					this.sendResult(operation, result);
@@ -137,7 +153,7 @@ class Calculator {
 					this.sendResult(operation, result);
 				}
 			}
-			
+
 			this.display.isEnteredNewValue = false;
 			this.typeOperation = operation;
 
@@ -155,9 +171,13 @@ class Calculator {
 			return;
 		}
 
-		this.display.$smallDisplay.innerHTML = '';
 		this.isResultPressed = true;
+
+		this.display.$smallDisplay.innerHTML = '';
+		this.display.values = [];
 		this.display.isEnteredNewValue = true;
+		this.display.isPressedSingleOperation = false;
+		this.display.resultPressed = true;
 
 		if (this.isNeedValueForProgressive) {
 			this.valueForProgressive = parseFloat(this.display.text);
@@ -597,13 +617,34 @@ class Calculator {
 		if (!this.operationsDisabled && this.isResultPressed) {
 			return;
 		}
-		
+
 		this.operationsDisabled = false;
 		this.display.backspace();
 	};
 
 	buttonReverse = () => {
-		this.singleOperation(OPERATIONS.NEGATE);
+		if (this.operationsDisabled || isNaN(parseFloat(this.display.text))) {
+			return;
+		}
+
+		this.valueForProgressive = this.operations.sendOperation(OPERATIONS.NEGATE, this.display.text);
+
+		if (this.display.text === '0' || this.isResultPressed) {
+			this.display.sendToSmallDisplay(OPERATIONS.LABEL_SINGLE_OPERATION, OPERATIONS.NEGATE);
+		}
+
+		if (this.display.text === '0') {
+			return;
+		}
+
+		// Условие нужно, чтобы если введено число с точкой на конце, при нажатие на операцию, точка в конце не стиралась
+		if (this.display.text.indexOf('-') === -1) {
+			this.display.text = `-${this.display.text}`;
+
+			return;
+		}
+
+		this.display.text = this.display.text.substr(1, this.display.text.length - 1);
 	};
 
 	buttonPow = () => {
@@ -619,7 +660,7 @@ class Calculator {
 	};
 
 	buttonPercent = () => {
-		this.singleOperation(OPERATIONS.PERCENT);
+		this.percent();
 	};
 
 	buttonMemorySave = () => {
