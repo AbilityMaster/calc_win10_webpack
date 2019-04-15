@@ -423,7 +423,7 @@ class Calculator {
 		switch (typeFunction) {
 			case OPERATIONS.ADDITIONAL.PLUS_MINUS: {
 				this.buttonReverse();
-				
+
 				break;
 			}
 			case OPERATIONS.ADDITIONAL.PERCENT: {
@@ -764,7 +764,6 @@ class Calculator {
 	};
 
 	sendToRecycle() {
-		this.$buttons.removeEventListener('click', this.buttonsEventSwitcher);
 		window.removeEventListener('resize', this.calcPosOnResize);
 		this.$forDrag.removeEventListener('mousedown', this.calculatorDragAndDrop);
 		this.$calculator.removeEventListener('dragstart', this.calculatorDragStart);
