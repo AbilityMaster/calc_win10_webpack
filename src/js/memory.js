@@ -217,7 +217,7 @@ class Memory {
 	}
 
 	setVisual() {		
-		this.memory.isActivatedMemoryButtons = true;
+		this.isActivatedMemoryButtons = true;
 		this.$buttonMemoryRead.classList.remove('calc-add__button_disabled');
 		this.$buttonMemoryClear.classList.remove('calc-add__button_disabled');
 		this.$buttonMemoryOpen.classList.remove('calc-add__button_disabled');
