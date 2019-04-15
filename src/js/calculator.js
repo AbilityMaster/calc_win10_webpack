@@ -18,7 +18,7 @@ class Calculator {
 				return this.display.text;
 			},
 			isNeedNewValueToDisplay: () => {
-				this.display.needNewValue = true;
+				this.isNeedNewValueToDisplay = true;
 			}
 		});
 		this.NAME = projectInfo.name;
@@ -28,6 +28,7 @@ class Calculator {
 		this.maxLength = MAX_LENGTH_DISPLAY;
 		this.isOperationPressed = false;
 		this.isNeedValueForProgressive = false;
+		this.isNeedNewValueToDisplay = false;		
 		this.valueForProgressive = null;
 		this.typeOperation = '';
 		this.currentValue = null;
@@ -64,6 +65,7 @@ class Calculator {
 		this.isResultPressed = false;
 		this.isOperationPressed = false;
 		this.isNeedValueForProgressive = false;
+		this.isNeedNewValueToDisplay = false;
 		this.valueForProgressive = null;
 		this.typeOperation = '';
 		this.currentValue = null;
@@ -97,7 +99,7 @@ class Calculator {
 		this.sendResult(OPERATIONS.PERCENT, result);
 		this.display.sendToSmallDisplay(OPERATIONS.PERCENT, OPERATIONS.PERCENT, this.isPressedSingleOperation);
 		this.isPressedSingleOperation = true;
-		this.needNewValue = true;
+		this.isNeedNewValueInDisplay = true;
 	}
 
 
@@ -106,7 +108,7 @@ class Calculator {
 			return;
 		}
 
-		this.needNewValue = true;
+		this.isNeedNewValueInDisplay = true;
 		this.display.sendToSmallDisplay(OPERATIONS.LABEL_SINGLE_OPERATION, operation, this.isPressedSingleOperation);
 		this.isPressedSingleOperation = true;
 
@@ -124,7 +126,7 @@ class Calculator {
 		}
 
 		this.isNeedValueForProgressive = true;
-		this.needNewValue = true;
+		this.isNeedNewValueInDisplay = true;
 		this.display.sendToSmallDisplay(OPERATIONS.LABEL_DEFAULT_OPERATION, operation, this.isPressedSingleOperation, this.isEnteredNewValue, this.isResultPressed);
 		this.isResultPressed = false;
 		this.isPressedSingleOperation = false;
@@ -521,15 +523,15 @@ class Calculator {
 		this.display.$display.style.fontSize = STYLES.NORMAL;
 		this.isPressedSingleOperation = false;
 
-		if ((this.display.text === '0' || (this.needNewValue) || (this.isResultPressed && this.display.text !== '0.') || this.display.text === MESSAGES.DIVIDE_BY_ZERO)) {
+		if ((this.display.text === '0' || (this.isNeedNewValueInDisplay) || (this.isResultPressed && this.display.text !== '0.') || this.display.text === MESSAGES.DIVIDE_BY_ZERO)) {
 			this.display.text = number;
-			this.needNewValue = false;
+			this.isNeedNewValueInDisplay = false;
 			this.isResultPressed = false;
 
 			return;
 		}
 
-		if (this.display.text === '0.' && !this.needNewValue) {
+		if (this.display.text === '0.' && !this.isNeedNewValueInDisplay) {
 			this.display.text += number;
 			this.isResultPressed = false;
 
@@ -638,13 +640,13 @@ class Calculator {
 		this.updateSmallDisplay();
 
 		if (this.display.isResultPressed ||
-			this.display.text.indexOf('.') === -1 && this.needNewValue ||
+			this.display.text.indexOf('.') === -1 && this.isNeedNewValueInDisplay ||
 			this.display.text.indexOf('.') === -1 && this.isResultPressed ||
-			this.display.text.indexOf('.') !== -1 && this.needNewValue ||
+			this.display.text.indexOf('.') !== -1 && this.isNeedNewValueInDisplay ||
 			this.display.text.indexOf('.') !== -1 && this.isResultPressed) {
 
 			this.display.text = '0.';
-			this.needNewValue = false;
+			this.isNeedNewValueInDisplay = false;
 
 			return;
 		}
@@ -697,7 +699,7 @@ class Calculator {
 
 		if (this.display.text === '0' || this.isResultPressed) {
 			this.isEnteredNewValue = true;
-			this.needNewValue = true;
+			this.isNeedNewValueInDisplay = true;
 			this.display.sendToSmallDisplay(OPERATIONS.LABEL_SINGLE_OPERATION, OPERATIONS.NEGATE);
 		}
 
@@ -858,18 +860,12 @@ class Calculator {
 			return;
 		}
 
-		this.memory.isActivatedMemoryButtons = false;
-		this.sendToLocalStorage.isActivatedMemoryButtons = '0';
-
+		this.isActivatedMemoryButtons = false;
 		this.$buttonMemoryRead.classList.add('calc-add__button_disabled');
 		this.$buttonMemoryClear.classList.add('calc-add__button_disabled');
 		this.$buttonMemoryOpen.classList.add('calc-add__button_disabled');
 		this.$memoryBoard.innerHTML = '';
-
-		this.memory.storageMemoryData = {};
-		this.sendToLocalStorage.memoryValues = {};
-
-		this.localStorage.dataset = this.sendToLocalStorage;
+		this.memory.clear();
 	};
 
 	buttonTrey = () => {

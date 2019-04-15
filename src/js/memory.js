@@ -51,8 +51,11 @@ class Memory {
 		btnMemoryClear.style.opacity = '0';
 		memoryBlock.appendChild(btnMemoryClear);
 		btnMemoryClear.addEventListener('click', (event) => {
-			this.clear(event.target.parentElement);
+			this.removeItem(event.target.parentElement);
 			this.storageMemoryData.memoryValues = this.memoryValues;
+			if (this.isEmpty()) {
+				this.storageMemoryData.isActivatedMemoryButtons = false;
+			}
 			this.calc.updateLSData(this.storageMemoryData);
 		});
 
@@ -124,7 +127,13 @@ class Memory {
 		this.memoryValues[position] = String(parseFloat(value) - parseFloat(displayValue));
 	}
 
-	clear(elem) {
+	clear() {
+		this.storageMemoryData.memoryValues = {};
+		this.storageMemoryData.isActivatedMemoryButtons = false;
+		this.calc.updateLSData(this.storageMemoryData);
+	}
+
+	removeItem(elem) {
 		elem.remove(elem);
 		delete this.memoryValues[elem.dataset.position];
 	}
