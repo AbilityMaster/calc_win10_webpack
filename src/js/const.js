@@ -14,7 +14,8 @@ export const MESSAGES = {
 	UNCORRECT_DATA: 'Введены неверные данные',
 	ERROR: {
 		MODES: 'Ошибка в режиме калькулятора',
-		OPERATIONS: 'Ошибка в работе операций'
+		OPERATIONS: 'Ошибка в работе операций',
+		EVENTS: 'Ошибка в назначении событий'
 	}
 };
 
