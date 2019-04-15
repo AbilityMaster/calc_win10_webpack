@@ -7,24 +7,8 @@ import projectInfo from '../../package.json';
 
 class Calculator {
 	constructor() {
-		this.display = new Display({
-			updateStateDisabledButtons: () => {
-				this.operationsDisabled = false;
-				this.toggleVisualStateButtons();
-			},
-			getResultPercentOperation: () => {
-				return this.operations.percent(this.currentValue, this.display.text);
-			},
-			getOperationPressed: () => {
-				return this.isOperationPressed;
-			},
-			getResultPressed: () => {
-				return this.isResultPressed;
-			},
-			getIsOperationPressed: () => {
-				return this.isOperationPressed;
-			}
-		});
+		this.values = [];
+		this.display = new Display();
 		this.operations = new Operations();
 		this.memory = new Memory({
 			updateLSData: data => {
@@ -86,15 +70,19 @@ class Calculator {
 	}
 
 	trimmer(temp) {
-		if (String(temp).length > this.maxLength) {
-			temp = temp.toPrecision(6);	
-		}
+		temp = temp.toPrecision(6);
+		temp = parseFloat(temp);
 
-		return parseFloat(temp);
+		if (String(temp).length > this.maxLength) {
+			temp = temp.toPrecision(6);
+		}
+	
+		return temp;
 	}
 
 	sendResult(operation, result) {
 		this.checkException(operation, result);
+		
 		if (!this.operationsDisabled) {
 			this.display.text = this.trimmer(result);
 		}
@@ -106,13 +94,10 @@ class Calculator {
 		}
 
 		let result = this.operations.percent(this.currentValue, parseFloat(this.display.text));
-
 		this.sendResult(OPERATIONS.PERCENT, result);
-
-
-		this.display.sendToSmallDisplay(OPERATIONS.PERCENT);
-
-		console.log(this.trimmer(result));
+		this.display.sendToSmallDisplay(OPERATIONS.PERCENT, OPERATIONS.PERCENT, this.isPressedSingleOperation);
+		this.isPressedSingleOperation = true;
+		this.needNewValue = true;
 	}
 
 
@@ -121,7 +106,9 @@ class Calculator {
 			return;
 		}
 
-		this.display.sendToSmallDisplay(OPERATIONS.LABEL_SINGLE_OPERATION, operation);
+		this.needNewValue = true;
+		this.display.sendToSmallDisplay(OPERATIONS.LABEL_SINGLE_OPERATION, operation, this.isPressedSingleOperation);
+		this.isPressedSingleOperation = true;
 
 		if (this.currentValue === null) {
 			this.currentValue = parseFloat(this.display.text);
@@ -136,25 +123,24 @@ class Calculator {
 			return;
 		}
 
-		this.isResultPressed = false;
 		this.isNeedValueForProgressive = true;
-		this.isHasOperationNow = true;
-
-		this.display.needNewValue = true;
-		this.display.sendToSmallDisplay(OPERATIONS.LABEL_DEFAULT_OPERATION, operation);
+		this.needNewValue = true;
+		this.display.sendToSmallDisplay(OPERATIONS.LABEL_DEFAULT_OPERATION, operation, this.isPressedSingleOperation, this.isEnteredNewValue, this.isResultPressed);
+		this.isResultPressed = false;
+		this.isPressedSingleOperation = false;
 
 		if (this.isOperationPressed) {
-			if (this.display.isEnteredNewValue) {
+			if (this.isEnteredNewValue) {
 				if (this.isResultPressed) {
-					let result = this.currentValue = this.operations.sendOperation(this.typeOperation, this.currentValue, this.valueForProgressive);
-					this.sendResult(operation, result);
+					this.currentValue = this.operations.sendOperation(this.typeOperation, this.currentValue, this.valueForProgressive);
+					this.sendResult(operation, this.currentValue);
 				} else {
-					let result = this.currentValue = this.operations.sendOperation(this.typeOperation, this.currentValue, parseFloat(this.display.text));
-					this.sendResult(operation, result);
+					this.currentValue = this.operations.sendOperation(this.typeOperation, this.currentValue, parseFloat(this.display.text));
+					this.sendResult(operation, this.currentValue);
 				}
 			}
 
-			this.display.isEnteredNewValue = false;
+			this.isEnteredNewValue = false;
 			this.typeOperation = operation;
 
 			return;
@@ -163,34 +149,37 @@ class Calculator {
 		this.currentValue = parseFloat(this.display.text);
 		this.typeOperation = operation;
 		this.isOperationPressed = true;
-		this.display.isEnteredNewValue = false;
+		this.isEnteredNewValue = false;
 	}
 
 	result() {
-		if (this.operationsDisabled || !this.isHasOperationNow) {
+		if (this.operationsDisabled) {
 			return;
 		}
-
+		
+		this.display.SDclear();
 		this.isResultPressed = true;
 
-		this.display.$smallDisplay.innerHTML = '';
-		this.display.values = [];
-		this.display.isEnteredNewValue = true;
-		this.display.isPressedSingleOperation = false;
-		this.display.resultPressed = true;
+		if (this.isEnteredNewValue && !this.isOperationPressed) {
+			this.currentValue = parseFloat(this.display.text);
+		}
+
+		this.isEnteredNewValue = false;
+		this.isPressedSingleOperation = false;		
+		this.isOperationPressed = false;		
 
 		if (this.isNeedValueForProgressive) {
 			this.valueForProgressive = parseFloat(this.display.text);
 			this.isNeedValueForProgressive = false;
-		}
+		} 		
 
 		if (this.isResultPressed && this.currentValue !== null) {
+			
+			
 			let result = this.operations.sendOperation(this.typeOperation, this.currentValue, this.valueForProgressive);
 			this.sendResult(this.typeOperation, result);
 			this.currentValue = parseFloat(this.display.text);
 		}
-
-		this.isOperationPressed = false;
 	}
 
 	checkException(operation, result) {
@@ -498,21 +487,61 @@ class Calculator {
 						this.display.clear();
 						this.toggleVisualStateButtons();
 					}
-					this.display.numberPress(event.target.dataset.value);
-					this.display.isPressedSingleOperation = false;
+					this.numberPress(event.target.dataset.value);
+
 					break;
 				}
 				case OPERATIONS.NAME_OF_DATASET_ATTRIBUTE.OPERATION: {
 					this.operation(event.target.dataset.operation);
+
 					break;
 				}
 				case OPERATIONS.NAME_OF_DATASET_ATTRIBUTE.ADDITIONAL: {
 					this.addFunctionSwitcher(event.target.dataset.add);
+					
 					break;
 				}
 			}
 		}
 	};
+
+	updateSmallDisplay() {
+		if (this.isPressedSingleOperation && !this.isOperationPressed) {
+			this.display.SDclear();
+		}
+
+		if (this.isPressedSingleOperation && this.isOperationPressed) {
+			this.display.SDclearLastValue();
+		}
+	}
+
+	numberPress = (number) => {
+		this.updateSmallDisplay();
+		this.isEnteredNewValue = true;
+		this.display.$display.style.fontSize = STYLES.NORMAL;
+		this.isPressedSingleOperation = false;
+
+		if ((this.display.text === '0' || (this.needNewValue) || (this.isResultPressed && this.display.text !== '0.') || this.display.text === MESSAGES.DIVIDE_BY_ZERO)) {
+			this.display.text = number;
+			this.needNewValue = false;
+			this.isResultPressed = false;
+
+			return;
+		}
+
+		if (this.display.text === '0.' && !this.needNewValue) {
+			this.display.text += number;
+			this.isResultPressed = false;
+
+			return;
+		}
+
+		if (String(this.display.text).length >= this.maxLength) {
+			return;
+		}
+
+		this.display.text += number;
+	}
 
 	calcPosOnResize = () => {
 		if ((this.$calculator.offsetLeft + this.$calculator.clientWidth) > window.innerWidth) {
@@ -606,7 +635,23 @@ class Calculator {
 			return;
 		}
 
-		this.display.addPoint();
+		this.updateSmallDisplay();
+
+		if (this.display.isResultPressed ||
+			this.display.text.indexOf('.') === -1 && this.needNewValue ||
+			this.display.text.indexOf('.') === -1 && this.isResultPressed ||
+			this.display.text.indexOf('.') !== -1 && this.needNewValue ||
+			this.display.text.indexOf('.') !== -1 && this.isResultPressed) {
+
+			this.display.text = '0.';
+			this.needNewValue = false;
+
+			return;
+		}
+
+		if (this.display.text.indexOf('.') === -1) {
+			this.display.text += '.';
+		}
 	};
 
 	buttonClear = () => {
@@ -614,12 +659,32 @@ class Calculator {
 	};
 
 	buttonBackspace = () => {
-		if (!this.operationsDisabled && this.isResultPressed) {
+		if (!this.operationsDisabled && this.isResultPressed || this.isOperationPressed) {
 			return;
 		}
 
 		this.operationsDisabled = false;
-		this.display.backspace();
+
+		if (this.display.text.indexOf('e') !== -1 || this.isPressedSingleOperation) {
+			return;
+		}
+
+		if (this.display.text.length === 2 && this.display.text[0] === '-' || this.display.text.length === 1) {
+			this.display.text = '0';
+
+			return;
+		}
+
+		if (this.display.text === MESSAGES.DIVIDE_BY_ZERO || this.display.text === MESSAGES.OVERFLOW || this.display.text === MESSAGES.UNCORRECT_DATA) {
+			this.display.text = '';
+			this.display.$display.style.fontSize = STYLES.NORMAL;
+			this.display.text = '0';
+			this.updateStateDisabledButtons();
+
+			return;
+		}
+
+		this.display.text = this.display.text.slice(0, this.display.text.length - 1);
 	};
 
 	buttonReverse = () => {
@@ -627,9 +692,12 @@ class Calculator {
 			return;
 		}
 
+		this.isPressedSingleOperation = true;
 		this.valueForProgressive = this.operations.sendOperation(OPERATIONS.NEGATE, this.display.text);
 
 		if (this.display.text === '0' || this.isResultPressed) {
+			this.isEnteredNewValue = true;
+			this.needNewValue = true;
 			this.display.sendToSmallDisplay(OPERATIONS.LABEL_SINGLE_OPERATION, OPERATIONS.NEGATE);
 		}
 
@@ -637,7 +705,6 @@ class Calculator {
 			return;
 		}
 
-		// Условие нужно, чтобы если введено число с точкой на конце, при нажатие на операцию, точка в конце не стиралась
 		if (this.display.text.indexOf('-') === -1) {
 			this.display.text = `-${this.display.text}`;
 

@@ -1,24 +1,16 @@
-import { MAX_WIDTH_DISPLAY, MAX_LENGTH_DISPLAY, NAME_FOR_DISPLAY, OPERATIONS, MESSAGES, STYLES } from './const';
+import { MAX_WIDTH_DISPLAY, NAME_FOR_DISPLAY, OPERATIONS } from './const';
 
 class Display {
-  constructor(props) {
-    this.calc = props;
-    this.valueArray = [];
-    this.needNewValue = false;
-    this.maxLength = MAX_LENGTH_DISPLAY;
-    this.isPressedSingleOperation = false;
+  constructor() {
     this.$display = null;
     this.$smallDisplay = null;
     this.$hiddenDisplay = null;
     this.$buttonMoveLeft = null;
     this.$buttonMoveRight = null;
-    this.displayValueNow = null;
-    this.isEnteredNewValue = true;
     this.values = [];
   }
 
   clear() {
-    this.needNewValue = false;
     this.$display.innerHTML = '0';
     this.$smallDisplay.innerHTML = '';
     this.$smallDisplay.style.width = '';
@@ -26,55 +18,21 @@ class Display {
     this.$hiddenDisplay.style.width = '';
     this.$buttonMoveLeft.style.visibility = 'hidden';
     this.$buttonMoveRight.style.visibility = 'hidden';
-    this.isEnteredNewValue = false;
-    this.isPressedSingleOperation = false;
     this.values = [];
   }
 
-  updateSmallDisplay() {
-    if (this.isPressedSingleOperation && !this.calc.getOperationPressed()) {
-      this.$smallDisplay.innerHTML = '';
-      this.values = [];
-    }   
-
-    if (this.isPressedSingleOperation && this.calc.getOperationPressed()) {
-      this.$smallDisplay.innerHTML = '';
-      this.values.pop();
-      for (let i = 0; i < this.values.length; i++) {
-        this.$hiddenDisplay.innerHTML += this.values[i];
-        this.$smallDisplay.innerHTML += this.values[i];
-      }
-    }
+  SDclear() {
+    this.$smallDisplay.innerHTML = '';
+		this.values = [];
   }
 
-  numberPress(number) {
-    this.updateSmallDisplay();
-
-    this.isEnteredNewValue = true;
-    this.$display.style.fontSize = STYLES.NORMAL;
-
-       console.log(this.resultPressed);
-    if ((this.$display.innerHTML === '0' || (this.needNewValue) || (this.resultPressed) || this.$display.innerHTML === MESSAGES.DIVIDE_BY_ZERO)) {
-      this.$display.innerHTML = number;
-      this.needNewValue = false;
-      this.resultPressed = false;
-      this.isPressedSingleOperation = false;
-
-      return;
+  SDclearLastValue() {
+    this.$smallDisplay.innerHTML = '';
+    this.values.pop();
+    for (let i = 0; i < this.values.length; i++) {
+      this.$hiddenDisplay.innerHTML += this.values[i];
+      this.$smallDisplay.innerHTML += this.values[i];
     }
-
-    if (this.$display.innerHTML === '0.' && !this.needNewValue) {
-      this.$display.innerHTML += number;
-      this.resultPressed = false;
-
-      return;
-    }
-
-    if (String(this.text).length >= this.maxLength) {
-      return;
-    }
-
-    this.text += number;
   }
 
   formatText(data) {
@@ -149,112 +107,62 @@ class Display {
     }
   };
 
-  addPoint() {    
-    this.updateSmallDisplay();
-
-    if (this.resultPressed ||
-      this.$display.innerHTML.indexOf('.') === -1 && this.needNewValue ||
-      this.$display.innerHTML.indexOf('.') === -1 && this.resultPressed ||
-      this.$display.innerHTML.indexOf('.') !== -1 && this.needNewValue ||
-      this.$display.innerHTML.indexOf('.') !== -1 && this.resultPressed) {
-
-      this.$display.innerHTML = '0.';
-      this.needNewValue = false;
-
-      return;
-    }
-
-    if (this.$display.innerHTML.indexOf('.') === -1) {
-      this.$display.innerHTML += '.';
-    }
-  }
-
-  backspace() {
-    if (this.text.indexOf('e') !== -1 || this.isPressedSingleOperation) {
-      return;
-    }
-
-    if (this.text.length === 2 && this.text[0] === '-' || this.text.length === 1) {
-      this.text = '0';
-
-      return;
-    }
-
-    if (this.$display.innerHTML === MESSAGES.DIVIDE_BY_ZERO || this.$display.innerHTML === MESSAGES.OVERFLOW || this.$display.innerHTML === MESSAGES.UNCORRECT_DATA) {
-      this.$smallDisplay.innerHTML = '';
-      this.$display.style.fontSize = STYLES.NORMAL;
-      this.text = '0';
-      this.calc.updateStateDisabledButtons();
-
-      return;
-    }
-
-    this.text = this.text.slice(0, this.text.length - 1);
-  }
-
-  sendToSmallDisplay(type, operation) {
-    this.needNewValue = true;
+  sendToSmallDisplay(type, operation, isPressedSingleOperation, isEnteredNewValue, isResultPressed) {
     this.$smallDisplay.style.removeProperty('left');
     this.$smallDisplay.style.right = 0;
     this.$smallDisplay.style.textAlign = 'right';
 
     switch (type) {
       case OPERATIONS.PERCENT: {
-        if (!this.isPressedSingleOperation) {
+        if (!isPressedSingleOperation) {
           this.values.push(parseFloat(this.text));
-          this.updateWitdhDisplay(type);
+          this.updateWitdhDisplay(type, isPressedSingleOperation);
           this.sendData();
-          this.isPressedSingleOperation = true;
 
           return;
         }
 
         this.values[this.values.length - 1] = parseFloat(this.text);
-        this.updateWitdhDisplay(type);
+        this.updateWitdhDisplay(type, isPressedSingleOperation);
         this.sendData();
 
         break;
       }
       case OPERATIONS.LABEL_SINGLE_OPERATION: {
-        this.needNewValue = true;
-        this.isEnteredNewValue = true;
-
-        if (!this.isPressedSingleOperation) {
+        if (!isPressedSingleOperation) {
           this.values.push(`${NAME_FOR_DISPLAY[operation]}(${this.text})`);
-          this.updateWitdhDisplay(type);
+          this.updateWitdhDisplay(type, isPressedSingleOperation);
           this.sendData();
-          this.isPressedSingleOperation = true;
 
           return;
         }
 
         this.values[this.values.length - 1] = `${NAME_FOR_DISPLAY[operation]}(${this.values[this.values.length - 1]})`;
-        this.updateWitdhDisplay();
+        this.updateWitdhDisplay(type, isPressedSingleOperation);
         this.sendData();
 
         break;
       }
       case OPERATIONS.LABEL_DEFAULT_OPERATION: {
-        if (this.isPressedSingleOperation) {
+        if (isPressedSingleOperation) {
           this.values.push(`&nbsp;${operation}&nbsp;`);
-          this.updateWitdhDisplay(type);
+          this.updateWitdhDisplay(type, isPressedSingleOperation);
           this.sendData();
-          this.isPressedSingleOperation = false;
 
           return;
         }
-
-        if (this.isEnteredNewValue) {
+       
+        if (isEnteredNewValue || isResultPressed) {
           this.values.push(parseFloat(this.text));
           this.values.push(`&nbsp;${operation}&nbsp;`);
-          this.updateWitdhDisplay(type);
+          this.updateWitdhDisplay(type, isPressedSingleOperation);
           this.sendData();
 
           return;
         }
 
         this.values[this.values.length - 1] = `&nbsp;${operation}&nbsp;`;
-        this.updateWitdhDisplay(type);
+        this.updateWitdhDisplay(type, isPressedSingleOperation);
         this.sendData();
 
         break;
@@ -269,16 +177,19 @@ class Display {
     }
   }
 
-  updateWitdhDisplay(type) {
-    if (type === OPERATIONS.LABEL_DEFAULT_OPERATION && !this.isPressedSingleOperation) {
+  updateWitdhDisplay(type, isPressedSingleOperation) {
+    if (type === OPERATIONS.LABEL_DEFAULT_OPERATION && !isPressedSingleOperation) {
       this.$hiddenDisplay.innerHTML = `${this.values[this.values.length - 2]}${this.values[this.values.length - 1]}`;
     } else {      
       this.$hiddenDisplay.innerHTML = this.values[this.values.length - 1];
     }
+
     let width = this.$smallDisplay.clientWidth;
+
     if (this.values.length === 1) {
       width = 0;
     }
+
     if ((width + this.$hiddenDisplay.clientWidth) >= MAX_WIDTH_DISPLAY) {
       this.$buttonMoveLeft.style.visibility = 'visible';
       this.$buttonMoveRight.style.visibility = 'visible';
